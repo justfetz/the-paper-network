@@ -13,8 +13,6 @@ on:
     paths: ["data/mills_final.csv", "data/counties.csv", "model/**", "site/src/**", "site/build_site.py"]
 permissions:
   contents: write
-  pages: write
-  id-token: write
 concurrency:
   group: refresh
   cancel-in-progress: false
@@ -57,20 +55,11 @@ jobs:
           git diff --cached --quiet && echo "no changes" && exit 0
           git commit -m "refresh: $(date -u +%Y-%m-%d) scheduled data and model re-run"
           for i in 1 2 3 4; do git pull --rebase -q origin main && git push && break || sleep 15; done
-      - name: Upload site for Pages
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-  deploy:
-    needs: refresh
-    continue-on-error: true   # fails softly until GitHub Pages is enabled for the repository (Settings, Pages, Source: GitHub Actions)
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/configure-pages@v5
-        with:
-          enablement: true
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Publish the site to the gh-pages branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          rm -rf /tmp/pages && mkdir -p /tmp/pages && cp site/index.html site/data.js site/ui.js site/og.png site/.nojekyll /tmp/pages/
+          cd /tmp/pages && git init -q && git checkout -q -b gh-pages && git add -A
+          git -c user.name="paper-network-bot" -c user.email="bot@users.noreply.github.com" commit -q -m "site: built page, $(date -u +%F)"
+          git push -f -q "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
