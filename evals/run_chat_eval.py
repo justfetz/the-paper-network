@@ -2,14 +2,15 @@
 Usage: python evals/run_chat_eval.py evals/chat_golden.json data/paper_network.json [--model claude-opus-5-5] [--limit 10]
 Scores: numeric questions pass when the expected number appears within tolerance and at least one lookup preceded it;
 abstain questions pass when the answer declines instead of inventing. Writes evals/chat_eval_results.json."""
-import json, sys, re, argparse, anthropic
+import json, sys, re, argparse
 PRICES = {"claude-opus-5-5": (4.0, 20.0, 5.0, 0.20), "claude-sonnet-5-5": (2.0, 10.0, 2.5, 0.10), "claude-haiku-5-5": (0.10, 0.50, 0.125, 0.01)}
 UNIT_RX = {"M": r"\$?\s?([\d,.]+)\s?(?:M\b|million)", "B": r"\$?\s?([\d,.]+)\s?(?:B\b|billion)", "kt": r"([\d,.]+)\s?kt\b", "/t": r"\$\s?([\d,.]+)\s?(?:/t|per ton|a ton)", "mi": r"([\d,.]+)\s?(?:mi\b|miles)", "%": r"([\d,.]+)\s?%"}
 ABSTAIN = ["not public", "non-public", "isn't public", "is not public", "not in the model", "no public", "cannot", "can't", "don't have", "does not have", "doesn't have", "not something the model", "not available"]
 
 def tools_over(d):
     fp = d["scenarios"]["fp2026"]; mills = d["mills"]; nodes = d["nodes"]; norm = lambda s: re.sub(r"[^a-z0-9 ]", " ", str(s or "").lower()).strip()
-    mn = lambda i: f"{mills[i]['name']}, {mills[i]['st']} ({mills[i]['owner']})"; nn = lambda i: f"{nodes[i]['name']}, {nodes[i]['st']}"
+    mn = lambda i: f"{mills[i]['name']}, {mills[i]['st']} ({mills[i]['owner']})"; nn = lambda i: nodes[i]["name"] if re.search(r",\s*[A-Z]{2}$", nodes[i]["name"]) else f"{nodes[i]['name']}, {nodes[i]['st']}"
+    CITY = json.loads('''{"chicago":"Cook, IL","los angeles":"Los Angeles, CA","houston":"Harris, TX","dallas":"Dallas, TX","fort worth":"Tarrant, TX","atlanta":"Fulton, GA","phoenix":"Maricopa, AZ","philadelphia":"Philadelphia, PA","miami":"Miami-Dade, FL","detroit":"Wayne, MI","seattle":"King, WA","minneapolis":"Hennepin, MN","st louis":"St. Louis, MO","saint louis":"St. Louis, MO","denver":"Denver, CO","boston":"Suffolk, MA","new york":"Kings, NY","nyc":"Kings, NY","brooklyn":"Kings, NY","las vegas":"Clark, NV","portland":"Multnomah, OR","san antonio":"Bexar, TX","charlotte":"Mecklenburg, NC","nashville":"Davidson, TN","indianapolis":"Marion, IN","columbus":"Franklin, OH","milwaukee":"Milwaukee, WI","kansas city":"Jackson, MO","cincinnati":"Hamilton, OH","cleveland":"Cuyahoga, OH","pittsburgh":"Allegheny, PA","baltimore":"Baltimore, MD","memphis":"Shelby, TN","louisville":"Jefferson, KY","orlando":"Orange, FL","tampa":"Hillsborough, FL","salt lake city":"Salt Lake, UT","sacramento":"Sacramento, CA","san francisco":"San Francisco, CA","san jose":"Santa Clara, CA","oakland":"Alameda, CA","austin":"Travis, TX","oklahoma city":"Oklahoma, OK","richmond":"Henrico, VA","raleigh":"Wake, NC","jacksonville":"Duval, FL","new orleans":"Orleans, LA","birmingham":"Jefferson, AL","buffalo":"Erie, NY","rochester":"Monroe, NY","grand rapids":"Kent, MI","omaha":"Douglas, NE","tulsa":"Tulsa, OK","albuquerque":"Bernalillo, NM","el paso":"El Paso, TX","san diego":"San Diego, CA","riverside":"Riverside, CA","anaheim":"Orange, CA","newark":"Essex, NJ","hartford":"Hartford, CT","providence":"Providence, RI","des moines":"Polk, IA","little rock":"Pulaski, AR","spokane":"Spokane, WA","boise":"Ada, ID","savannah":"Chatham, GA","greensboro":"Guilford, NC","green bay":"Brown, WI","toledo":"Lucas, OH","dayton":"Montgomery, OH","akron":"Summit, OH","knoxville":"Knox, TN","chattanooga":"Hamilton, TN","lexington":"Fayette, KY","madison":"Dane, WI","fresno":"Fresno, CA","bakersfield":"Kern, CA","stockton":"San Joaquin, CA","reno":"Washoe, NV","tucson":"Pima, AZ","greenville":"Greenville, SC","charleston":"Charleston, SC","harrisburg":"Dauphin, PA","allentown":"Lehigh, PA","scranton":"Lackawanna, PA","syracuse":"Onondaga, NY","albany":"Albany, NY","wichita":"Sedgwick, KS","mobile":"Mobile, AL","baton rouge":"East Baton Rouge, LA","shreveport":"Caddo, LA","lubbock":"Lubbock, TX","corpus christi":"Nueces, TX","mcallen":"Hidalgo, TX","laredo":"Webb, TX"}''')
     def find_mill(query):
         q = norm(query); r = [m for m in mills if any(q in norm(f) for f in (m["name"], m["owner"], m["city"], m["st"]))][:8]
         if not r: raise ValueError(f"no mill matches {query}")
@@ -24,11 +25,13 @@ def tools_over(d):
                             if_this_mill_goes_down=dict(network_cost_usd_per_year=ko["d_total"], unmet_tons=ko["unmet"], owner_must_buy_on_open_market_tons=ko["owner_buys"]) if ko else "not among the 20 costliest single-mill outages"))
         return out
     def find_market(query):
-        q = norm(query); r = [n for n in nodes if norm(n["name"]) == q or norm(n["name"] + " " + n["st"]) == q] or [n for n in nodes if q in norm(n["name"] + " " + n["st"])]
-        if not r: raise ValueError(f"no market matches {query}")
+        q = norm(query); a = CITY.get(q) or CITY.get(re.sub(r"\s+[a-z]{2}$", "", q)); idx = []
+        if a: idx = [i for i, n in enumerate(nodes) if norm(n["name"]) == norm(a)]
+        idx = idx or [i for i, n in enumerate(nodes) if norm(n["name"]) == q or norm(re.sub(r",\s*[A-Z]{2}$", "", n["name"])) == q] or [i for i, n in enumerate(nodes) if q in norm(n["name"] + " " + n["st"])]
+        if not idx: raise ValueError(f"no market matches {query}")
         out = []
-        for n in r[:5]:
-            i = n["id"]; sup = {}
+        for i in idx[:5]:
+            n = nodes[i]; sup = {}
             for a in fp["arcs"]:
                 if a[1] == i: sup[mn(a[0])] = sup.get(mn(a[0]), 0) + a[2]
             p = d["prospects"]["L"][i]
@@ -76,6 +79,7 @@ def grade(item, text, calls):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("golden"); ap.add_argument("data"); ap.add_argument("--model", default="claude-opus-5-5"); ap.add_argument("--limit", type=int, default=0); a = ap.parse_args()
     d = json.load(open(a.data)); defs, impl = tools_over(d); items = json.load(open(a.golden)); items = items[:a.limit] if a.limit else items
+    import anthropic
     client = anthropic.Anthropic(); p = PRICES.get(a.model, PRICES["claude-opus-5-5"]); results = []; cost = 0.0
     for it in items:
         msgs = [{"role": "user", "content": it["question"]}]; calls = []; text = ""

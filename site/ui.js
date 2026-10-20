@@ -673,9 +673,17 @@
   function kt(t) { return Math.round((t || 0) / 1000) + " kt"; }
   function strip(h) { return String(h == null ? "" : h).replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&gt;/g, ">").replace(/&lt;/g, "<"); }
   function millName(i) { var m = mills[i]; return m ? m.name + ", " + m.st + " (" + m.owner + ")" : "mill " + i; }
-  function nodeName(i) { var n = nodes[i]; return n ? n.name + ", " + n.st : "market " + i; }
+  function nodeName(i) { var n = nodes[i]; if (!n) return "market " + i; return /,\s*[A-Z]{2}$/.test(n.name) ? n.name : n.name + ", " + n.st; }
+  var CITY = {"chicago":"Cook, IL","los angeles":"Los Angeles, CA","houston":"Harris, TX","dallas":"Dallas, TX","fort worth":"Tarrant, TX","atlanta":"Fulton, GA","phoenix":"Maricopa, AZ","philadelphia":"Philadelphia, PA","miami":"Miami-Dade, FL","detroit":"Wayne, MI","seattle":"King, WA","minneapolis":"Hennepin, MN","st louis":"St. Louis, MO","saint louis":"St. Louis, MO","denver":"Denver, CO","boston":"Suffolk, MA","new york":"Kings, NY","nyc":"Kings, NY","brooklyn":"Kings, NY","las vegas":"Clark, NV","portland":"Multnomah, OR","san antonio":"Bexar, TX","charlotte":"Mecklenburg, NC","nashville":"Davidson, TN","indianapolis":"Marion, IN","columbus":"Franklin, OH","milwaukee":"Milwaukee, WI","kansas city":"Jackson, MO","cincinnati":"Hamilton, OH","cleveland":"Cuyahoga, OH","pittsburgh":"Allegheny, PA","baltimore":"Baltimore, MD","memphis":"Shelby, TN","louisville":"Jefferson, KY","orlando":"Orange, FL","tampa":"Hillsborough, FL","salt lake city":"Salt Lake, UT","sacramento":"Sacramento, CA","san francisco":"San Francisco, CA","san jose":"Santa Clara, CA","oakland":"Alameda, CA","austin":"Travis, TX","oklahoma city":"Oklahoma, OK","richmond":"Henrico, VA","raleigh":"Wake, NC","jacksonville":"Duval, FL","new orleans":"Orleans, LA","birmingham":"Jefferson, AL","buffalo":"Erie, NY","rochester":"Monroe, NY","grand rapids":"Kent, MI","omaha":"Douglas, NE","tulsa":"Tulsa, OK","albuquerque":"Bernalillo, NM","el paso":"El Paso, TX","san diego":"San Diego, CA","riverside":"Riverside, CA","anaheim":"Orange, CA","newark":"Essex, NJ","hartford":"Hartford, CT","providence":"Providence, RI","des moines":"Polk, IA","little rock":"Pulaski, AR","spokane":"Spokane, WA","boise":"Ada, ID","savannah":"Chatham, GA","greensboro":"Guilford, NC","green bay":"Brown, WI","toledo":"Lucas, OH","dayton":"Montgomery, OH","akron":"Summit, OH","knoxville":"Knox, TN","chattanooga":"Hamilton, TN","lexington":"Fayette, KY","madison":"Dane, WI","fresno":"Fresno, CA","bakersfield":"Kern, CA","stockton":"San Joaquin, CA","reno":"Washoe, NV","tucson":"Pima, AZ","greenville":"Greenville, SC","charleston":"Charleston, SC","harrisburg":"Dauphin, PA","allentown":"Lehigh, PA","scranton":"Lackawanna, PA","syracuse":"Onondaga, NY","albany":"Albany, NY","wichita":"Sedgwick, KS","mobile":"Mobile, AL","baton rouge":"East Baton Rouge, LA","shreveport":"Caddo, LA","lubbock":"Lubbock, TX","corpus christi":"Nueces, TX","mcallen":"Hidalgo, TX","laredo":"Webb, TX"};   // markets are named by county; the cities people ask about map to them
   function findMills(q) { q = norm(q); if (!q) return []; return mills.filter(function (m) { return [m.name, m.owner, m.city, m.st].some(function (f) { return norm(f).indexOf(q) >= 0; }); }); }
-  function findNodes(q) { q = norm(q); if (!q) return []; var exact = nodes.filter(function (n) { return norm(n.name) === q || norm(n.name + " " + n.st) === q; }); return exact.length ? exact : nodes.filter(function (n) { return norm(n.name + " " + n.st).indexOf(q) >= 0; }); }
+  function findNodes(q) {   // returns market indices (positions in D.nodes); node.id is the county FIPS code, not a position
+    q = norm(q); if (!q) return [];
+    var alias = CITY[q] || CITY[q.replace(/\s+(?:county|il|tx|ca|ga|oh|pa|fl|mi|wa|mn|mo|co|ma|ny|nv|or|nc|tn|in|wi|md|ky|ut|az|ok|va|la|al|ne|nm|nj|ct|ri|ia|ar|id|sc|ks|ms)$/, "")];
+    var idx = [];
+    if (alias) { var a = norm(alias); nodes.forEach(function (n, i) { if (norm(n.name) === a) idx.push(i); }); if (idx.length) return idx; }
+    nodes.forEach(function (n, i) { if (norm(n.name) === q || norm(n.name.replace(/,\s*[A-Z]{2}$/, "")) === q) idx.push(i); }); if (idx.length) return idx;
+    nodes.forEach(function (n, i) { if (norm(n.name + " " + n.st).indexOf(q) >= 0) idx.push(i); }); return idx;
+  }
 
   function millCard(m) {
     var sc = SC(), i = m.id, dest = {}, ex = 0;
@@ -687,8 +695,8 @@
       scenario: sc.label, utilization: sc.util[i], shipped_tons_per_year: sc.shipped[i], capacity_scarcity_value_usd_per_ton: sc.shadow[i], exported_tons_per_year: ex, top_markets_served: top,
       if_this_mill_goes_down: ko ? { network_cost_usd_per_year: ko.d_total, unmet_tons: ko.unmet, owner_must_buy_on_open_market_tons: ko.owner_buys } : "not among the 20 costliest single-mill outages" };
   }
-  function marketCard(n) {
-    var sc = SC(), i = n.id, sup = {};
+  function marketCard(i) {
+    var sc = SC(), n = nodes[i], sup = {};
     sc.arcs.forEach(function (a) { if (a[1] === i) sup[millName(a[0])] = (sup[millName(a[0])] || 0) + a[2]; });
     var top = Object.keys(sup).sort(function (a, b) { return sup[b] - sup[a]; }).slice(0, 6).map(function (k) { return k + ": " + kt(sup[k]); });
     var p = D.prospects && D.prospects.L && D.prospects.L[i], c = D.corr && D.corr.nodes && D.corr.nodes[i], pl = D.plant_layer && D.plant_layer.nodes && D.plant_layer.nodes[i];
@@ -721,7 +729,7 @@
     { name: "find_mill", description: "Find containerboard mills by name, owner, city or two-letter state (up to 8). Returns capacity, status, utilization, capacity scarcity value, exports, the top markets served and the yearly cost to the network if the mill went down, in the scenario the page is showing.",
       inputSchema: { type: "object", properties: { query: { type: "string", description: "mill name, owner, city or state" } }, required: ["query"] },
       execute: function (inp) { var r = findMills(inp.query); if (!r.length) throw new Error("no mill matches '" + inp.query + "'; try an owner (International Paper, Packaging Corp of America, Smurfit Westrock, Georgia-Pacific, Pratt Industries) or a state"); return r.slice(0, 8).map(millCard); } },
-    { name: "find_market", description: "Find a demand market (a metro or county cluster; the model has 441) by city, county or two-letter state (up to 5). Returns board demand, delivered marginal cost, the mills supplying it, the cheapest alternative mills with the switching gap, the corrugator tier and the counted box plants.",
+    { name: "find_market", description: "Find a demand market by city, county or two-letter state (up to 5). The 441 markets are named by county (Cook, IL is Chicago; Harris, TX is Houston) and the big cities are mapped to them, so a city name works. Returns board demand, delivered marginal cost, the mills supplying it, the cheapest alternative mills with the switching gap, the corrugator tier and the counted box plants.",
       inputSchema: { type: "object", properties: { query: { type: "string", description: "city, county or state" } }, required: ["query"] },
       execute: function (inp) { var r = findNodes(inp.query); if (!r.length) throw new Error("no market matches '" + inp.query + "'"); return r.slice(0, 5).map(marketCard); } },
     { name: "knockouts", description: "The 20 single-mill outages that cost the network most per year against the 2026 footprint: extra freight, open-market purchases at a $150/t premium and unmet demand at $400/t.",

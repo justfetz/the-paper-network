@@ -44,6 +44,19 @@ try:
     for wf in sorted(glob.glob(os.path.join(ROOT, ".github", "workflows", "*.yml"))):
         y = yaml.safe_load(open(wf)); check(f"workflow parses: {os.path.basename(wf)}", isinstance(y, dict) and "jobs" in y)
 except ImportError: print("skip workflow parse (pip install pyyaml)")
+# the chat's lookups, through their Python mirror (the page's JS mirrors the same logic and is exercised by the Playwright harness)
+try:
+    sys.path.insert(0, os.path.join(ROOT, "evals")); sys.argv = [sys.argv[0], "x", os.path.join(ROOT, "data", "paper_network.json")]
+    import run_chat_eval as rce
+    defs, impl = rce.tools_over(d)
+    chi = impl["find_market"]("Chicago")[0]
+    check("chat lookup: Chicago resolves to Cook, IL with demand, cost and suppliers", chi["market"] == "Cook, IL" and chi["board_demand_tons_per_year"] > 100000 and chi["delivered_marginal_cost_usd_per_ton"] > 0 and len(chi["top_supplying_mills"]) >= 3 and chi["cheapest_linerboard_sources"]["switching_gap_usd_per_ton"] >= 0, json.dumps(chi)[:200])
+    check("chat lookup: Houston, TX and Cook both resolve", impl["find_market"]("Houston, TX")[0]["market"] == "Harris, TX" and impl["find_market"]("Cook")[0]["market"] == "Cook, IL")
+    mans = impl["find_mill"]("Mansfield")[0]
+    check("chat lookup: Mansfield has a knockout cost and named top markets", mans["if_this_mill_goes_down"]["network_cost_usd_per_year"] > 1e8 and mans["top_markets_served"] and ", TX, TX" not in mans["top_markets_served"][0])
+    check("chat lookup: owners and plant search", impl["plant_owners"]()["total_sites"] > 1000 and impl["find_plants"]("International Paper", "TX")["matches"] > 0)
+    check("chat lookup: price shock and scenarios", impl["price_shock"]("IP")["open_market_tons_before"] > 0 and len(impl["scenarios"]()) > 20 and len(defs) == 7)
+except Exception as e: check("chat lookups import and run", False, repr(e))
 tmp = tempfile.mkdtemp()
 r = subprocess.run([sys.executable, os.path.join(ROOT, "evals", "chat_golden.py"), os.path.join(ROOT, "data", "paper_network.json"), os.path.join(tmp, "g.json")], capture_output=True, text=True)
 check("chat golden set generates (>= 40 questions)", r.returncode == 0 and len(json.load(open(os.path.join(tmp, "g.json")))) >= 40, r.stderr[-300:])
