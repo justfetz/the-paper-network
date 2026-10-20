@@ -22,7 +22,23 @@ from the anchors. The independent check is output against production: +2.7% in 2
 mills on freight grounds, while 1.3–1.4 Mt actually crosses the border on contracts and currency. Fixing it
 is a lower bound on Canadian sales into the US (roadmap).
 
-## 2. Demand geography against an independent signal
+## 2a. Update: the plant layer measured it
+
+With the EPA Facility Registry (1,796 NAICS 322211 sites with coordinates, 48 states) and the Census County Business
+Patterns state file (complete state totals for 322211) in hand, the population proxy's state-level error is no longer a
+guess: RMS log error 0.44 against the EPA plant counts (0.39 weighted by plants), about 45% for a typical state.
+Florida carried twice its real weight (people, few plants: 5.3% of the proxy, 2.7% of plants), Illinois and New Jersey
+about half theirs (4.1% vs 8.3%, 2.3% vs 4.7%), California was under by a quarter (11.2% vs 14.2%). Texas is the
+instructive case: 5.2% of plants but 8.6% of employment, because Texas plants are large; counts and tonnage are not the
+same thing, which is why the new weights use employment for the state totals and plant counts only within a state.
+
+From this run the demand weights are: state share = CBP 322211 employment (complete state file); within a state, 70%
+EPA plant counts + 30% the old proxy (so a county with one unregistered plant does not go to zero). The state-level
+error against the Census is therefore zero by construction, and the remaining uncertainty is within-state placement,
+which the EPA list bounds at roughly the county level. The county-level CBP file (133 counties, 692 establishments)
+is thinned by the Census's newer disclosure rules and is kept only as a cross-check.
+
+## 2. Demand geography against an independent signal (before the plant layer)
 
 The model spreads demand by population tilted toward manufacturing states. The only free, independent check
 found is D&B's count of corrugated-box listings by state (1,940 listings; includes non-manufacturers):

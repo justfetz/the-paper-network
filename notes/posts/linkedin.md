@@ -1,6 +1,6 @@
 # LinkedIn drafts
 
-Three versions. Numbers are from the October 2026 run; the ones in [brackets] get filled from the plant-layer build.
+Three versions. Numbers are from the October 2026 run with the EPA plant layer and Census state employment in.
 First two lines are what people see before "see more", so they carry the hook.
 
 ---
@@ -12,7 +12,7 @@ I built the map to prove it, from public filings, in a day, with an AI pair.
 
 What's in it:
 • Every containerboard mill in the US and Canada, 90 of them, with owner, grades and tonnage from the 10-Ks and the closure notices. The company totals land within 1–5% of what the companies report.
-• Box demand in 441 markets, [N named box plants from the EPA facility registry], and the min-cost flows between mills and markets, solved as the transshipment problem from a graduate algorithms course.
+• Box demand in 441 markets, 1,796 named box plants with coordinates from the EPA facility registry (1,868 sites), and the min-cost flows between mills and markets, solved as the transshipment problem from a graduate algorithms course.
 • A unilateral $70/ton increase on the open market loses every third-party ton in the model. Increases hold because everyone announces together, and the index covers about 5% of consumption.
 • A ton of capacity on the West Coast is worth $72 to the network; east of the Rockies, $27. That is the whole business case for the West Coast recycled mills.
 • A maintenance calendar priced by the model's own shadow prices cuts the outage cost of the network from $269M to $122M a year, same outages, different months.
@@ -35,7 +35,7 @@ Eleven years running corrugators taught me the industry runs on a map nobody sha
 
 The duals do the talking. The capacity multiplier says what a ton of each mill is worth to the system ($72 in the West, $27 in the East). The demand multiplier says what the last ton costs delivered in every county. Run the twelve months of a maintenance calendar through it and the outage schedule becomes an assignment problem; the optimized calendar costs $122M a year against $269M for the one I drew by hand.
 
-The honest part: the demand map is a Census-weighted proxy until the plant layer lands [update: N named plants from EPA now in], the flows are a cost-minimizer's answer rather than a record, and the 2025 closures were not where freight said they would be. All of that is written on the page next to the numbers.
+The honest part: the demand map is a Census-weighted proxy until the plant layer lands update: 1,796 named plants from the EPA registry are now in, and Census employment sets the state weights, the flows are a cost-minimizer's answer rather than a record, and the 2025 closures were not where freight said they would be. All of that is written on the page next to the numbers.
 
 Code MIT, data cited row by row: [link]. Built with Claude as the research and coding partner; every figure traces to a public page.
 

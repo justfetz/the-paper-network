@@ -192,7 +192,7 @@ def main(mills_csv, out_json, demand_2024=34.5e6, exports_2024=4.6e6, demand_202
         calendar=[dict(mill=int(fp26.gid.values[i]), month=int(r.month), days=int(r.days)) for i, r in cal.iterrows()], calendar_opt=calendar_opt,
         knockouts=kos, price_shocks=price_shocks, prospects=dict(L=pr_L, M=pr_M), diesel=diesel, occ=occ_out, backtest=bt, scenarios=scen)
     json.dump(out, open(out_json, "w"), separators=(",",":"))
-    import os; print("wrote", out_json, f"{os.path.getsize(out_json)/1e6:.2f} MB in {time.time()-t0:.0f}s")
+    print("wrote", out_json, f"{os.path.getsize(out_json)/1e6:.2f} MB in {time.time()-t0:.0f}s")
     return out
 
 if __name__ == "__main__":
