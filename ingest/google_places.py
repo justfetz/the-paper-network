@@ -15,10 +15,14 @@ def search(q, lat, lon, key, radius_m=50000):   # the API caps a locationBias ci
     return json.load(urllib.request.urlopen(req, timeout=30)).get("places", [])
 
 def main(nodes_csv, dst):
-    key = os.environ["GOOGLE_MAPS_API_KEY"]; nodes = pd.read_csv(nodes_csv); seen, rows, calls, err = set(), [], 0, None
+    key = os.environ["GOOGLE_MAPS_API_KEY"]; nodes = pd.read_csv(nodes_csv); seen, rows, calls, err, quota = set(), [], 0, None, False
+    done = set()
+    if os.path.exists(dst):   # resume: the (node, query) pairs already searched are skipped, so a daily quota of a few hundred calls finishes the list over a few runs
+        prev = pd.read_csv(dst); rows = prev.to_dict("records"); seen = set(prev.place_id); done = set(zip(prev.query_node.astype(int), prev["query"]))
     try:
         for n in nodes.itertuples():
             for q in QUERIES:
+                if (int(n.node_id), q) in done: continue
                 if calls >= MAX_REQUESTS: raise StopIteration
                 calls += 1
                 for p in search(q, n.lat, n.lon, key):
@@ -29,10 +33,14 @@ def main(nodes_csv, dst):
     except StopIteration:
         print(f"stopped at the PLACES_MAX_REQUESTS cap ({MAX_REQUESTS})")
     except urllib.error.HTTPError as e:
-        err = f"HTTP {e.code}: {e.read()[:300].decode(errors='replace')}"
+        body = e.read()[:300].decode(errors="replace")
+        if e.code == 429: quota = True; print(f"daily quota reached after {calls} requests this run; results so far are saved, rerun tomorrow or raise 'SearchText requests per day' in the Google Cloud console (APIs & Services, Places API (New), Quotas)")
+        else: err = f"HTTP {e.code}: {body}"
     except Exception as e:  # keep what we have
         err = repr(e)
-    pd.DataFrame(rows).to_csv(dst, index=False); print(f"{calls} requests, {len(rows)} distinct places -> {dst}" + (f"; stopped on {err}" if err else ""))
+    pd.DataFrame(rows).to_csv(dst, index=False)
+    remaining = sum(1 for n in nodes.itertuples() for q in QUERIES if (int(n.node_id), q) not in done) - calls
+    print(f"{calls} requests this run, {len(rows)} distinct places -> {dst}; {max(remaining, 0)} (node, query) searches still to do" + (f"; stopped on {err}" if err else ""))
     if err: sys.exit(1)
 
 if __name__ == "__main__": main(sys.argv[1], sys.argv[2])

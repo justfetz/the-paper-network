@@ -1,8 +1,11 @@
 # Google Places (New) text search around every demand point: plant names, addresses, phones, websites.
-# Needs the GOOGLE_MAPS_API_KEY repository secret (Places API (New) enabled, key restricted to that API). Run on demand.
+# Needs the GOOGLE_MAPS_API_KEY repository secret (Places API (New) enabled, key restricted to that API). Resumable: a run that hits the
+# project's daily SearchText quota saves what it found and the next run continues; raise the quota in the Google Cloud console to finish in one go.
 name: places
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "11 16 * * *"   # daily until the list is complete; each run resumes where the daily quota stopped it and exits in seconds once done
 permissions: { contents: write }
 jobs:
   places:
@@ -23,11 +26,13 @@ jobs:
           [ -z "$GOOGLE_MAPS_API_KEY" ] && { echo "no GOOGLE_MAPS_API_KEY secret; nothing to do"; exit 0; }
           python ingest/google_places.py data/demand_nodes.csv data/plants_places.csv
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: places-layer
           path: data/plants_places.csv
           if-no-files-found: warn
       - name: Commit
+        if: always()
         run: |
           git config user.name "paper-network-bot" && git config user.email "bot@users.noreply.github.com"
           git add data/plants_places.csv data/demand_nodes.csv 2>/dev/null; git diff --cached --quiet && echo "no changes" && exit 0
