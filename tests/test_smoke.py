@@ -52,6 +52,11 @@ try:
     chi = impl["find_market"]("Chicago")[0]
     check("chat lookup: Chicago resolves to Cook, IL with demand, cost and suppliers", chi["market"] == "Cook, IL" and chi["board_demand_tons_per_year"] > 100000 and chi["delivered_marginal_cost_usd_per_ton"] > 0 and len(chi["top_supplying_mills"]) >= 3 and chi["cheapest_linerboard_sources"]["switching_gap_usd_per_ton"] >= 0, json.dumps(chi)[:200])
     check("chat lookup: Houston, TX and Cook both resolve", impl["find_market"]("Houston, TX")[0]["market"] == "Harris, TX" and impl["find_market"]("Cook")[0]["market"] == "Cook, IL")
+    check("chat lookup: a state beats the city alias (Madison, AL is the county, bare Madison is the WI city)", impl["find_market"]("Madison, AL")[0]["market"] == "Madison, AL" and impl["find_market"]("Madison")[0]["market"] == "Dane, WI" and impl["find_market"]("Chicago, IL")[0]["market"] == "Cook, IL")
+    G = lambda unit, value, text: rce.grade(dict(kind="numeric", unit=unit, value=value, tol=0.03), text, ["lookup"])[0]
+    check("eval grader reads units the model actually writes (Mt, million tons, raw dollars, $k, $M, billion, 0.419)", G("kt", 1050, "about 1.05 million tons a year") and G("kt", 1050, "1.05 Mt/yr") and G("kt", 355, "355,000 t per year") and not G("kt", 1050, "$1,050 million") and G("M", 171.05, "$171,048,536 a year") and G("M", 0.775, "about $775k") and G("B", 2.096, "$2,096 million") and G("B", 2.096, "$2.10 billion") and G("/t", 27.5, "$27.5/t") and not G("/t", 27.5, "$70/t") and G("%", 41.9, "rail share 0.419") and G("mi", 514, "514 miles"))
+    import re as _re; gq = json.load(open(os.path.join(ROOT, "evals", "chat_golden.json")))
+    check("golden questions never double the state (no 'Tarrant, TX, TX')", not [q for q in gq if _re.search(r", ([A-Z]{2}), \1\b", q["question"])])
     mans = impl["find_mill"]("Mansfield")[0]
     check("chat lookup: Mansfield has a knockout cost and named top markets", mans["if_this_mill_goes_down"]["network_cost_usd_per_year"] > 1e8 and mans["top_markets_served"] and ", TX, TX" not in mans["top_markets_served"][0])
     fp_ = impl["find_plants"]("International Paper", "TX"); check("chat lookup: plant search returns rows as registered, no guessed owner", fp_["matches"] > 0 and "registered_name" in fp_["shown"][0] and "owner_guess" not in json.dumps(fp_))

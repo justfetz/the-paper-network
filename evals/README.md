@@ -25,8 +25,11 @@ Open questions over the solved model. Its correctness rests on the page function
   questions whose answers are computed from the data file: knockout costs, mill capacities and owners, market demand
   and delivered marginal cost, price-shock tons, scenario KPIs, plus questions whose right answer is "that is not public".
 - **Runner.** `python evals/run_chat_eval.py evals/chat_golden.json data/paper_network.json [--model ...] [--limit N]`
-  asks each question through the Messages API with the same five tools implemented in Python and scores: the expected
-  number appears (within tolerance), a lookup happened before any number was stated, and non-public questions were
-  declined. Needs `ANTHROPIC_API_KEY`; a full run is a few dollars on Claude Opus 5.5.
+  asks each question through the Messages API with the same six tools implemented in Python and scores: the expected
+  number appears (within tolerance, in whatever unit the model wrote it: `1.05 million tons`, `1.05 Mt` and `1,050 kt`
+  all count), a lookup happened before any number was stated, and non-public questions were declined. Needs
+  `ANTHROPIC_API_KEY`; a full run of 45 questions is about $0.60 on Claude Opus 5.5. `--regrade evals/chat_eval_results.json`
+  re-scores the saved answers with the current grader without calling the API, which is how grader bugs are separated
+  from model bugs.
 - **Page-side guardrail.** The drawer lists the lookups under every answer with the raw results, and flags any answer
   that quotes dollars, tons or percentages about the network without a lookup behind it.

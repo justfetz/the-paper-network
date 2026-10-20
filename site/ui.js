@@ -670,6 +670,7 @@
   var D = window.PN_DATA, S = window.PN; if (!D || !S || !D.scenarios) return;
   var mills = D.mills, nodes = D.nodes;
   function SC() { return D.scenarios[S.scen] || D.scenarios.fp2026; }
+  var STATES = " al ak az ar ca co ct de dc fl ga hi id il in ia ks ky la me md ma mi mn ms mo mt ne nv nh nj nm ny nc nd oh ok or pa ri sc sd tn tx ut vt va wa wv wi wy ";
   function norm(s) { return String(s == null ? "" : s).toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim(); }
   function kt(t) { return Math.round((t || 0) / 1000) + " kt"; }
   function strip(h) { return String(h == null ? "" : h).replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&gt;/g, ">").replace(/&lt;/g, "<"); }
@@ -681,7 +682,8 @@
   function findMills(q) { q = norm(expand(q)); if (!q) return []; return mills.filter(function (m) { return [m.name, m.owner, m.city, m.st].some(function (f) { return norm(f).indexOf(q) >= 0; }); }); }
   function findNodes(q) {   // returns market indices (positions in D.nodes); node.id is the county FIPS code, not a position
     q = norm(q).replace(/\s+county$/, "").replace(/\s+(?:county)\s+/, " "); if (!q) return [];
-    var alias = CITY[q] || CITY[q.replace(/\s+(?:il|tx|ca|ga|oh|pa|fl|mi|wa|mn|mo|co|ma|ny|nv|or|nc|tn|in|wi|md|ky|ut|az|ok|va|la|al|ne|nm|nj|ct|ri|ia|ar|id|sc|ks|ms)$/, "")];
+    var m = /^(.*\S)\s+([a-z]{2})$/.exec(q), st = (m && STATES.indexOf(" " + m[2] + " ") >= 0) ? m[2] : null, base = st ? m[1] : q;
+    var alias = CITY[q] || ((CITY[base] && (!st || CITY[base].slice(-2).toLowerCase() === st)) ? CITY[base] : null);   // "Madison, AL" is Madison County, AL; bare "Madison" is the city, Dane County, WI
     var idx = [];
     if (alias) { var a = norm(alias); nodes.forEach(function (n, i) { if (norm(n.name) === a) idx.push(i); }); if (idx.length) return idx; }
     nodes.forEach(function (n, i) { if (norm(n.name) === q || norm(n.name.replace(/,\s*[A-Z]{2}$/, "")) === q) idx.push(i); }); if (idx.length) return idx;

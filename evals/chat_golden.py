@@ -3,6 +3,7 @@ Usage: python evals/chat_golden.py data/paper_network.json evals/chat_golden.jso
 import json, sys, random
 def main(src, dst):
     d = json.load(open(src)); fp = d["scenarios"]["fp2026"]; mills = d["mills"]; nodes = d["nodes"]; rnd = random.Random(7); q = []
+    import re; nn = lambda i: nodes[i]["name"] if re.search(r",\s*[A-Z]{2}$", nodes[i]["name"]) else f"{nodes[i]['name']}, {nodes[i]['st']}"   # market names already carry the state
     for k in d["knockouts"][:8]:
         q.append(dict(id=f"ko_{k['mill']}", kind="numeric", question=f"What does it cost the network per year if the {k['name']} mill ({k['owner']}) goes down?", value=k["d_total"] / 1e6, unit="M", tol=0.05))
     big = sorted([m for m in mills if m["status"] == "open" and m["country"] == "US"], key=lambda m: -m["cap"])
@@ -10,9 +11,9 @@ def main(src, dst):
         q.append(dict(id=f"cap_{m['id']}", kind="numeric", question=f"What is the capacity of the {m['name']} mill in {m['st']}, and who owns it?", value=m["cap"] / 1e3, unit="kt", tol=0.02, also=m["owner"]))
     top = sorted(range(len(nodes)), key=lambda i: -fp["node_demand"][i])[:60]
     for i in rnd.sample(top, 6):
-        q.append(dict(id=f"dem_{i}", kind="numeric", question=f"How much containerboard does the {nodes[i]['name']}, {nodes[i]['st']} market use in a year?", value=fp["node_demand"][i] / 1e3, unit="kt", tol=0.05))
+        q.append(dict(id=f"dem_{i}", kind="numeric", question=f"How much containerboard does the {nn(i)} market use in a year?", value=fp["node_demand"][i] / 1e3, unit="kt", tol=0.05))
     for i in rnd.sample(top, 4):
-        q.append(dict(id=f"mc_{i}", kind="numeric", question=f"What is the delivered marginal cost of board in {nodes[i]['name']}, {nodes[i]['st']}?", value=fp["node_mc"][i], unit="/t", tol=0.05))
+        q.append(dict(id=f"mc_{i}", kind="numeric", question=f"What is the delivered marginal cost of board in {nn(i)}?", value=fp["node_mc"][i], unit="/t", tol=0.05))
     for o, s in d["price_shocks"].items():
         q.append(dict(id=f"shock_{o[:3]}", kind="numeric", question=f"If {o} raises its open-market price by $70 a ton, how many open-market tons does the model say it loses?", value=s["base_market_tons"] / 1e3, unit="kt", tol=0.05))
     k = fp["kpi"]; q += [dict(id="kpi_freight", kind="numeric", question="What is the total freight bill of the network in the October 2026 footprint?", value=k["freight_usd"] / 1e9, unit="B", tol=0.03),

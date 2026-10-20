@@ -3,7 +3,7 @@
   "id": "ko_31",
   "kind": "numeric",
   "question": "What does it cost the network per year if the Mansfield mill (International Paper) goes down?",
-  "value": 171.048536,
+  "value": 171.048648,
   "unit": "M",
   "tol": 0.05
  },
@@ -11,7 +11,7 @@
   "id": "ko_34",
   "kind": "numeric",
   "question": "What does it cost the network per year if the Valliant mill (International Paper) goes down?",
-  "value": 133.977534,
+  "value": 133.977634,
   "unit": "M",
   "tol": 0.05
  },
@@ -19,7 +19,7 @@
   "id": "ko_58",
   "kind": "numeric",
   "question": "What does it cost the network per year if the Counce mill (Packaging Corp of America) goes down?",
-  "value": 91.198913,
+  "value": 91.198987,
   "unit": "M",
   "tol": 0.05
  },
@@ -27,7 +27,7 @@
   "id": "ko_55",
   "kind": "numeric",
   "question": "What does it cost the network per year if the DeRidder mill (Packaging Corp of America) goes down?",
-  "value": 89.566758,
+  "value": 89.566852,
   "unit": "M",
   "tol": 0.05
  },
@@ -35,7 +35,7 @@
   "id": "ko_26",
   "kind": "numeric",
   "question": "What does it cost the network per year if the Cedar River mill (International Paper) goes down?",
-  "value": 115.719468,
+  "value": 115.719469,
   "unit": "M",
   "tol": 0.05
  },
@@ -43,7 +43,7 @@
   "id": "ko_13",
   "kind": "numeric",
   "question": "What does it cost the network per year if the Monticello mill (Georgia-Pacific) goes down?",
-  "value": 109.327008,
+  "value": 109.327122,
   "unit": "M",
   "tol": 0.05
  },
@@ -51,7 +51,7 @@
   "id": "ko_20",
   "kind": "numeric",
   "question": "What does it cost the network per year if the Prattville mill (International Paper) goes down?",
-  "value": 64.005015,
+  "value": 64.005101,
   "unit": "M",
   "tol": 0.05
  },
@@ -59,7 +59,7 @@
   "id": "ko_14",
   "kind": "numeric",
   "question": "What does it cost the network per year if the Toledo mill (Georgia-Pacific) goes down?",
-  "value": 117.251985,
+  "value": 117.252142,
   "unit": "M",
   "tol": 0.05
  },
@@ -138,31 +138,31 @@
  {
   "id": "dem_328",
   "kind": "numeric",
-  "question": "How much containerboard does the Madison, AL, AL market use in a year?",
-  "value": 184.128,
+  "question": "How much containerboard does the Madison, AL market use in a year?",
+  "value": 184.129,
   "unit": "kt",
   "tol": 0.05
  },
  {
   "id": "dem_253",
   "kind": "numeric",
-  "question": "How much containerboard does the Tarrant, TX, TX market use in a year?",
-  "value": 428.01,
+  "question": "How much containerboard does the Tarrant, TX market use in a year?",
+  "value": 428.011,
   "unit": "kt",
   "tol": 0.05
  },
  {
   "id": "dem_54",
   "kind": "numeric",
-  "question": "How much containerboard does the Pulaski, AR, AR market use in a year?",
-  "value": 212.829,
+  "question": "How much containerboard does the Pulaski, AR market use in a year?",
+  "value": 212.83,
   "unit": "kt",
   "tol": 0.05
  },
  {
   "id": "dem_399",
   "kind": "numeric",
-  "question": "How much containerboard does the Hamilton, TN, TN market use in a year?",
+  "question": "How much containerboard does the Hamilton, TN market use in a year?",
   "value": 272.897,
   "unit": "kt",
   "tol": 0.05
@@ -170,23 +170,23 @@
  {
   "id": "dem_391",
   "kind": "numeric",
-  "question": "How much containerboard does the Los Angeles, CA, CA market use in a year?",
-  "value": 564.47,
+  "question": "How much containerboard does the Los Angeles, CA market use in a year?",
+  "value": 564.471,
   "unit": "kt",
   "tol": 0.05
  },
  {
   "id": "dem_403",
   "kind": "numeric",
-  "question": "How much containerboard does the Winnebago, WI, WI market use in a year?",
-  "value": 405.713,
+  "question": "How much containerboard does the Winnebago, WI market use in a year?",
+  "value": 405.714,
   "unit": "kt",
   "tol": 0.05
  },
  {
   "id": "mc_80",
   "kind": "numeric",
-  "question": "What is the delivered marginal cost of board in Forsyth, NC, NC?",
+  "question": "What is the delivered marginal cost of board in Forsyth, NC?",
   "value": 27.5,
   "unit": "/t",
   "tol": 0.05
@@ -194,7 +194,7 @@
  {
   "id": "mc_167",
   "kind": "numeric",
-  "question": "What is the delivered marginal cost of board in Outagamie, WI, WI?",
+  "question": "What is the delivered marginal cost of board in Outagamie, WI?",
   "value": 13.6,
   "unit": "/t",
   "tol": 0.05
@@ -202,7 +202,7 @@
  {
   "id": "mc_197",
   "kind": "numeric",
-  "question": "What is the delivered marginal cost of board in Marion, IN, IN?",
+  "question": "What is the delivered marginal cost of board in Marion, IN?",
   "value": 34.7,
   "unit": "/t",
   "tol": 0.05
@@ -210,7 +210,7 @@
  {
   "id": "mc_260",
   "kind": "numeric",
-  "question": "What is the delivered marginal cost of board in Montgomery, OH, OH?",
+  "question": "What is the delivered marginal cost of board in Montgomery, OH?",
   "value": 36.8,
   "unit": "/t",
   "tol": 0.05
@@ -259,7 +259,7 @@
   "id": "kpi_freight",
   "kind": "numeric",
   "question": "What is the total freight bill of the network in the October 2026 footprint?",
-  "value": 2.096308575766,
+  "value": 2.096308760949,
   "unit": "B",
   "tol": 0.03
  },
@@ -283,7 +283,7 @@
   "id": "kpi_dz6",
   "kind": "numeric",
   "question": "What is the freight bill if diesel is $6.20 a gallon?",
-  "value": 2.224321647783,
+  "value": 2.224322053678,
   "unit": "B",
   "tol": 0.03
  },
