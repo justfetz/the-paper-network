@@ -38,6 +38,32 @@ error against the Census is therefore zero by construction, and the remaining un
 which the EPA list bounds at roughly the county level. The county-level CBP file (133 counties, 692 establishments)
 is thinned by the Census's newer disclosure rules and is kept only as a cross-check.
 
+
+### What changed when the measured demand went in (same mills, same prices, same freight)
+
+| Output, October 2026 | Population proxy | Measured demand (Census state employment × EPA plants) |
+|---|---|---|
+| Average haul | 568 mi | 514 mi |
+| Rail share | 44% | 42% |
+| Freight per ton | $64 | $60 |
+| West capacity value | $96/t | $66/t |
+| East capacity value | $39/t | $33/t |
+| IP internal share | 88% | 88% |
+| Median gap to the 2nd-cheapest mill | $5.2/t | $5.2/t |
+| Markets with a 2nd mill within $5/t | 49% | 49% |
+| Outage calendar, staggered → assigned | $269M → $122M | $276M → $122M |
+| Largest knockout | Mansfield +$186M | Mansfield +$172M |
+| Corrugator markets with no corrugator | 99 of 441 | 171 of 441 |
+| State shares, top 5 | CA 11.2, TX 8.1, FL 5.3, NY 4.6, OH 4.5 | CA 9.9, OH 6.8, TX 6.8, PA 6.3, IL 4.9 |
+
+The proxy had been putting board where people live rather than where boxes are made: too much in Florida, Texas
+and New York, too little in Ohio, Pennsylvania, Wisconsin, Indiana and Illinois. Moving it shortened the average
+haul by about 10%, cut the freight bill by 6%, and took a third off the West's scarcity premium (the proxy had
+overstated Western demand relative to Western plants). The switching math did not move at all: the gap between a
+market's cheapest and second-cheapest mill is freight geometry, not demand. Integration rates and the maintenance
+calendar result were unchanged. The corrugator tier concentrated: with demand following plants, more small markets
+have no corrugator of their own and buy sheets from the nearest one that does.
+
 ## 2. Demand geography against an independent signal (before the plant layer)
 
 The model spreads demand by population tilted toward manufacturing states. The only free, independent check
