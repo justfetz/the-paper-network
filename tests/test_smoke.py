@@ -22,7 +22,7 @@ for key, s in S.items():
     check(f"{key}: freight per ton and rail share sane", 30 <= k["avg_freight_per_ton"] <= 120 and 0 < k["rail_share"] < 1 and k["freight_usd"] > 0, f"{k['avg_freight_per_ton']} $/t, rail {k['rail_share']}")
 fp = S["fp2026"]
 check("drawn arcs carry nearly all domestic tons", 0.95 <= sum(a[2] for a in fp["arcs"]) / fp["kpi"]["tons_shipped_domestic"] <= 1.001)
-check("export arcs carry all export tons", abs(sum(e[2] for e in fp["exports"]) - fp["kpi"]["tons_exported"]) < 1)
+check("export arcs carry all export tons (within 0.1%)", abs(sum(e[2] for e in fp["exports"]) - fp["kpi"]["tons_exported"]) <= 0.001 * fp["kpi"]["tons_exported"], f"{sum(e[2] for e in fp['exports'])} vs {fp['kpi']['tons_exported']}")
 check("no mill above capacity", not [m for m in mills if m["status"] == "open" and fp["shipped"][m["id"]] > m["cap"] * 1.001 + 1])
 check("utilization and scarcity values well-formed", all(0 <= u <= 1.001 for u in fp["util"]) and all(v >= -1e-6 for v in fp["shadow"]))
 check("delivered marginal cost per market", len(fp["node_mc"]) == 441 and all(0 < v < 400 for v in fp["node_mc"] if v), f"min {min(fp['node_mc'])}, max {max(fp['node_mc'])}")

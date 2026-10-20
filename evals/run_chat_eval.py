@@ -42,9 +42,10 @@ def tools_over(d):
     def price_shock(producer):
         ABBR = {"ip": "International Paper", "pca": "Packaging Corp of America", "sw": "Smurfit Westrock", "smurfit": "Smurfit Westrock", "westrock": "Smurfit Westrock", "gp": "Georgia-Pacific", "georgia pacific": "Georgia-Pacific", "pratt": "Pratt Industries"}
         q = norm(ABBR.get(norm(producer), producer)); k = next((o for o in d["price_shocks"] if norm(o) == q or q in norm(o) or norm(o).split()[0] in q), None)
-        if not k: raise ValueError("no shock for " + producer); s = d["price_shocks"][k]
+        if not k: raise ValueError("no shock for " + producer)
+        s = d["price_shocks"][k]
         return dict(producer=k, open_market_tons_before=s["base_market_tons"], open_market_tons_after=s["market_tons_after"], extra_network_cost_usd_per_year=s["d_cost"], markets_that_switch=len(s["calls"]))
-    def scenarios(): return [dict(id=k, label=s["label"], kind=s["kind"], demand_tons=s["demand_tons"], export_tons=s["export_tons"], kpi=s["kpi"]) for k, s in d["scenarios"].items()]
+    def scenarios(): return [dict(id=k, label=s.get("label"), kind=s.get("kind"), demand_tons=s.get("demand_tons"), export_tons=s.get("export_tons"), kpi=s["kpi"]) for k, s in d["scenarios"].items()]
     import csv, os
     plants = list(csv.DictReader(open(os.path.join(os.path.dirname(os.path.abspath(sys.argv[2])), "plants_frs_box.csv")))) if os.path.exists(os.path.join(os.path.dirname(os.path.abspath(sys.argv[2])), "plants_frs_box.csv")) else []
     def find_plants(query, state=""):
