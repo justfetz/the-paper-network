@@ -54,11 +54,13 @@ jobs:
           git add -A
           git diff --cached --quiet && echo "no changes" && exit 0
           git commit -m "refresh: $(date -u +%Y-%m-%d) scheduled data and model re-run"
-          for i in 1 2 3 4; do git pull --rebase -q origin main && git push && break || sleep 15; done
+          for i in 1 2 3 4; do if git pull --rebase -X theirs -q origin main && git push; then break; fi; git rebase --abort 2>/dev/null || true; sleep 15; done
       - name: Publish the site to the gh-pages branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          if grep -q '^<<<<<<< ' site/data.js site/index.html site/ui.js; then echo "conflict markers in the built site; not publishing"; exit 1; fi
+          node -e "new Function(require('fs').readFileSync('site/data.js','utf8')); new Function(require('fs').readFileSync('site/ui.js','utf8'))" || { echo "built JS does not parse; not publishing"; exit 1; }
           rm -rf /tmp/pages && mkdir -p /tmp/pages && cp site/index.html site/data.js site/ui.js site/og.png site/.nojekyll /tmp/pages/
           cd /tmp/pages && git init -q && git checkout -q -b gh-pages && git add -A
           git -c user.name="paper-network-bot" -c user.email="bot@users.noreply.github.com" commit -q -m "site: built page, $(date -u +%F)"

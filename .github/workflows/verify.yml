@@ -51,4 +51,4 @@ jobs:
           git config user.name "paper-network-bot" && git config user.email "bot@users.noreply.github.com"
           git add data/plants_verified.csv data/plants_verified_ledger.json 2>/dev/null; git diff --cached --quiet && echo "no changes" && exit 0
           git commit -m "verify: Claude web check of EPA box-plant sites, $(date -u +%Y-%m-%d)"
-          for i in 1 2 3 4; do git pull --rebase -q origin main && git push && break || sleep 15; done
+          for i in 1 2 3 4; do if git pull --rebase -X theirs -q origin main && git push; then break; fi; git rebase --abort 2>/dev/null || true; sleep 15; done
