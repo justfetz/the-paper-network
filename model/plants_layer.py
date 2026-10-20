@@ -41,6 +41,10 @@ def main(frs_csv, cbp_csv, pn_json, dst):
         f["lat"] = pd.to_numeric(f.lat, errors="coerce"); f["lon"] = pd.to_numeric(f.lon, errors="coerce")
         box = f[(f.naics == "322211")].drop_duplicates("registry_id").copy()
         box = box[box.lat.between(17, 72) & box.lon.between(-170, -60)]
+        # one record per physical site: FRS carries the same plant under several program ids; collapse records within ~100 m
+        box["site_key"] = box.lat.round(3).astype(str) + "," + box.lon.round(3).astype(str)
+        n_records = len(box); box = box.sort_values("name").drop_duplicates("site_key"); n_sites = len(box)
+        out["sources"]["frs_dedupe"] = dict(records=int(n_records), distinct_sites=int(n_sites), note="FRS has no operating-status field in the facility file; closed plants and mis-coded sites remain, so the list is a superset of the ~1,100 operating plants the FBA and Census count")
         mills = f[f.naics.isin(["322130", "322120"])].drop_duplicates("registry_id")
         d = haversine(box.lat.values[:, None], box.lon.values[:, None], nodes.lat.values[None, :], nodes.lon.values[None, :])
         box["node"] = d.argmin(axis=1); box["node_mi"] = d.min(axis=1) * 1.2
