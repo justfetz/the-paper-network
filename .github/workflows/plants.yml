@@ -1,0 +1,50 @@
+# Fetch the plant layer: EPA Facility Registry Service (box plants and paperboard mills with coordinates, no key)
+# and Census County Business Patterns (NAICS 322211 establishments and employment by county; a key is optional).
+name: plants
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "41 6 15 6 *"   # yearly, mid-June, after the CBP release
+permissions: { contents: write }
+concurrency: { group: plants, cancel-in-progress: false }
+jobs:
+  plants:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pandas
+      - name: Download EPA FRS (national combined file; falls back to per-state files)
+        run: |
+          set -e; mkdir -p frs && cd frs
+          if curl -fL --retry 3 --retry-delay 20 -o national_combined.zip "https://ordsext.epa.gov/FLA/www3/state_files/national_combined.zip"; then
+            unzip -o -q national_combined.zip '*FACILITY_FILE*' '*NAICS_FILE*' || unzip -o -q national_combined.zip
+          else
+            for st in AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY; do
+              curl -fL --retry 2 -o "state_combined_${st,,}.zip" "https://ordsext.epa.gov/FLA/www3/state_files/state_combined_${st,,}.zip" && unzip -o -q "state_combined_${st,,}.zip" '*FACILITY_FILE*' '*NAICS_FILE*' || echo "skip $st"
+            done
+          fi
+          ls -la | head -20; du -sh .
+      - name: Keep the paper industry
+        run: python ingest/epa_frs.py frs data/plants_frs.csv
+      - name: Census County Business Patterns, NAICS 322211 by county (2022)
+        env: { CENSUS_API_KEY: "${{ secrets.CENSUS_API_KEY }}" }
+        run: python ingest/census_cbp.py 2022 data/cbp_322211_county.csv || echo "CBP fetch failed (rate limit without a key?)"
+      - name: Summary
+        run: |
+          python - <<'PY'
+          import pandas as pd
+          d = pd.read_csv("data/plants_frs.csv", dtype=str)
+          b = d[d.naics == "322211"].drop_duplicates("registry_id")
+          print("box plants (unique sites):", len(b)); print(b.state.value_counts().head(12).to_string())
+          try:
+              c = pd.read_csv("data/cbp_322211_county.csv"); print("CBP counties:", len(c), "estab total:", pd.to_numeric(c.estab, errors="coerce").sum(), "emp total:", pd.to_numeric(c.emp, errors="coerce").sum())
+          except Exception as e: print("no CBP file:", e)
+          PY
+      - name: Commit the data
+        run: |
+          git config user.name "paper-network-bot" && git config user.email "bot@users.noreply.github.com"
+          git add data/plants_frs.csv data/cbp_322211_county.csv 2>/dev/null || git add data/plants_frs.csv
+          git diff --cached --quiet && echo "no changes" || (git commit -m "plants: EPA FRS and Census CBP layer, $(date -u +%Y-%m-%d)" && git push)

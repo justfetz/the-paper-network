@@ -53,6 +53,7 @@ jobs:
         with: { path: site }
   deploy:
     needs: refresh
+    if: vars.DEPLOY_PAGES == 'true'   # set repository variable DEPLOY_PAGES=true after enabling Pages (source: GitHub Actions)
     runs-on: ubuntu-latest
     environment: { name: github-pages, url: ${{ steps.deployment.outputs.page_url }} }
     steps:

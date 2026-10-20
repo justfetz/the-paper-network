@@ -3,7 +3,7 @@
 **A public, free model of the US containerboard and corrugated box market, built from public data,
 solved as a network-flow problem, and drawn on a map.**
 
-Live site: `site/index.html` (enable GitHub Pages on `main`, folder `/site`, and it serves at
+Live site: `site/index.html` (enable GitHub Pages with source "GitHub Actions", set the repository variable `DEPLOY_PAGES=true`, and `.github/workflows/refresh.yml` deploys it to
 https://justfetz.github.io/the-paper-network/). A hosted copy of the same page is at
 https://claude.ai/artifact/UCaPyJMWgrDAg94xakwn9w. Everything on it is reproducible from this repo.
 
