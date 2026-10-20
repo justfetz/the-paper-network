@@ -6,6 +6,13 @@ JSON_PATH = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "data", "pa
 BM_PATH = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, "data", "basemap.json")
 D = json.load(open(JSON_PATH)); BM = json.load(open(BM_PATH))
 CORR_PATH = os.path.join(os.path.dirname(JSON_PATH), "corrugators.json")
+PL_PATH = os.path.join(os.path.dirname(JSON_PATH), "plants_frs_box.csv"); PLN_PATH = os.path.join(os.path.dirname(JSON_PATH), "plants_by_node.json")
+D["plants"] = None; D["plant_layer"] = None
+if os.path.exists(PL_PATH):
+    import csv
+    rows = list(csv.DictReader(open(PL_PATH, encoding="utf-8", errors="ignore")))
+    D["plants"] = [[r["name"][:48], r["owner_guess"], r["city"].title() if r["city"] else "", r["state"], round(float(r["lat"]), 3), round(float(r["lon"]), 3), int(float(r["node"]))] for r in rows if r.get("lat") and r.get("lon")]
+if os.path.exists(PLN_PATH): D["plant_layer"] = json.load(open(PLN_PATH))
 D["corr"] = json.load(open(CORR_PATH)) if os.path.exists(CORR_PATH) else None
 mills, S, P, nodes = D["mills"], D["scenarios"], D["params"], D["nodes"]
 kt = lambda v: f"{v/1e6:.2f} Mt" if v >= 950000 else f"{round(v/1e3):,} kt"

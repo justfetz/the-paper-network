@@ -8,6 +8,18 @@ import sys, json, os, numpy as np, pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from netmodel import haversine, county_weights, aggregate_demand_nodes
 
+OWNER_PATTERNS = [("International Paper", r"international paper|\bIP\b|temple.?inland|weyerhaeuser"), ("Smurfit Westrock", r"westrock|west rock|rock.?tenn|smurfit|kapstone|mead ?westvaco|meadwestvaco"),
+    ("Packaging Corp of America", r"packaging corp|\bPCA\b|boise (packaging|inc|cascade)|greif|corrchoice"), ("Georgia-Pacific", r"georgia.?pacific|\bGP\b|color.?box"), ("Pratt Industries", r"\bpratt\b"),
+    ("Green Bay Packaging", r"green bay packaging"), ("Cascades", r"cascades|norampac|greenpac"), ("New-Indy", r"new.?indy|rand.?whitney|kraft group"), ("Sonoco", r"sonoco"), ("Graphic Packaging", r"graphic packaging"),
+    ("Menasha", r"menasha|orbis"), ("Schwarz Partners", r"schwarz|corrugated supplies"), ("US Corrugated", r"u\.?s\.? corrugated"), ("Welch Packaging", r"welch packaging"), ("Jamestown Container", r"jamestown container"),
+    ("Royal Group", r"royal (containers|group|box)"), ("Bay Cities", r"bay cities"), ("Vanguard Packaging", r"vanguard packaging"), ("Liberty Diversified", r"liberty (carton|diversified|packaging)"), ("Great Northern", r"great northern"), ("Lawrence Paper", r"lawrence paper"), ("Central Container", r"central container"), ("Dusobox", r"dusobox"), ("Kelly Box", r"kelly box"), ("Dixie Box", r"dixie box")]
+import re
+def owner_guess(name):
+    n = str(name)
+    for o, rx in OWNER_PATTERNS:
+        if re.search(rx, n, re.I): return o
+    return "Independent / unknown"
+
 def main(frs_csv, cbp_csv, pn_json, dst):
     D = json.load(open(pn_json)); nodes = pd.DataFrame(D["nodes"]); dem = np.array(D["scenarios"]["fp2026"]["node_demand"], dtype=float)
     out = dict(nodes=[dict() for _ in range(len(nodes))], sources={})
@@ -24,7 +36,9 @@ def main(frs_csv, cbp_csv, pn_json, dst):
         for j in range(len(nodes)): out["nodes"][j]["frs_box_plants"] = int(counts.get(j, 0))
         out["sources"]["frs"] = dict(box_plants=int(len(box)), paper_and_board_mills=int(len(mills)), states=int(box.state.nunique()), note="EPA Facility Registry Service, NAICS 322211 unique sites with coordinates; FRS covers facilities with an environmental program record, so small sheet plants without permits can be missing")
         out["frs_by_state"] = box.state.value_counts().to_dict()
-        box[["registry_id", "name", "address", "city", "state", "zip", "lat", "lon", "node", "node_mi"]].to_csv(os.path.join(os.path.dirname(dst), "plants_frs_box.csv"), index=False)
+        box["owner_guess"] = box.name.map(owner_guess)
+        box[["registry_id", "name", "owner_guess", "address", "city", "state", "zip", "lat", "lon", "node", "node_mi"]].to_csv(os.path.join(os.path.dirname(dst), "plants_frs_box.csv"), index=False)
+        out["frs_by_owner"] = box.owner_guess.value_counts().to_dict()
     # ---- Census CBP: establishments and employment by county -> node (by county fips -> nearest node of that county's centroid)
     if cbp_csv and os.path.exists(cbp_csv):
         c = pd.read_csv(cbp_csv, dtype={"fips": str}); c["fips"] = c.fips.str.zfill(5)

@@ -92,7 +92,8 @@
       <section class="card" id="panel-demand" hidden>
         <h2>Where the boxes are used</h2>
         <p>Demand is allocated to counties by population, tilted toward manufacturing states, and read as corrugator-equivalents. A real plant list replaces this layer (see Method).</p>
-        <div class="bar"><span class="lbl">Color</span><button type="button" data-dlayer="demand" aria-pressed="true">Tons of board</button><button type="button" data-dlayer="plants" aria-pressed="false">Plants implied</button></div>
+        <div class="bar"><span class="lbl">Color</span><button type="button" data-dlayer="demand" aria-pressed="true">Tons of board</button><button type="button" data-dlayer="plants" aria-pressed="false">Plants implied</button><button type="button" id="named-toggle" aria-pressed="false" hidden>Named plants (EPA)</button></div>
+        <div class="bar" id="named-search-bar" hidden><input type="search" id="named-search" placeholder="search plants: name, owner, city, state" aria-label="search named plants" style="font-family:var(--mono);font-size:12px;min-height:34px;padding:0 10px;border:1px solid var(--rule);border-radius:6px;background:var(--code-bg);color:var(--ink);width:100%"></div>
         <div class="kpis" id="kpis-demand"></div>
         <h2>Largest markets</h2>
         <div class="list" id="demand-rank"></div>
@@ -147,6 +148,8 @@
     <section class="card wide"><h2>The loop in numbers</h2><div class="tblwrap"><table class="rec" id="fiber-table"></table></div><p class="note" id="fiber-note"></p></section>
   </div>
   <div class="detail" id="detail-demand" hidden>
+    <section class="card wide" id="named-card" hidden><h2 id="named-h">Named plants from the EPA Facility Registry</h2><div class="list" id="named-list" style="max-height:520px"></div><p class="note" id="named-note"></p></section>
+    <section class="card wide" id="proxy-card" hidden><h2>Proxy vs measured: demand share by state</h2><div class="tblwrap"><table class="rec" id="proxy-table"></table></div><p class="note" id="proxy-note"></p></section>
     <section class="card wide"><h2>Board demand by Census division and end use (Mt, allocated)</h2><div id="enduse-chart"></div><p class="note" id="enduse-note"></p></section>
   </div>
   <div class="detail" id="detail-backtest" hidden>
