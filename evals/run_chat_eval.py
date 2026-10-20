@@ -6,7 +6,7 @@ import json, sys, re, argparse
 PRICES = {"claude-opus-5-5": (4.0, 20.0, 5.0, 0.20), "claude-sonnet-5-5": (2.0, 10.0, 2.5, 0.10), "claude-haiku-5-5": (0.10, 0.50, 0.125, 0.01)}
 STATES = set("al ak az ar ca co ct de dc fl ga hi id il in ia ks ky la me md ma mi mn ms mo mt ne nv nh nj nm ny nc nd oh ok or pa ri sc sd tn tx ut vt va wa wv wi wy".split())
 UNIT_WORDS = r"million tons|million t|thousand tons|million|billion|thousand|kt|mt|bn|tons|ton|t/yr|/ton|/t|per ton|a ton|miles|mi|k|m|b|t|%"
-AMOUNT = re.compile(r"(?<![\w.$])(\$)?\s?(\d[\d,]*(?:\.\d+)?)(?:\s?(" + UNIT_WORDS + r"))?(?![A-Za-z\d])", re.I)
+AMOUNT = re.compile(r"(?<![\w.$])(\$)?\s?(\d[\d,]*(?:\.\d+)?)(?:(?:\s?|\s(?:[a-z][a-z-]*\s){1,4})(" + UNIT_WORDS + r"))?(?![A-Za-z\d])", re.I)   # up to four plain words may sit between the number and its unit: "71,253 of its open-market tons", "201,000 unmet tons"
 TONS = {"kt": 1, "mt": 1000, "million tons": 1000, "million t": 1000, "million": 1000, "thousand tons": 1, "thousand": 1, "k": 1, "tons": 1e-3, "ton": 1e-3, "t": 1e-3, "t/yr": 1e-3}
 DOLLARS_M = {"million": 1, "m": 1, "billion": 1000, "b": 1000, "bn": 1000, "thousand": 1e-3, "k": 1e-3, "": 1e-6}   # "" = a raw dollar figure such as $171,048,536
 
@@ -103,6 +103,7 @@ def grade(item, text, calls):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("golden"); ap.add_argument("data"); ap.add_argument("--model", default="claude-opus-5-5"); ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--regrade", metavar="RESULTS_JSON", help="re-score the saved answers in this file with the current grader, no API calls; prints the summary and the failures")
+    ap.add_argument("--write", action="store_true", help="with --regrade: write the re-scored results back to the file, with regraded=true in the summary")
     a = ap.parse_args()
     d = json.load(open(a.data)); defs, impl = tools_over(d); items = json.load(open(a.golden)); items = items[:a.limit] if a.limit else items
     if a.regrade:
@@ -112,7 +113,9 @@ def main():
             if not it: continue
             ok, detail = grade(it, r["answer"], (r.get("detail") or {}).get("lookups") or []); results.append(dict(r, pass_=ok, detail=detail if detail is not None else r.get("detail")))
             if not ok: print(f"FAIL {r['id']:14s} found={detail and detail.get('found')} | {r['answer'][:100]!r}")
-        print(summarize(saved["summary"].get("model"), results, saved["summary"].get("cost_usd", 0))); return
+        summary = dict(summarize(saved["summary"].get("model"), results, saved["summary"].get("cost_usd", 0)), regraded=True); print(summary)
+        if a.write: json.dump(dict(summary=summary, results=results), open(a.regrade, "w"), indent=1); print("written", a.regrade)
+        return
     import anthropic
     client = anthropic.Anthropic(); p = PRICES.get(a.model, PRICES["claude-opus-5-5"]); results = []; cost = 0.0
     for it in items:

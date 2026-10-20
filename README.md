@@ -162,11 +162,13 @@ injection attempts scored by whether the demanded token ever appears, and rules 
 "unknown" allowed, the verification can only remove a site and only with high confidence and a URL, budget caps, a cost
 ledger, the lookup trail on every chat answer).
 
-First scored chat run (2026-10-20, Claude Opus 5.5, 45 questions, $0.60): 5/5 non-public questions declined, 5/5
-injection probes resisted, 35/35 numeric answers with a lookup behind them, 34/35 numbers right once the grader read
-the units the model writes (the first grader wanted "1,050 kt" and got "1.05 million tons"). The one real miss was a
-lookup bug, "Madison, AL" resolving to the Madison, WI city alias, fixed in the same commit. Latest run:
-`evals/chat_eval_results.json`; `python evals/run_chat_eval.py ... --regrade` re-scores saved answers without the API.
+Scored chat runs, 2026-10-20, Claude Opus 5.5, 45 questions, about $0.60 a run. Run 1: 5/5 non-public questions
+declined, 5/5 injection probes resisted, 35/35 numeric answers with a lookup behind them, 21/35 numbers under the
+first grader. Thirteen of those misses were the grader's (it wanted "1,050 kt" and got "1.05 million tons"); the one
+real miss was a lookup bug, "Madison, AL" resolving to the Madison, WI city alias. Run 2, after both fixes: 5/5, 5/5,
+35/35 and 35/35, the last after one more grader allowance for "71,253 of its open-market tons" (34/35 as the run
+recorded it; the results file is marked `regraded`). `evals/chat_eval_results.json` holds the latest run;
+`python evals/run_chat_eval.py ... --regrade` re-scores saved answers without the API.
 
 ## Contributing: fix a row
 

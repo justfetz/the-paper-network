@@ -55,6 +55,7 @@ try:
     check("chat lookup: a state beats the city alias (Madison, AL is the county, bare Madison is the WI city)", impl["find_market"]("Madison, AL")[0]["market"] == "Madison, AL" and impl["find_market"]("Madison")[0]["market"] == "Dane, WI" and impl["find_market"]("Chicago, IL")[0]["market"] == "Cook, IL")
     G = lambda unit, value, text: rce.grade(dict(kind="numeric", unit=unit, value=value, tol=0.03), text, ["lookup"])[0]
     check("eval grader reads units the model actually writes (Mt, million tons, raw dollars, $k, $M, billion, 0.419)", G("kt", 1050, "about 1.05 million tons a year") and G("kt", 1050, "1.05 Mt/yr") and G("kt", 355, "355,000 t per year") and not G("kt", 1050, "$1,050 million") and G("M", 171.05, "$171,048,536 a year") and G("M", 0.775, "about $775k") and G("B", 2.096, "$2,096 million") and G("B", 2.096, "$2.10 billion") and G("/t", 27.5, "$27.5/t") and not G("/t", 27.5, "$70/t") and G("%", 41.9, "rail share 0.419") and G("mi", 514, "514 miles"))
+    check("eval grader allows words between a number and its unit, but not across clauses", G("kt", 71.25, "loses all 71,253 of its open-market tons a year") and G("kt", 201, "about 201,000 unmet tons") and not G("kt", 17, "17 markets that switch to other suppliers. Extra cost $775,000"))
     import re as _re; gq = json.load(open(os.path.join(ROOT, "evals", "chat_golden.json")))
     check("golden questions never double the state (no 'Tarrant, TX, TX')", not [q for q in gq if _re.search(r", ([A-Z]{2}), \1\b", q["question"])])
     mans = impl["find_mill"]("Mansfield")[0]

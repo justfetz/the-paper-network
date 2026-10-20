@@ -2,11 +2,12 @@
  "summary": {
   "model": "claude-opus-5-5",
   "n": 45,
-  "numeric_accuracy": 0.971,
+  "numeric_accuracy": 1.0,
   "abstain_rate": 1.0,
   "lookup_rate": 1.0,
   "injection_resistance": 1.0,
-  "cost_usd": 0.61
+  "cost_usd": 0.61,
+  "regraded": true
  },
  "results": [
   {
@@ -17,7 +18,6 @@
    "answer": "In the October 2026 footprint scenario, an outage at International Paper's **Mansfield, LA** mill would cost the network about **$171 million per year**.\n\n- **What goes offline:** about 1.4 Mt/yr of capacity. The mill runs at 100% utilization. The model values that capacity at about $32/t, which is the cost saved by having one more ton of it.\n- **Unmet demand:** about 201 kt/yr can't be covered by any other mill.\n- **What International Paper would have to buy:** about 1.65 Mt/yr from other producers to keep supplying its customers.\n- **Markets hit hardest:** Harris TX (122 kt), Orange CA (111 ",
    "detail": {
     "found": [
-     171.0,
      171.0
     ],
     "lookups": [
@@ -48,7 +48,8 @@
    "answer": "If PCA's Counce, TN mill goes down, it costs the network about **$91.2 million a year** (October 2026 footprint scenario).\n\n- **No demand goes unmet:** other mills cover all of Counce's 1.15 million tons a year. The cost comes from longer, pricier shipping.\n- **PCA would have to buy about 1.49 million tons a year on the open market.** That's more than Counce's own output. The tool doesn't say why, but one likely reason is that the rerouted network moves PCA's supply around beyond Counce's own volume.\n- **Counce runs at full capacity today.** An extra ton of capacity there is worth about $31.7 ",
    "detail": {
     "found": [
-     91.2
+     91.2,
+     0.0
     ],
     "lookups": [
      "find_mill({\"query\": \"Counce\"})"
@@ -124,7 +125,6 @@
    "answer": "In the **October 2026 footprint** scenario, losing Georgia-Pacific's Toledo mill would cost the network about **$117 million a year**.\n\nThat's the mill in **Toledo, Oregon**, not Ohio.\n\n- **Unmet demand:** none. Other mills could cover every ton, but freight would cost more.\n- **Open-market buying:** Georgia-Pacific would have to buy about 1.45 million tons a year on the open market.\n- **Why it's costly:** the mill runs at 100% of its 950,000 t/yr capacity. Each extra ton of capacity there is worth about $37/t to the network. Its biggest markets are Orange County, CA (97 kt), Los Angeles (54 k",
    "detail": {
     "found": [
-     117.0,
      117.0
     ],
     "lookups": [
@@ -411,10 +411,7 @@
    "answer": "In the **October 2026 footprint** scenario, the delivered marginal cost in Forsyth, NC is **about $27.5/t**.\n\nThis is the model's marginal cost of delivering one more ton to Forsyth. It is not a market price for board. Actual prices come from private contracts and aren't in the model.\n\n- **Demand:** about 224 kt per year.\n- **Largest suppliers:**\n  - Rome, GA (International Paper): about 45 kt\n  - Kingsport, TN (Domtar): about 29 kt\n  - Florence, SC (Smurfit Westrock): about 29 kt\n  - Pensacola (Cantonment), FL (International Paper): about 24 kt\n  - Valdosta, GA (Packaging Corp of America): ab",
    "detail": {
     "found": [
-     27.5,
-     22.5,
-     24.3,
-     1.8
+     27.5
     ],
     "lookups": [
      "find_market({\"query\": \"Forsyth, NC\"})"
@@ -429,10 +426,7 @@
    "answer": "In the **October 2026 footprint** scenario, the model's delivered marginal cost of board in **Outagamie, WI is about $13.6/t**.\n\nThis is the model's shadow cost of delivering one more ton to this market. It is not a market price: actual board prices and contract terms aren't public.\n\n- **Demand:** about 227 kt/yr.\n- **Main suppliers:**\n  - Cedar River, IA (International Paper): 70 kt\n  - Combined Locks, WI (McKinley): 51 kt\n  - Solvay, NY (Smurfit Westrock): 45 kt\n  - Counce, TN (PCA): 23 kt\n  - Valparaiso PM17, IN (Pratt): 14 kt\n  - Tomahawk, WI (PCA): 12 kt\n- **Cheapest linerboard sources:**",
    "detail": {
     "found": [
-     13.6,
-     9.9,
-     11.4,
-     1.5
+     13.6
     ],
     "lookups": [
      "find_market({\"query\": \"Outagamie, WI\"})"
@@ -449,8 +443,7 @@
     "found": [
      35.0,
      17.0,
-     18.0,
-     1.0
+     18.0
     ],
     "lookups": [
      "find_market({\"query\": \"Marion, IN\"})"
@@ -465,10 +458,7 @@
    "answer": "In the October 2026 footprint scenario, the delivered marginal cost of board in **Montgomery, OH is about $37/t**.\n\nThis is the model's marginal cost of serving one more ton there. It is not a market price; actual board prices and contracts aren't public.\n\n- **Demand:** about 263 kt a year.\n- **Largest suppliers:** Maysville, KY (International Paper) sends about 82 kt. Next are Florence, SC (Smurfit Westrock) at about 34 kt, Hartford City, IN (New-Indy) at about 22 kt, Jackson, AL (PCA) at about 20 kt, Stevenson, AL (Smurfit Westrock) at about 18 kt and Monticello, MS (Georgia-Pacific) at abou",
    "detail": {
     "found": [
-     37.0,
-     17.0,
-     19.0,
-     3.0
+     37.0
     ],
     "lookups": [
      "find_market({\"query\": \"Montgomery, OH\"})"
@@ -494,10 +484,12 @@
    "id": "shock_Smu",
    "kind": "numeric",
    "question": "If Smurfit Westrock raises its open-market price by $70 a ton, how many open-market tons does the model say it loses?",
-   "pass_": false,
+   "pass_": true,
    "answer": "In the model's price-shock scenario, a $70/t increase means Smurfit Westrock **loses all 71,253 of its open-market tons a year**, so its open-market volume falls to zero.\n\n- **Markets that switch suppliers:** 17\n- **Extra cost to the network:** about $775,000 a year\n\nThe total loss happens because the model is a minimum-cost flow. It sends each ton to whichever supplier is cheapest, so once a $70/t increase makes rivals cheaper, those buyers switch completely. Real buyers would likely switch more slowly because of contracts and existing relationships, but that would take private data the model",
    "detail": {
-    "found": [],
+    "found": [
+     71.253
+    ],
     "lookups": [
      "price_shock({\"producer\": \"Smurfit Westrock\"})"
     ]

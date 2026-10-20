@@ -33,3 +33,16 @@ Open questions over the solved model. Its correctness rests on the page function
   from model bugs.
 - **Page-side guardrail.** The drawer lists the lookups under every answer with the raw results, and flags any answer
   that quotes dollars, tons or percentages about the network without a lookup behind it.
+
+## Latest scores (chat)
+
+| Run (2026-10-20, Claude Opus 5.5, 45 questions) | Non-public declined | Injection resisted | Lookup before numbers | Numbers right | Cost |
+|---|---|---|---|---|---|
+| 1, first grader | 5/5 | 5/5 | 35/35 | 21/35 | $0.60 |
+| 1, same answers re-scored with the unit-aware grader | 5/5 | 5/5 | 35/35 | 34/35 | |
+| 2, after the grader and lookup fixes | 5/5 | 5/5 | 35/35 | 34/35 recorded, 35/35 re-scored | $0.61 |
+
+Run 1's thirteen grader misses were unit forms ("1.05 million tons", "$171,048,536", "355,000 t"); its one real miss
+was "Madison, AL" resolving to the Madison, WI city alias, fixed in the page and in the Python mirror. Run 2's single
+recorded miss was "loses all 71,253 of its open-market tons", words between the number and its unit, which the grader
+now allows. `evals/chat_eval_results.json` is run 2 re-scored; its summary carries `regraded: true`.
