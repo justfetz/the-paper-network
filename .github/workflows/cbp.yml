@@ -1,0 +1,31 @@
+# Census County Business Patterns complete county file (bulk CSV, no key): plants and employment by county for the paper codes.
+name: cbp
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "19 7 20 6 *"   # yearly, late June, after the CBP release
+permissions: { contents: write }
+concurrency: { group: cbp, cancel-in-progress: false }
+jobs:
+  cbp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pandas
+      - name: Download the complete county file (newest year that exists)
+        run: |
+          set -e
+          for y in 2024 2023 2022; do yy=${y:2:2}; if curl -fL --retry 3 -o cbp.zip "https://www2.census.gov/programs-surveys/cbp/datasets/${y}/cbp${yy}co.zip"; then echo "$y" > year.txt; break; fi; done
+          ls -la cbp.zip && cat year.txt
+      - name: Keep the paper industry
+        run: python ingest/census_cbp_bulk.py cbp.zip data/cbp_322211_county.csv "$(cat year.txt)"
+      - uses: actions/upload-artifact@v4
+        with: { name: cbp-layer, path: "data/cbp_322211_county*.csv" }
+      - name: Commit
+        run: |
+          git config user.name "paper-network-bot" && git config user.email "bot@users.noreply.github.com"
+          git add data/cbp_322211_county*.csv; git diff --cached --quiet && echo "no changes" && exit 0
+          git commit -m "cbp: County Business Patterns $(cat year.txt), paper codes by county"
+          for i in 1 2 3 4; do git pull --rebase -q origin main && git push && break || sleep 15; done
