@@ -675,10 +675,12 @@
   function millName(i) { var m = mills[i]; return m ? m.name + ", " + m.st + " (" + m.owner + ")" : "mill " + i; }
   function nodeName(i) { var n = nodes[i]; if (!n) return "market " + i; return /,\s*[A-Z]{2}$/.test(n.name) ? n.name : n.name + ", " + n.st; }
   var CITY = {"chicago":"Cook, IL","los angeles":"Los Angeles, CA","houston":"Harris, TX","dallas":"Dallas, TX","fort worth":"Tarrant, TX","atlanta":"Fulton, GA","phoenix":"Maricopa, AZ","philadelphia":"Philadelphia, PA","miami":"Miami-Dade, FL","detroit":"Wayne, MI","seattle":"King, WA","minneapolis":"Hennepin, MN","st louis":"St. Louis, MO","saint louis":"St. Louis, MO","denver":"Denver, CO","boston":"Suffolk, MA","new york":"Kings, NY","nyc":"Kings, NY","brooklyn":"Kings, NY","las vegas":"Clark, NV","portland":"Multnomah, OR","san antonio":"Bexar, TX","charlotte":"Mecklenburg, NC","nashville":"Davidson, TN","indianapolis":"Marion, IN","columbus":"Franklin, OH","milwaukee":"Milwaukee, WI","kansas city":"Jackson, MO","cincinnati":"Hamilton, OH","cleveland":"Cuyahoga, OH","pittsburgh":"Allegheny, PA","baltimore":"Baltimore, MD","memphis":"Shelby, TN","louisville":"Jefferson, KY","orlando":"Orange, FL","tampa":"Hillsborough, FL","salt lake city":"Salt Lake, UT","sacramento":"Sacramento, CA","san francisco":"San Francisco, CA","san jose":"Santa Clara, CA","oakland":"Alameda, CA","austin":"Travis, TX","oklahoma city":"Oklahoma, OK","richmond":"Henrico, VA","raleigh":"Wake, NC","jacksonville":"Duval, FL","new orleans":"Orleans, LA","birmingham":"Jefferson, AL","buffalo":"Erie, NY","rochester":"Monroe, NY","grand rapids":"Kent, MI","omaha":"Douglas, NE","tulsa":"Tulsa, OK","albuquerque":"Bernalillo, NM","el paso":"El Paso, TX","san diego":"San Diego, CA","riverside":"Riverside, CA","anaheim":"Orange, CA","newark":"Essex, NJ","hartford":"Hartford, CT","providence":"Providence, RI","des moines":"Polk, IA","little rock":"Pulaski, AR","spokane":"Spokane, WA","boise":"Ada, ID","savannah":"Chatham, GA","greensboro":"Guilford, NC","green bay":"Brown, WI","toledo":"Lucas, OH","dayton":"Montgomery, OH","akron":"Summit, OH","knoxville":"Knox, TN","chattanooga":"Hamilton, TN","lexington":"Fayette, KY","madison":"Dane, WI","fresno":"Fresno, CA","bakersfield":"Kern, CA","stockton":"San Joaquin, CA","reno":"Washoe, NV","tucson":"Pima, AZ","greenville":"Greenville, SC","charleston":"Charleston, SC","harrisburg":"Dauphin, PA","allentown":"Lehigh, PA","scranton":"Lackawanna, PA","syracuse":"Onondaga, NY","albany":"Albany, NY","wichita":"Sedgwick, KS","mobile":"Mobile, AL","baton rouge":"East Baton Rouge, LA","shreveport":"Caddo, LA","lubbock":"Lubbock, TX","corpus christi":"Nueces, TX","mcallen":"Hidalgo, TX","laredo":"Webb, TX"};   // markets are named by county; the cities people ask about map to them
-  function findMills(q) { q = norm(q); if (!q) return []; return mills.filter(function (m) { return [m.name, m.owner, m.city, m.st].some(function (f) { return norm(f).indexOf(q) >= 0; }); }); }
+  var OWNER_ABBR = { ip: "International Paper", pca: "Packaging Corp of America", "packaging corp": "Packaging Corp of America", sw: "Smurfit Westrock", smurfit: "Smurfit Westrock", westrock: "Smurfit Westrock", gp: "Georgia-Pacific", "georgia pacific": "Georgia-Pacific", pratt: "Pratt Industries", gbp: "Green Bay Packaging", "nine dragons": "ND Paper", nd: "ND Paper", "new indy": "New-Indy", newindy: "New-Indy" };
+  function expand(q) { var n = norm(q); return OWNER_ABBR[n] || q; }
+  function findMills(q) { q = norm(expand(q)); if (!q) return []; return mills.filter(function (m) { return [m.name, m.owner, m.city, m.st].some(function (f) { return norm(f).indexOf(q) >= 0; }); }); }
   function findNodes(q) {   // returns market indices (positions in D.nodes); node.id is the county FIPS code, not a position
-    q = norm(q); if (!q) return [];
-    var alias = CITY[q] || CITY[q.replace(/\s+(?:county|il|tx|ca|ga|oh|pa|fl|mi|wa|mn|mo|co|ma|ny|nv|or|nc|tn|in|wi|md|ky|ut|az|ok|va|la|al|ne|nm|nj|ct|ri|ia|ar|id|sc|ks|ms)$/, "")];
+    q = norm(q).replace(/\s+county$/, "").replace(/\s+(?:county)\s+/, " "); if (!q) return [];
+    var alias = CITY[q] || CITY[q.replace(/\s+(?:il|tx|ca|ga|oh|pa|fl|mi|wa|mn|mo|co|ma|ny|nv|or|nc|tn|in|wi|md|ky|ut|az|ok|va|la|al|ne|nm|nj|ct|ri|ia|ar|id|sc|ks|ms)$/, "")];
     var idx = [];
     if (alias) { var a = norm(alias); nodes.forEach(function (n, i) { if (norm(n.name) === a) idx.push(i); }); if (idx.length) return idx; }
     nodes.forEach(function (n, i) { if (norm(n.name) === q || norm(n.name.replace(/,\s*[A-Z]{2}$/, "")) === q) idx.push(i); }); if (idx.length) return idx;
@@ -706,15 +708,14 @@
       counted_plants: pl ? { epa_box_plant_records: pl.frs_box_plants, census_establishments: pl.cbp_estab, census_employment: pl.cbp_emp } : undefined };
   }
   function shock(ownerQ) {
-    var ABBR = { ip: "International Paper", pca: "Packaging Corp of America", sw: "Smurfit Westrock", smurfit: "Smurfit Westrock", westrock: "Smurfit Westrock", gp: "Georgia-Pacific", "georgia pacific": "Georgia-Pacific", pratt: "Pratt Industries" };
-    var keys = Object.keys(D.price_shocks || {}), q = norm(ABBR[norm(ownerQ)] || ownerQ), k = keys.filter(function (o) { return norm(o) === q || norm(o).indexOf(q) >= 0 || (q && q.indexOf(norm(o).split(" ")[0]) >= 0); })[0];
+    var keys = Object.keys(D.price_shocks || {}), q = norm(expand(ownerQ)), k = keys.filter(function (o) { return norm(o) === q || norm(o).indexOf(q) >= 0 || (q && q.indexOf(norm(o).split(" ")[0]) >= 0); })[0];
     if (!k) throw new Error("no price-shock scenario for " + ownerQ + "; available: " + keys.join(", "));
     var s = D.price_shocks[k], calls = (s.calls || []).slice().sort(function (a, b) { return b.tons - a.tons; });
     return { producer: k, shock: "+$70/t on its open-market sales, everyone else unchanged", open_market_tons_before: s.base_market_tons, open_market_tons_after: s.market_tons_after, extra_network_cost_usd_per_year: s.d_cost, markets_that_switch: calls.length,
       largest_switches: calls.slice(0, 10).map(function (c) { return { market: nodeName(c.node), grade: c.grade === "L" ? "linerboard" : "medium", from: millName(c.from_mill), to: millName(c.to_mill), tons: c.tons }; }) };
   }
   function findPlants(query, state) {
-    var plants = D.plants || [], q = norm(query), st = String(state || "").trim().toUpperCase().slice(0, 2);
+    var plants = D.plants || [], q = norm(expand(query)), st = String(state || "").trim().toUpperCase().slice(0, 2);
     if (q === "all" || q === "any" || q === "*") q = "";
     var hits = plants.filter(function (p) { return (!st || p[3] === st) && (!q || norm(p[0] + " " + p[1] + " " + p[2] + " " + p[3]).indexOf(q) >= 0); });
     return { matches: hits.length, shown: hits.slice(0, 25).map(function (p) { return { name: p[0].replace(/^\d+ - /, ""), owner_guess: p[1], city: p[2], state: p[3], market: nodeName(p[6]) }; }),
@@ -732,7 +733,7 @@
       execute: function (inp) { var r = findMills(inp.query); if (!r.length) throw new Error("no mill matches '" + inp.query + "'; try an owner (International Paper, Packaging Corp of America, Smurfit Westrock, Georgia-Pacific, Pratt Industries) or a state"); return r.slice(0, 8).map(millCard); } },
     { name: "find_market", description: "Find a demand market by city, county or two-letter state (up to 5). The 441 markets are named by county (Cook, IL is Chicago; Harris, TX is Houston) and the big cities are mapped to them, so a city name works. Returns board demand, delivered marginal cost, the mills supplying it, the cheapest alternative mills with the switching gap, the corrugator tier and the counted box plants.",
       inputSchema: { type: "object", properties: { query: { type: "string", description: "city, county or state" } }, required: ["query"] },
-      execute: function (inp) { var r = findNodes(inp.query); if (!r.length) throw new Error("no market matches '" + inp.query + "'"); return r.slice(0, 5).map(marketCard); } },
+      execute: function (inp) { var r = findNodes(inp.query); if (!r.length) throw new Error("no market matches '" + inp.query + "'" + (/\b(ak|hi|alaska|hawaii|anchorage|honolulu|puerto rico)\b/.test(norm(inp.query)) ? " (the model covers the contiguous 48 states)" : "; markets are named by county, try the county or a nearby big city")); return r.slice(0, 5).map(marketCard); } },
     { name: "knockouts", description: "The 20 single-mill outages that cost the network most per year against the 2026 footprint: extra freight, open-market purchases at a $150/t premium and unmet demand at $400/t.",
       execute: function () { return D.knockouts.map(function (k) { return { mill: k.name + ", " + k.st, owner: k.owner, capacity_tons: k.cap, network_cost_usd_per_year: k.d_total, unmet_tons: k.unmet, owner_must_buy_tons: k.owner_buys, change_in_avg_haul_miles: k.d_haul }; }); } },
     { name: "price_shock", description: "What the model says happens when one producer raises its open-market price by $70/t: the tons it loses, the extra cost to the network and the specific market-to-mill switches (the 'will you switch?' call list). Producers: International Paper, Smurfit Westrock, Packaging Corp of America, Georgia-Pacific, Pratt Industries.",
@@ -900,7 +901,7 @@
   }
   var render0 = S.render;
   S.render = function () { render0(); try { history.replaceState(null, "", "#" + S.tab + (S.scen && S.scen !== "fp2026" ? "/" + S.scen : "")); } catch (e) {} };
-  (function readHash() { var parts = (location.hash || "").replace("#", "").split("/"); if (parts[1] && D.scenarios[parts[1]]) { setScenario(parts[1]); S.render(); } })();
+  (function readHash() { var parts = decodeURIComponent(location.hash || "").replace("#", "").split("/"); if (parts[1] && D.scenarios[parts[1]]) { setScenario(parts[1]); S.render(); } })();
   function jump(tab, scen, after) { if (scen) setScenario(scen); else if (S.scen !== "fp2026" && S.scen !== "fp2024") setScenario("fp2026"); S.setTab(tab); if (after) try { after(); } catch (e) {} window.scrollTo({ top: 0, behavior: "smooth" }); }
 
   // --- the items: live inputs first, then what the model says, then what changed

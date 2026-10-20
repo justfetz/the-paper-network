@@ -20,7 +20,7 @@
   }
   var render0 = S.render;
   S.render = function () { render0(); try { history.replaceState(null, "", "#" + S.tab + (S.scen && S.scen !== "fp2026" ? "/" + S.scen : "")); } catch (e) {} };
-  (function readHash() { var parts = (location.hash || "").replace("#", "").split("/"); if (parts[1] && D.scenarios[parts[1]]) { setScenario(parts[1]); S.render(); } })();
+  (function readHash() { var parts = decodeURIComponent(location.hash || "").replace("#", "").split("/"); if (parts[1] && D.scenarios[parts[1]]) { setScenario(parts[1]); S.render(); } })();
   function jump(tab, scen, after) { if (scen) setScenario(scen); else if (S.scen !== "fp2026" && S.scen !== "fp2024") setScenario("fp2026"); S.setTab(tab); if (after) try { after(); } catch (e) {} window.scrollTo({ top: 0, behavior: "smooth" }); }
 
   // --- the items: live inputs first, then what the model says, then what changed

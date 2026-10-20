@@ -1,0 +1,39 @@
+# Runs the chat golden set through the Messages API with the page's tools (evals/run_chat_eval.py) and commits the scores.
+# Needs ANTHROPIC_API_KEY. A full run of the 45 questions is a few dollars on Claude Opus 5.5. On demand only.
+name: eval
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: "claude-opus-5-5 | claude-sonnet-5-5 | claude-haiku-5-5"
+        default: "claude-opus-5-5"
+      limit:
+        description: "Questions to run (0 = all)"
+        default: "0"
+permissions:
+  contents: write
+jobs:
+  chat-eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install anthropic pandas numpy
+      - name: Ask the golden questions
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          IN_MODEL: ${{ inputs.model }}
+          IN_LIMIT: ${{ inputs.limit }}
+        run: |
+          [ -z "$ANTHROPIC_API_KEY" ] && { echo "no ANTHROPIC_API_KEY secret; nothing to do"; exit 0; }
+          python evals/chat_golden.py data/paper_network.json evals/chat_golden.json
+          python evals/run_chat_eval.py evals/chat_golden.json data/paper_network.json --model "$IN_MODEL" --limit "$IN_LIMIT"
+      - name: Commit the scores
+        run: |
+          git config user.name "paper-network-bot" && git config user.email "bot@users.noreply.github.com"
+          git add evals/chat_eval_results.json evals/chat_golden.json; git diff --cached --quiet && echo "no changes" && exit 0
+          git commit -m "eval: chat golden set scored, $(date -u +%Y-%m-%d)"
+          for i in 1 2 3 4; do if git pull --rebase --autostash -X theirs -q origin main && git push; then break; fi; git rebase --abort 2>/dev/null || true; sleep 15; done

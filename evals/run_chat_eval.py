@@ -11,8 +11,10 @@ def tools_over(d):
     fp = d["scenarios"]["fp2026"]; mills = d["mills"]; nodes = d["nodes"]; norm = lambda s: re.sub(r"[^a-z0-9 ]", " ", str(s or "").lower()).strip()
     mn = lambda i: f"{mills[i]['name']}, {mills[i]['st']} ({mills[i]['owner']})"; nn = lambda i: nodes[i]["name"] if re.search(r",\s*[A-Z]{2}$", nodes[i]["name"]) else f"{nodes[i]['name']}, {nodes[i]['st']}"
     CITY = json.loads('''{"chicago":"Cook, IL","los angeles":"Los Angeles, CA","houston":"Harris, TX","dallas":"Dallas, TX","fort worth":"Tarrant, TX","atlanta":"Fulton, GA","phoenix":"Maricopa, AZ","philadelphia":"Philadelphia, PA","miami":"Miami-Dade, FL","detroit":"Wayne, MI","seattle":"King, WA","minneapolis":"Hennepin, MN","st louis":"St. Louis, MO","saint louis":"St. Louis, MO","denver":"Denver, CO","boston":"Suffolk, MA","new york":"Kings, NY","nyc":"Kings, NY","brooklyn":"Kings, NY","las vegas":"Clark, NV","portland":"Multnomah, OR","san antonio":"Bexar, TX","charlotte":"Mecklenburg, NC","nashville":"Davidson, TN","indianapolis":"Marion, IN","columbus":"Franklin, OH","milwaukee":"Milwaukee, WI","kansas city":"Jackson, MO","cincinnati":"Hamilton, OH","cleveland":"Cuyahoga, OH","pittsburgh":"Allegheny, PA","baltimore":"Baltimore, MD","memphis":"Shelby, TN","louisville":"Jefferson, KY","orlando":"Orange, FL","tampa":"Hillsborough, FL","salt lake city":"Salt Lake, UT","sacramento":"Sacramento, CA","san francisco":"San Francisco, CA","san jose":"Santa Clara, CA","oakland":"Alameda, CA","austin":"Travis, TX","oklahoma city":"Oklahoma, OK","richmond":"Henrico, VA","raleigh":"Wake, NC","jacksonville":"Duval, FL","new orleans":"Orleans, LA","birmingham":"Jefferson, AL","buffalo":"Erie, NY","rochester":"Monroe, NY","grand rapids":"Kent, MI","omaha":"Douglas, NE","tulsa":"Tulsa, OK","albuquerque":"Bernalillo, NM","el paso":"El Paso, TX","san diego":"San Diego, CA","riverside":"Riverside, CA","anaheim":"Orange, CA","newark":"Essex, NJ","hartford":"Hartford, CT","providence":"Providence, RI","des moines":"Polk, IA","little rock":"Pulaski, AR","spokane":"Spokane, WA","boise":"Ada, ID","savannah":"Chatham, GA","greensboro":"Guilford, NC","green bay":"Brown, WI","toledo":"Lucas, OH","dayton":"Montgomery, OH","akron":"Summit, OH","knoxville":"Knox, TN","chattanooga":"Hamilton, TN","lexington":"Fayette, KY","madison":"Dane, WI","fresno":"Fresno, CA","bakersfield":"Kern, CA","stockton":"San Joaquin, CA","reno":"Washoe, NV","tucson":"Pima, AZ","greenville":"Greenville, SC","charleston":"Charleston, SC","harrisburg":"Dauphin, PA","allentown":"Lehigh, PA","scranton":"Lackawanna, PA","syracuse":"Onondaga, NY","albany":"Albany, NY","wichita":"Sedgwick, KS","mobile":"Mobile, AL","baton rouge":"East Baton Rouge, LA","shreveport":"Caddo, LA","lubbock":"Lubbock, TX","corpus christi":"Nueces, TX","mcallen":"Hidalgo, TX","laredo":"Webb, TX"}''')
+    ABBR = {"ip": "International Paper", "pca": "Packaging Corp of America", "packaging corp": "Packaging Corp of America", "sw": "Smurfit Westrock", "smurfit": "Smurfit Westrock", "westrock": "Smurfit Westrock", "gp": "Georgia-Pacific", "georgia pacific": "Georgia-Pacific", "pratt": "Pratt Industries", "gbp": "Green Bay Packaging", "nine dragons": "ND Paper", "nd": "ND Paper", "new indy": "New-Indy"}
+    expand = lambda q: ABBR.get(norm(q), q)
     def find_mill(query):
-        q = norm(query); r = [m for m in mills if any(q in norm(f) for f in (m["name"], m["owner"], m["city"], m["st"]))][:8]
+        q = norm(expand(query)); r = [m for m in mills if any(q in norm(f) for f in (m["name"], m["owner"], m["city"], m["st"]))][:8]
         if not r: raise ValueError(f"no mill matches {query}")
         out = []
         for m in r:
@@ -25,7 +27,7 @@ def tools_over(d):
                             if_this_mill_goes_down=dict(network_cost_usd_per_year=ko["d_total"], unmet_tons=ko["unmet"], owner_must_buy_on_open_market_tons=ko["owner_buys"]) if ko else "not among the 20 costliest single-mill outages"))
         return out
     def find_market(query):
-        q = norm(query); a = CITY.get(q) or CITY.get(re.sub(r"\s+[a-z]{2}$", "", q)); idx = []
+        q = re.sub(r"\s+county$", "", norm(query)); a = CITY.get(q) or CITY.get(re.sub(r"\s+[a-z]{2}$", "", q)); idx = []
         if a: idx = [i for i, n in enumerate(nodes) if norm(n["name"]) == norm(a)]
         idx = idx or [i for i, n in enumerate(nodes) if norm(n["name"]) == q or norm(re.sub(r",\s*[A-Z]{2}$", "", n["name"])) == q] or [i for i, n in enumerate(nodes) if q in norm(n["name"] + " " + n["st"])]
         if not idx: raise ValueError(f"no market matches {query}")
@@ -40,8 +42,7 @@ def tools_over(d):
         return out
     def knockouts(): return [dict(mill=f"{k['name']}, {k['st']}", owner=k["owner"], capacity_tons=k["cap"], network_cost_usd_per_year=k["d_total"], unmet_tons=k["unmet"], owner_must_buy_tons=k["owner_buys"]) for k in d["knockouts"]]
     def price_shock(producer):
-        ABBR = {"ip": "International Paper", "pca": "Packaging Corp of America", "sw": "Smurfit Westrock", "smurfit": "Smurfit Westrock", "westrock": "Smurfit Westrock", "gp": "Georgia-Pacific", "georgia pacific": "Georgia-Pacific", "pratt": "Pratt Industries"}
-        q = norm(ABBR.get(norm(producer), producer)); k = next((o for o in d["price_shocks"] if norm(o) == q or q in norm(o) or norm(o).split()[0] in q), None)
+        q = norm(expand(producer)); k = next((o for o in d["price_shocks"] if norm(o) == q or q in norm(o) or norm(o).split()[0] in q), None)
         if not k: raise ValueError("no shock for " + producer)
         s = d["price_shocks"][k]
         return dict(producer=k, open_market_tons_before=s["base_market_tons"], open_market_tons_after=s["market_tons_after"], extra_network_cost_usd_per_year=s["d_cost"], markets_that_switch=len(s["calls"]))
@@ -49,7 +50,7 @@ def tools_over(d):
     import csv, os
     plants = list(csv.DictReader(open(os.path.join(os.path.dirname(os.path.abspath(sys.argv[2])), "plants_frs_box.csv")))) if os.path.exists(os.path.join(os.path.dirname(os.path.abspath(sys.argv[2])), "plants_frs_box.csv")) else []
     def find_plants(query, state=""):
-        q = norm(query); q = "" if q in ("all", "any", "*") else q; st = str(state or "").strip().upper()[:2]
+        q = norm(expand(query)); q = "" if q in ("all", "any", "*") else q; st = str(state or "").strip().upper()[:2]
         hits = [p for p in plants if (not st or p["state"] == st) and (not q or q in norm(" ".join([p["name"], p["owner_guess"], p["city"], p["state"]])))]
         if not hits: raise ValueError(f"no EPA site matches {query}")
         return dict(matches=len(hits), shown=[dict(name=re.sub(r"^\d+ - ", "", p["name"]), owner_guess=p["owner_guess"], city=p["city"].title(), state=p["state"], market=nn(int(float(p["node"])))) for p in hits[:25]])
