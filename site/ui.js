@@ -637,7 +637,7 @@
     prospects: ["Will you switch?", "For each market, the cheapest mill by delivered freight and the one behind it. The gap is the price of loyalty. Pick an owner and raise its open-market price to see the call sheet."],
     prices: ["What a thousand square feet of board costs, delivered", "Mill prices from the published index, freight from the flow model, diesel from EIA. Mullen or ECT, your numbers."],
     fiber: ["The boxes come back", "Recovered corrugated flows from where it was used to the recycled mills and export docks that want it. Same network, reversed."],
-    demand: ["Where the boxes are used", "A statistical stand-in for the plant list: population tilted by manufacturing, read as corrugators and facilities. The next data layer replaces it."],
+    demand: ["Where the boxes are made", "Census employment sets each state's share of board demand, the EPA plant registry places it within the state, and the plants themselves are on the map by name. Turn on Named plants and search for a company, a city or a state."],
     backtest: ["Does the model match the record?", "Capacity, shipments, integration and operating rates against the filings and the AF&PA survey, and an honest look at the 2025 closures."],
     method: ["How it is built", "One min-cost flow, expanded for ownership and grade; public data in, a JSON out; every assumption on this page."] };
   function setTab(tab) {

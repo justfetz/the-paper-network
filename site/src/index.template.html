@@ -90,8 +90,8 @@
         <div class="list" id="fiber-mills"></div>
       </section>
       <section class="card" id="panel-demand" hidden>
-        <h2>Where the boxes are used</h2>
-        <p>Demand is allocated to counties by population, tilted toward manufacturing states, and read as corrugator-equivalents. A real plant list replaces this layer (see Method).</p>
+        <h2>Where the boxes are made</h2>
+        <p>Demand follows the plants: Census employment for NAICS 322211 sets each state's share, the EPA facility registry's plant counts place it within the state, and 1,796 of those plants are on the map by name. Read as tons of board, corrugator-equivalents and facilities.</p>
         <div class="bar"><span class="lbl">Color</span><button type="button" data-dlayer="demand" aria-pressed="true">Tons of board</button><button type="button" data-dlayer="plants" aria-pressed="false">Plants implied</button><button type="button" id="named-toggle" aria-pressed="false" hidden>Named plants (EPA)</button></div>
         <div class="bar" id="named-search-bar" hidden><input type="search" id="named-search" placeholder="search plants: name, owner, city, state" aria-label="search named plants" style="font-family:var(--mono);font-size:12px;min-height:34px;padding:0 10px;border:1px solid var(--rule);border-radius:6px;background:var(--code-bg);color:var(--ink);width:100%"></div>
         <div class="kpis" id="kpis-demand"></div>

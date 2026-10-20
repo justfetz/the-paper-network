@@ -233,8 +233,8 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--rule);font-fa
         <div class="list" id="fiber-mills"></div>
       </section>
       <section class="card" id="panel-demand" hidden>
-        <h2>Where the boxes are used</h2>
-        <p>Demand is allocated to counties by population, tilted toward manufacturing states, and read as corrugator-equivalents. A real plant list replaces this layer (see Method).</p>
+        <h2>Where the boxes are made</h2>
+        <p>Demand follows the plants: Census employment for NAICS 322211 sets each state's share, the EPA facility registry's plant counts place it within the state, and 1,796 of those plants are on the map by name. Read as tons of board, corrugator-equivalents and facilities.</p>
         <div class="bar"><span class="lbl">Color</span><button type="button" data-dlayer="demand" aria-pressed="true">Tons of board</button><button type="button" data-dlayer="plants" aria-pressed="false">Plants implied</button><button type="button" id="named-toggle" aria-pressed="false" hidden>Named plants (EPA)</button></div>
         <div class="bar" id="named-search-bar" hidden><input type="search" id="named-search" placeholder="search plants: name, owner, city, state" aria-label="search named plants" style="font-family:var(--mono);font-size:12px;min-height:34px;padding:0 10px;border:1px solid var(--rule);border-radius:6px;background:var(--code-bg);color:var(--ink);width:100%"></div>
         <div class="kpis" id="kpis-demand"></div>
@@ -1034,7 +1034,7 @@ res = linprog(np.array(c_obj), A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bound
     prospects: ["Will you switch?", "For each market, the cheapest mill by delivered freight and the one behind it. The gap is the price of loyalty. Pick an owner and raise its open-market price to see the call sheet."],
     prices: ["What a thousand square feet of board costs, delivered", "Mill prices from the published index, freight from the flow model, diesel from EIA. Mullen or ECT, your numbers."],
     fiber: ["The boxes come back", "Recovered corrugated flows from where it was used to the recycled mills and export docks that want it. Same network, reversed."],
-    demand: ["Where the boxes are used", "A statistical stand-in for the plant list: population tilted by manufacturing, read as corrugators and facilities. The next data layer replaces it."],
+    demand: ["Where the boxes are made", "Census employment sets each state's share of board demand, the EPA plant registry places it within the state, and the plants themselves are on the map by name. Turn on Named plants and search for a company, a city or a state."],
     backtest: ["Does the model match the record?", "Capacity, shipments, integration and operating rates against the filings and the AF&PA survey, and an honest look at the 2025 closures."],
     method: ["How it is built", "One min-cost flow, expanded for ownership and grade; public data in, a JSON out; every assumption on this page."] };
   function setTab(tab) {
