@@ -505,6 +505,7 @@
     lineChart(host, "OCC, national average ($/ton, FOB seller's dock)", P.occ_national, "$", P.notes.occ);
     lineChart(host, "On-highway diesel, US average ($/gal)", P.diesel, "$", P.notes.diesel);
     lineChart(host, "Recycled linerboard 30/31-lb East and medium index ($/t)", P.recycled_liner, "$", P.notes.recycled);
+    if (P.fred) Object.keys(P.fred).forEach(function (sid) { var s = P.fred[sid]; if (s.points.length > 3) lineChart(host, s.label + " · FRED " + sid, s.points, s.label.indexOf("$") >= 0 ? "$" : "", "Federal Reserve Economic Data, monthly; indexes are not prices but move with them."); });
     d3.select("#price-note").html(P.notes.general);
     var t = d3.select("#ect-table"); t.html("<tr><th>Spec</th><th>Furnish</th><th class='n'>lb / MSF</th><th class='n'>Paper $/MSF at current prices</th><th class='n'>Tons per 1,000 MSF</th></tr>");
     [["200# Mullen (burst)", "42-26-42, C-flute", 42 + 42 + 26 * 1.43 + 3], ["32 ECT (edge crush)", "35-26-35, C-flute", 35 + 35 + 26 * 1.43 + 3], ["32 ECT with 23-lb medium", "35-23-35, C-flute", 35 + 35 + 23 * 1.43 + 3], ["29 ECT lightweight", "31-23-31, C-flute", 31 + 31 + 23 * 1.43 + 3]].forEach(function (r) {
