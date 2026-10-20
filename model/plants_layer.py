@@ -8,11 +8,17 @@ import sys, json, os, numpy as np, pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from netmodel import haversine, county_weights, aggregate_demand_nodes, STATE_ABBR
 
-OWNER_PATTERNS = [("International Paper", r"international paper|\bIP\b|temple.?inland|weyerhaeuser"), ("Smurfit Westrock", r"westrock|west rock|rock.?tenn|smurfit|kapstone|mead ?westvaco|meadwestvaco"),
-    ("Packaging Corp of America", r"packaging corp|\bPCA\b|boise (packaging|inc|cascade)|greif|corrchoice"), ("Georgia-Pacific", r"georgia.?pacific|\bGP\b|color.?box"), ("Pratt Industries", r"\bpratt\b"),
-    ("Green Bay Packaging", r"green bay packaging"), ("Cascades", r"cascades|norampac|greenpac"), ("New-Indy", r"new.?indy|rand.?whitney|kraft group"), ("Sonoco", r"sonoco"), ("Graphic Packaging", r"graphic packaging"),
-    ("Menasha", r"menasha|orbis"), ("Schwarz Partners", r"schwarz|corrugated supplies"), ("US Corrugated", r"u\.?s\.? corrugated"), ("Welch Packaging", r"welch packaging"), ("Jamestown Container", r"jamestown container"),
-    ("Royal Group", r"royal (containers|group|box)"), ("Bay Cities", r"bay cities"), ("Vanguard Packaging", r"vanguard packaging"), ("Liberty Diversified", r"liberty (carton|diversified|packaging)"), ("Great Northern", r"great northern"), ("Lawrence Paper", r"lawrence paper"), ("Central Container", r"central container"), ("Dusobox", r"dusobox"), ("Kelly Box", r"kelly box"), ("Dixie Box", r"dixie box")]
+OWNER_PATTERNS = [
+    ("International Paper", r"international paper|\bIP\b|temple.?inland|inland (paperboard|container)|weyerhaeuser|willamette|union camp|gaylord container|box usa|four m corp"),
+    ("Smurfit Westrock", r"westrock|west rock|rock.?tenn|smurfit|stone container|jefferson smurfit|kapstone|longview fibre|mead ?westvaco|meadwestvaco|st\.? laurent|southern container"),
+    ("Packaging Corp of America", r"packaging corp|\bPCA\b|boise (packaging|inc|cascade|paper)|tenneco packaging|greif|corrchoice"),
+    ("Georgia-Pacific", r"georgia.?pacific|\bGP\b|color.?box|great northern nekoosa"),
+    ("Pratt Industries", r"\bpratt\b"), ("Green Bay Packaging", r"green bay packaging"), ("Cascades", r"cascades|norampac|greenpac"),
+    ("New-Indy", r"new.?indy|rand.?whitney|kraft group"), ("Sonoco", r"sonoco"), ("Graphic Packaging", r"graphic packaging|altivity"), ("Menasha", r"menasha|orbis"),
+    ("Schwarz Partners", r"schwarz|corrugated supplies"), ("US Corrugated", r"u\.?s\.? corrugated"), ("Welch Packaging", r"welch packaging"), ("Jamestown Container", r"jamestown container"),
+    ("Royal Group", r"royal (containers|group|box)"), ("Bay Cities", r"bay cities"), ("Vanguard Packaging", r"vanguard packaging"), ("Liberty Diversified", r"liberty (carton|diversified|packaging)"),
+    ("Great Northern", r"great northern corp"), ("Lawrence Paper", r"lawrence paper"), ("Central Container", r"central container"), ("Dusobox", r"dusobox"), ("Kelly Box", r"kelly box"), ("Dixie Box", r"dixie box"),
+    ("Smurfit Westrock", r"interstate (container|resources|paper)")]
 import re
 def owner_guess(name):
     n = str(name)
