@@ -6,7 +6,14 @@
    "model": "claude-opus-5-5",
    "sites": 20,
    "cost_usd": 0.95
+  },
+  {
+   "at": "2026-10-20T19:24:11+00:00",
+   "mode": "sync",
+   "model": "claude-opus-5-5",
+   "sites": 6,
+   "cost_usd": 0.29
   }
  ],
- "total_cost_usd": 0.95
+ "total_cost_usd": 1.24
 }
