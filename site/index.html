@@ -1154,7 +1154,8 @@ res = linprog(np.array(c_obj), A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bound
       counted_plants: pl ? { epa_box_plant_records: pl.frs_box_plants, census_establishments: pl.cbp_estab, census_employment: pl.cbp_emp } : undefined };
   }
   function shock(ownerQ) {
-    var keys = Object.keys(D.price_shocks || {}), q = norm(ownerQ), k = keys.filter(function (o) { return norm(o) === q || norm(o).indexOf(q) >= 0 || (q && q.indexOf(norm(o).split(" ")[0]) >= 0); })[0];
+    var ABBR = { ip: "International Paper", pca: "Packaging Corp of America", sw: "Smurfit Westrock", smurfit: "Smurfit Westrock", westrock: "Smurfit Westrock", gp: "Georgia-Pacific", "georgia pacific": "Georgia-Pacific", pratt: "Pratt Industries" };
+    var keys = Object.keys(D.price_shocks || {}), q = norm(ABBR[norm(ownerQ)] || ownerQ), k = keys.filter(function (o) { return norm(o) === q || norm(o).indexOf(q) >= 0 || (q && q.indexOf(norm(o).split(" ")[0]) >= 0); })[0];
     if (!k) throw new Error("no price-shock scenario for " + ownerQ + "; available: " + keys.join(", "));
     var s = D.price_shocks[k], calls = (s.calls || []).slice().sort(function (a, b) { return b.tons - a.tons; });
     return { producer: k, shock: "+$70/t on its open-market sales, everyone else unchanged", open_market_tons_before: s.base_market_tons, open_market_tons_after: s.market_tons_after, extra_network_cost_usd_per_year: s.d_cost, markets_that_switch: calls.length,
