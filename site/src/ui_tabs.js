@@ -197,7 +197,8 @@
     var kk = d3.select("#kpis-method").selectAll("div.k").data(items); kk.exit().remove(); kk.enter().append("div").attr("class", "k").merge(kk).html(function (d) { return "<span>" + d[0] + "</span><b>" + d[1] + "</b>"; }); }
 
   /* ---------- tabs and dispatch ---------- */
-  var TITLES = { corr: ["The middle men: corrugators and sheet feeders", "458 corrugator plants turn the rolls into board and convert most of it; what they do not convert travels as sheets to about 630 sheet plants. Capacity is width times speed times hours times OEE, and the sheet trade is the same flow problem one layer down."],
+  var TITLES = { thru: ["Every piece of the chain, per day", "The same network read as rates: tons a day out of each mill, truckloads and railcars on the road, MSF a day through each market's corrugators, sheets to the sheet plants, bales back to the recycled mills and the docks."],
+    corr: ["The middle men: corrugators and sheet feeders", "458 corrugator plants turn the rolls into board and convert most of it; what they do not convert travels as sheets to about 630 sheet plants. Capacity is width times speed times hours times OEE, and the sheet trade is the same flow problem one layer down."],
     flows: ["Where every ton of board goes", "{{n_us_open}} US containerboard mills, {{n_nodes}} box markets, and the min-cost flow between them. Hover anything; pick a scenario on the right."],
     prospects: ["Will you switch?", "For each market, the cheapest mill by delivered freight and the one behind it. The gap is the price of loyalty. Pick an owner and raise its open-market price to see the call sheet."],
     prices: ["What a thousand square feet of board costs, delivered", "Mill prices from the published index, freight from the flow model, diesel from EIA. Mullen or ECT, your numbers."],
@@ -207,14 +208,14 @@
     method: ["How it is built", "One min-cost flow, expanded for ownership and grade; public data in, a JSON out; every assumption on this page."] };
   function setTab(tab) {
     S.tab = tab; d3.selectAll("nav.tabs button").attr("aria-selected", function () { return this.dataset.tab === tab ? "true" : "false"; });
-    ["flows", "corr", "prospects", "prices", "fiber", "demand", "backtest", "method"].forEach(function (t) { document.getElementById("panel-" + t).hidden = t !== tab; document.getElementById("detail-" + t).hidden = t !== tab; });
+    ["flows", "corr", "thru", "prospects", "prices", "fiber", "demand", "backtest", "method"].forEach(function (t) { document.getElementById("panel-" + t).hidden = t !== tab; document.getElementById("detail-" + t).hidden = t !== tab; });
     document.getElementById("title").textContent = TITLES[tab][0]; document.getElementById("lede").textContent = TITLES[tab][1].replace("{{n_us_open}}", D.facts.n_us_open).replace("{{n_nodes}}", D.nodes.length);
-    document.getElementById("legend").hidden = tab === "prices" || tab === "demand" || tab === "corr";
+    document.getElementById("legend").hidden = tab === "prices" || tab === "demand" || tab === "corr" || tab === "thru";
     if (tab !== "backtest" && S.scen === "fp2024" && S._autoScen) { S.scen = "fp2026"; S._autoScen = false; }
     if (tab === "backtest") { S._autoScen = S.scen !== "fp2024"; }
     S.render(); try { location.hash = tab; } catch (e) {}
   }
-  S.render = function () { if (S.tab === "flows") S.renderFlows(); else if (S.tab === "corr" && S.renderCorr) S.renderCorr(); else if (S.tab === "prospects") renderProspects(); else if (S.tab === "prices") renderPrices(); else if (S.tab === "fiber") renderFiber(); else if (S.tab === "demand") renderDemand(); else if (S.tab === "backtest") renderBacktest(); else renderMethod(); };
+  S.render = function () { if (S.tab === "flows") S.renderFlows(); else if (S.tab === "corr" && S.renderCorr) S.renderCorr(); else if (S.tab === "thru" && S.renderThru) S.renderThru(); else if (S.tab === "prospects") renderProspects(); else if (S.tab === "prices") renderPrices(); else if (S.tab === "fiber") renderFiber(); else if (S.tab === "demand") renderDemand(); else if (S.tab === "backtest") renderBacktest(); else renderMethod(); };
   d3.selectAll("nav.tabs button").on("click", function () { setTab(this.dataset.tab); });
   d3.selectAll(".list").on("click", function (ev) { var tr = ev.target.closest("tr[data-node]"); if (!tr) return; var n = D.nodes[+tr.dataset.node]; document.getElementById("mapcard").scrollIntoView({ behavior: "smooth", block: "center" }); L.nodes.selectAll("rect").filter(function (d) { return d === n; }).each(function () { var r = this.getBoundingClientRect(); S.showTip({ clientX: r.left + r.width / 2, clientY: r.top }, "<b>" + n.name + "</b>"); }); });
   var themeBtn = document.getElementById("theme"); if (themeBtn) themeBtn.addEventListener("click", function () { var root = document.documentElement, dark = window.matchMedia("(prefers-color-scheme: dark)").matches, cur = root.getAttribute("data-theme") || (dark ? "dark" : "light"), next = cur === "dark" ? "light" : "dark"; root.setAttribute("data-theme", next); try { localStorage.setItem("theme", next); } catch (e) {} });

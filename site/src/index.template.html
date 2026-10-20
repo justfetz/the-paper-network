@@ -4,6 +4,7 @@
   <nav class="tabs" role="tablist" aria-label="Views">
     <button role="tab" data-tab="flows" aria-selected="true">Flows</button>
     <button role="tab" data-tab="corr" aria-selected="false">Corrugators</button>
+    <button role="tab" data-tab="thru" aria-selected="false">Throughput</button>
     <button role="tab" data-tab="prospects" aria-selected="false">Will you switch?</button>
     <button role="tab" data-tab="prices" aria-selected="false">Prices &amp; delivered cost</button>
     <button role="tab" data-tab="fiber" aria-selected="false">Fiber loop</button>
@@ -51,6 +52,15 @@
         <div class="kpis" id="kpis-corr"></div>
         <h2>Where corrugator hours are worth most</h2>
         <div class="list" id="corr-rank"></div>
+      </section>
+      <section class="card" id="panel-thru" hidden>
+        <h2>Every piece, per day</h2>
+        <p>The same network read as rates: what each mill makes, what moves on the road and the rail, what the corrugators in each market run, what the docks and the recycled mills take back.</p>
+        <div class="bar"><span class="lbl">Basis</span><button type="button" data-basis="day" aria-pressed="true">Per calendar day</button><button type="button" data-basis="year" aria-pressed="false">Per year</button></div>
+        <div class="bar"><span class="lbl">Pieces</span><select id="piece" aria-label="Which pieces to list"><option value="mills">Mills</option><option value="markets">Corrugator markets</option><option value="sheets">Markets buying sheets</option><option value="docks">Export docks</option><option value="occ">Recycled mills (fiber in)</option><option value="owners">Owners (systems)</option></select></div>
+        <div class="kpis" id="kpis-thru"></div>
+        <h2 id="thru-h">Mills</h2>
+        <div class="list" id="thru-list"></div>
       </section>
       <section class="card" id="panel-prospects" hidden>
         <h2>Contestability</h2>
@@ -117,6 +127,11 @@
       <p class="note" id="calc-note"></p></section>
     <section class="card"><h2>Width classes at these settings</h2><div class="tblwrap"><table class="rec" id="width-table"></table></div></section>
     <section class="card wide"><h2>Markets that import sheets</h2><div class="tblwrap"><table class="rec" id="sheet-table"></table></div><p class="note" id="corr-note"></p></section>
+  </div>
+  <div class="detail" id="detail-thru" hidden>
+    <section class="card wide"><h2>One day of board, end to end (short tons; hover a band)</h2><div id="chain"></div><p class="note" id="chain-note"></p></section>
+    <section class="card wide2"><h2>Loads on the move, per day</h2><div class="tblwrap"><table class="rec" id="loads-table"></table></div></section>
+    <section class="card"><h2>Conversions used</h2><div class="tblwrap"><table class="rec" id="conv-table"></table></div></section>
   </div>
   <div class="detail" id="detail-prospects" hidden>
     <section class="card wide"><h2>What a unilateral $70/t increase does to open-market volume</h2><div class="tblwrap"><table class="rec" id="shock-table"></table></div><p class="note">Integrated tonnage does not move: a company's own box plants keep buying from its own mills. The open-market tons are the ones that can walk, and in a market where the next mill is $5/t away, they all do. Real increases hold because the producers announce them together and the index follows.</p></section>
