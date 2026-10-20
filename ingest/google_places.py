@@ -17,8 +17,11 @@ def search(q, lat, lon, key, radius_m=50000):   # the API caps a locationBias ci
 def main(nodes_csv, dst):
     key = os.environ["GOOGLE_MAPS_API_KEY"]; nodes = pd.read_csv(nodes_csv); seen, rows, calls, err, quota = set(), [], 0, None, False
     done = set()
-    if os.path.exists(dst):   # resume: the (node, query) pairs already searched are skipped, so a daily quota of a few hundred calls finishes the list over a few runs
-        prev = pd.read_csv(dst); rows = prev.to_dict("records"); seen = set(prev.place_id); done = set(zip(prev.query_node.astype(int), prev["query"]))
+    if os.path.exists(dst) and os.path.getsize(dst) > 0:   # resume: the (node, query) pairs already searched are skipped, so a daily quota of a few hundred calls finishes the list over a few runs
+        try:
+            prev = pd.read_csv(dst); rows = prev.to_dict("records"); seen = set(prev.place_id); done = set(zip(prev.query_node.astype(int), prev["query"]))
+        except (pd.errors.EmptyDataError, KeyError, ValueError):
+            print("previous results file unreadable; starting over")
     try:
         for n in nodes.itertuples():
             for q in QUERIES:
@@ -38,7 +41,8 @@ def main(nodes_csv, dst):
         else: err = f"HTTP {e.code}: {body}"
     except Exception as e:  # keep what we have
         err = repr(e)
-    pd.DataFrame(rows).to_csv(dst, index=False)
+    if rows: pd.DataFrame(rows).to_csv(dst, index=False)
+    elif os.path.exists(dst): os.remove(dst)   # nothing found yet (quota spent before the first call): leave no empty file behind
     remaining = sum(1 for n in nodes.itertuples() for q in QUERIES if (int(n.node_id), q) not in done) - calls
     print(f"{calls} requests this run, {len(rows)} distinct places -> {dst}; {max(remaining, 0)} (node, query) searches still to do" + (f"; stopped on {err}" if err else ""))
     if err: sys.exit(1)
