@@ -9,6 +9,18 @@ def main(mills_csv, out_json, demand_2024=34.5e6, exports_2024=4.6e6, demand_202
     t0 = time.time()
     counties = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "counties.csv"), dtype={"fips":str})
     nodes = aggregate_demand_nodes(county_weights(counties))
+    # measured demand weights (Census CBP employment for NAICS 322211 aggregated to the same nodes by plants_layer.py), blended with the proxy
+    weights_path = os.environ.get("PN_WEIGHTS", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "plants_by_node.json"))
+    weighting = "population proxy tilted by manufacturing share"
+    if os.path.exists(weights_path):
+        pl = json.load(open(weights_path))
+        if pl.get("emp_weights") and len(pl["emp_weights"]) == len(nodes):
+            emp = np.array(pl["emp_weights"], dtype=float); blend = float(os.environ.get("PN_EMP_BLEND", "0.85"))
+            if emp.sum() > 0:
+                proxy = nodes.w_total.values / nodes.w_total.sum()
+                nodes["w_total"] = blend * emp / emp.sum() + (1 - blend) * proxy
+                weighting = f"{blend:.0%} Census CBP 322211 employment (establishments where employment is suppressed) + {1-blend:.0%} population proxy"
+    print("demand weighting:", weighting)
     allm = pd.read_csv(mills_csv)
     if "closed_year" not in allm:  # derive from notes for the seed file
         allm["closed_year"] = allm.status_note.fillna("").str.extract(r"closed[^0-9]*(20\d\d)")[0].astype(float)
@@ -163,7 +175,7 @@ def main(mills_csv, out_json, demand_2024=34.5e6, exports_2024=4.6e6, demand_202
     print(f"backtest done {time.time()-t0:.0f}s")
     out = dict(
         generated=time.strftime("%Y-%m-%d"),
-        params=dict(premium=premium, freight=FREIGHT, demand_2024=demand_2024, exports_2024=exports_2024, demand_2026=demand_2026, exports_2026=exports_2026, shares=shares, season=SEASON),
+        params=dict(premium=premium, freight=FREIGHT, demand_weighting=weighting, demand_2024=demand_2024, exports_2024=exports_2024, demand_2026=demand_2026, exports_2026=exports_2026, shares=shares, season=SEASON),
         mills=[dict(id=int(r.gid), name=r.mill_name, owner=r.owner, owner_2024=(r.owner_2024 if "owner_2024" in allm else r.owner), cap_2024=int(r.capacity_2024 if "capacity_2024" in allm and not pd.isna(r.capacity_2024) else r.capacity_tons_per_year), city=r.city, st=r.state, country=r.country, lat=float(r.lat), lon=float(r.lon),
                     cap=int(r.capacity_tons_per_year), grades=r.grades, status=r.status_oct2026, closed_year=(None if pd.isna(r.closed_year) else int(r.closed_year)),
                     note=("" if pd.isna(r.status_note) else str(r.status_note)), conf=str(r.confidence)) for r in allm.itertuples()],
