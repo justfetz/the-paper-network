@@ -7,7 +7,7 @@ job postings, permits, local news) and records one structured row per site throu
 
 Usage:
   python ingest/claude_verify.py data/plants_frs_box.csv data/plants_verified.csv [--model claude-opus-5-5]
-         [--limit 50] [--budget 20] [--state TX] [--batch] [--collect msgbatch_...]
+         [--limit 50] [--budget 20] [--state TX] [--match 'CORRUGATED SUPPLIES|SCHWARZ'] [--batch] [--collect msgbatch_...]
 
 Needs ANTHROPIC_API_KEY (repo secret, or exported locally). Resumable: sites already in the output file are
 skipped. Spend is estimated from reported usage at the list prices below and the run stops at --budget USD.
@@ -99,11 +99,12 @@ def ledger(dst, **kw):
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("src"); ap.add_argument("dst"); ap.add_argument("--model", default="claude-opus-5-5")
-    ap.add_argument("--limit", type=int, default=50); ap.add_argument("--budget", type=float, default=20.0); ap.add_argument("--state")
+    ap.add_argument("--limit", type=int, default=50); ap.add_argument("--budget", type=float, default=20.0); ap.add_argument("--state"); ap.add_argument("--match", help="only sites whose name matches this regex, e.g. 'CORRUGATED SUPPLIES|SCHWARZ'")
     ap.add_argument("--batch", action="store_true"); ap.add_argument("--collect"); ap.add_argument("--wait-min", type=int, default=120); a = ap.parse_args()
     client = anthropic.Anthropic()
     sites = pd.read_csv(a.src, dtype=str).fillna("")
     if a.state: sites = sites[sites.state == a.state]
+    if a.match: sites = sites[sites.name.str.contains(a.match, case=False, regex=True)]
     done = set(pd.read_csv(a.dst, dtype=str).registry_id) if os.path.exists(a.dst) else set()
     todo = sites[~sites.registry_id.isin(done)].head(a.limit).to_dict("records")
     print(f"{len(sites)} sites, {len(done)} already verified, {len(todo)} this run, model {a.model}, budget ${a.budget:.2f}")
