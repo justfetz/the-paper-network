@@ -146,7 +146,7 @@ needs_html = """<ul style="color:var(--ink-2);font-size:14px;padding-left:20px">
 <li><b>AICC/FBA directories</b> and a <b>job-posting feed</b>: ground truth for independents and a cheap corrugator-vs-sheet-plant tag.</li></ul>
 <p class="note">Details, endpoints and the scripts that consume each one: <a href="https://github.com/justfetz/the-paper-network/blob/main/NEEDS.md">NEEDS.md</a> and <a href="https://github.com/justfetz/the-paper-network/tree/main/ingest">ingest/</a>.</p>"""
 theme_btn = '<button class="theme" id="theme" type="button" aria-label="Toggle dark mode">light / dark</button>'
-fill = {"generated": D["generated"], "n_us_open": n_us_open, "n_nodes": len(nodes), "p_liner": 1115, "p_medium": 1035, "method_html": method_html, "sources": sources, "needs_html": needs_html}
+fill = {"generated": D["generated"], "n_plants": f"{len(D['plants'] or []):,}", "n_us_open": n_us_open, "n_nodes": len(nodes), "p_liner": 1115, "p_medium": 1035, "method_html": method_html, "sources": sources, "needs_html": needs_html}
 tpl = open(os.path.join(SRC, "index.template.html")).read()
 def render(extra):
     out = tpl

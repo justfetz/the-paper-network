@@ -5,11 +5,11 @@ inside the free Pro allowance; PLACES_MAX_REQUESTS (default 4500) is a hard stop
 Usage: python google_places.py ../data/demand_nodes.csv ../data/plants_places.csv"""
 import os, sys, json, time, urllib.request, urllib.error, pandas as pd
 QUERIES = ["corrugated box plant", "corrugated packaging manufacturer", "sheet plant corrugated", "paper mill containerboard"]
-PRO = "places.id,places.displayName,places.formattedAddress,places.location,places.types"
+PRO = "places.id,places.displayName,places.formattedAddress,places.location,places.types,places.primaryType,places.businessStatus"
 FIELDS = PRO + (",places.websiteUri,places.nationalPhoneNumber" if os.environ.get("PLACES_FIELDS") == "enterprise" else "")
 MAX_REQUESTS = int(os.environ.get("PLACES_MAX_REQUESTS", "4500"))
 
-def search(q, lat, lon, key, radius_m=120000):
+def search(q, lat, lon, key, radius_m=50000):   # the API caps a locationBias circle at 50 km
     body = json.dumps({"textQuery": q, "locationBias": {"circle": {"center": {"latitude": lat, "longitude": lon}, "radius": radius_m}}, "pageSize": 20}).encode()
     req = urllib.request.Request("https://places.googleapis.com/v1/places:searchText", data=body, headers={"Content-Type": "application/json", "X-Goog-Api-Key": key, "X-Goog-FieldMask": FIELDS})
     return json.load(urllib.request.urlopen(req, timeout=30)).get("places", [])
@@ -24,7 +24,7 @@ def main(nodes_csv, dst):
                 for p in search(q, n.lat, n.lon, key):
                     if p["id"] in seen: continue
                     seen.add(p["id"]); rows.append(dict(place_id=p["id"], name=p["displayName"]["text"], address=p.get("formattedAddress"), lat=p["location"]["latitude"], lon=p["location"]["longitude"],
-                                                         types="|".join(p.get("types", [])), website=p.get("websiteUri"), phone=p.get("nationalPhoneNumber"), query_node=n.node_id, query=q))
+                                                         types="|".join(p.get("types", [])), primary_type=p.get("primaryType"), business_status=p.get("businessStatus"), website=p.get("websiteUri"), phone=p.get("nationalPhoneNumber"), query_node=n.node_id, query=q))
                 time.sleep(0.1)
     except StopIteration:
         print(f"stopped at the PLACES_MAX_REQUESTS cap ({MAX_REQUESTS})")

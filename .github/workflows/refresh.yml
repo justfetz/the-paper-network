@@ -61,11 +61,14 @@ jobs:
           path: site
   deploy:
     needs: refresh
-    if: vars.DEPLOY_PAGES == 'true'   # set repository variable DEPLOY_PAGES=true after enabling Pages (source: GitHub Actions)
+    continue-on-error: true   # fails softly until GitHub Pages is enabled for the repository (Settings, Pages, Source: GitHub Actions)
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - id: deployment
         uses: actions/deploy-pages@v4

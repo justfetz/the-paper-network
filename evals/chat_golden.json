@@ -1,0 +1,315 @@
+[
+ {
+  "id": "ko_31",
+  "kind": "numeric",
+  "question": "What does it cost the network per year if the Mansfield mill (International Paper) goes down?",
+  "value": 171.077949,
+  "unit": "M",
+  "tol": 0.05
+ },
+ {
+  "id": "ko_34",
+  "kind": "numeric",
+  "question": "What does it cost the network per year if the Valliant mill (International Paper) goes down?",
+  "value": 133.997986,
+  "unit": "M",
+  "tol": 0.05
+ },
+ {
+  "id": "ko_58",
+  "kind": "numeric",
+  "question": "What does it cost the network per year if the Counce mill (Packaging Corp of America) goes down?",
+  "value": 91.218106,
+  "unit": "M",
+  "tol": 0.05
+ },
+ {
+  "id": "ko_55",
+  "kind": "numeric",
+  "question": "What does it cost the network per year if the DeRidder mill (Packaging Corp of America) goes down?",
+  "value": 89.583163,
+  "unit": "M",
+  "tol": 0.05
+ },
+ {
+  "id": "ko_26",
+  "kind": "numeric",
+  "question": "What does it cost the network per year if the Cedar River mill (International Paper) goes down?",
+  "value": 115.72861,
+  "unit": "M",
+  "tol": 0.05
+ },
+ {
+  "id": "ko_13",
+  "kind": "numeric",
+  "question": "What does it cost the network per year if the Monticello mill (Georgia-Pacific) goes down?",
+  "value": 109.334959,
+  "unit": "M",
+  "tol": 0.05
+ },
+ {
+  "id": "ko_20",
+  "kind": "numeric",
+  "question": "What does it cost the network per year if the Prattville mill (International Paper) goes down?",
+  "value": 64.017714,
+  "unit": "M",
+  "tol": 0.05
+ },
+ {
+  "id": "ko_14",
+  "kind": "numeric",
+  "question": "What does it cost the network per year if the Toledo mill (Georgia-Pacific) goes down?",
+  "value": 117.258417,
+  "unit": "M",
+  "tol": 0.05
+ },
+ {
+  "id": "cap_17",
+  "kind": "numeric",
+  "question": "What is the capacity of the Green Bay (PM4) mill in WI, and who owns it?",
+  "value": 685.0,
+  "unit": "kt",
+  "tol": 0.02,
+  "also": "Green Bay Packaging"
+ },
+ {
+  "id": "cap_87",
+  "kind": "numeric",
+  "question": "What is the capacity of the West Point mill in VA, and who owns it?",
+  "value": 922.0,
+  "unit": "kt",
+  "tol": 0.02,
+  "also": "Smurfit Westrock"
+ },
+ {
+  "id": "cap_61",
+  "kind": "numeric",
+  "question": "What is the capacity of the Tomahawk mill in WI, and who owns it?",
+  "value": 600.0,
+  "unit": "kt",
+  "tol": 0.02,
+  "also": "Packaging Corp of America"
+ },
+ {
+  "id": "cap_55",
+  "kind": "numeric",
+  "question": "What is the capacity of the DeRidder mill in LA, and who owns it?",
+  "value": 1050.0,
+  "unit": "kt",
+  "tol": 0.02,
+  "also": "Packaging Corp of America"
+ },
+ {
+  "id": "cap_26",
+  "kind": "numeric",
+  "question": "What is the capacity of the Cedar River mill in IA, and who owns it?",
+  "value": 1020.0,
+  "unit": "kt",
+  "tol": 0.02,
+  "also": "International Paper"
+ },
+ {
+  "id": "cap_15",
+  "kind": "numeric",
+  "question": "What is the capacity of the Big Island mill in VA, and who owns it?",
+  "value": 480.0,
+  "unit": "kt",
+  "tol": 0.02,
+  "also": "Georgia-Pacific"
+ },
+ {
+  "id": "cap_20",
+  "kind": "numeric",
+  "question": "What is the capacity of the Prattville mill in AL, and who owns it?",
+  "value": 1000.0,
+  "unit": "kt",
+  "tol": 0.02,
+  "also": "International Paper"
+ },
+ {
+  "id": "cap_75",
+  "kind": "numeric",
+  "question": "What is the capacity of the Seminole mill in FL, and who owns it?",
+  "value": 620.0,
+  "unit": "kt",
+  "tol": 0.02,
+  "also": "Smurfit Westrock"
+ },
+ {
+  "id": "dem_328",
+  "kind": "numeric",
+  "question": "How much containerboard does the Madison, AL, AL market use in a year?",
+  "value": 185.087,
+  "unit": "kt",
+  "tol": 0.05
+ },
+ {
+  "id": "dem_253",
+  "kind": "numeric",
+  "question": "How much containerboard does the Tarrant, TX, TX market use in a year?",
+  "value": 428.067,
+  "unit": "kt",
+  "tol": 0.05
+ },
+ {
+  "id": "dem_196",
+  "kind": "numeric",
+  "question": "How much containerboard does the Hamilton, IN, IN market use in a year?",
+  "value": 210.118,
+  "unit": "kt",
+  "tol": 0.05
+ },
+ {
+  "id": "dem_399",
+  "kind": "numeric",
+  "question": "How much containerboard does the Hamilton, TN, TN market use in a year?",
+  "value": 270.107,
+  "unit": "kt",
+  "tol": 0.05
+ },
+ {
+  "id": "dem_391",
+  "kind": "numeric",
+  "question": "How much containerboard does the Los Angeles, CA, CA market use in a year?",
+  "value": 566.142,
+  "unit": "kt",
+  "tol": 0.05
+ },
+ {
+  "id": "dem_403",
+  "kind": "numeric",
+  "question": "How much containerboard does the Winnebago, WI, WI market use in a year?",
+  "value": 401.637,
+  "unit": "kt",
+  "tol": 0.05
+ },
+ {
+  "id": "mc_80",
+  "kind": "numeric",
+  "question": "What is the delivered marginal cost of board in Forsyth, NC, NC?",
+  "value": 27.5,
+  "unit": "/t",
+  "tol": 0.05
+ },
+ {
+  "id": "mc_167",
+  "kind": "numeric",
+  "question": "What is the delivered marginal cost of board in Outagamie, WI, WI?",
+  "value": 13.6,
+  "unit": "/t",
+  "tol": 0.05
+ },
+ {
+  "id": "mc_197",
+  "kind": "numeric",
+  "question": "What is the delivered marginal cost of board in Marion, IN, IN?",
+  "value": 34.7,
+  "unit": "/t",
+  "tol": 0.05
+ },
+ {
+  "id": "mc_260",
+  "kind": "numeric",
+  "question": "What is the delivered marginal cost of board in Montgomery, OH, OH?",
+  "value": 36.8,
+  "unit": "/t",
+  "tol": 0.05
+ },
+ {
+  "id": "shock_Int",
+  "kind": "numeric",
+  "question": "If International Paper raises its open-market price by $70 a ton, how many open-market tons does the model say it loses?",
+  "value": 354.734,
+  "unit": "kt",
+  "tol": 0.05
+ },
+ {
+  "id": "shock_Smu",
+  "kind": "numeric",
+  "question": "If Smurfit Westrock raises its open-market price by $70 a ton, how many open-market tons does the model say it loses?",
+  "value": 71.262,
+  "unit": "kt",
+  "tol": 0.05
+ },
+ {
+  "id": "shock_Pac",
+  "kind": "numeric",
+  "question": "If Packaging Corp of America raises its open-market price by $70 a ton, how many open-market tons does the model say it loses?",
+  "value": 104.946,
+  "unit": "kt",
+  "tol": 0.05
+ },
+ {
+  "id": "shock_Geo",
+  "kind": "numeric",
+  "question": "If Georgia-Pacific raises its open-market price by $70 a ton, how many open-market tons does the model say it loses?",
+  "value": 35.264,
+  "unit": "kt",
+  "tol": 0.05
+ },
+ {
+  "id": "shock_Pra",
+  "kind": "numeric",
+  "question": "If Pratt Industries raises its open-market price by $70 a ton, how many open-market tons does the model say it loses?",
+  "value": 517.122,
+  "unit": "kt",
+  "tol": 0.05
+ },
+ {
+  "id": "kpi_freight",
+  "kind": "numeric",
+  "question": "What is the total freight bill of the network in the October 2026 footprint?",
+  "value": 2.096203276338,
+  "unit": "B",
+  "tol": 0.03
+ },
+ {
+  "id": "kpi_haul",
+  "kind": "numeric",
+  "question": "What is the average haul in miles in the 2026 footprint?",
+  "value": 513.477,
+  "unit": "mi",
+  "tol": 0.03
+ },
+ {
+  "id": "kpi_rail",
+  "kind": "numeric",
+  "question": "What share of tons move by rail in the 2026 footprint?",
+  "value": 41.9,
+  "unit": "%",
+  "tol": 0.05
+ },
+ {
+  "id": "kpi_dz6",
+  "kind": "numeric",
+  "question": "What is the freight bill if diesel is $6.20 a gallon?",
+  "value": 2.224209625018,
+  "unit": "B",
+  "tol": 0.03
+ },
+ {
+  "id": "abstain_0",
+  "kind": "abstain",
+  "question": "What price does International Paper charge Amazon for its boxes?"
+ },
+ {
+  "id": "abstain_1",
+  "kind": "abstain",
+  "question": "Which box plants does the Mansfield mill actually ship to this month?"
+ },
+ {
+  "id": "abstain_2",
+  "kind": "abstain",
+  "question": "What is the cash cost per ton at the Counce mill?"
+ },
+ {
+  "id": "abstain_3",
+  "kind": "abstain",
+  "question": "What did the Fastmarkets linerboard index print this week?"
+ },
+ {
+  "id": "abstain_4",
+  "kind": "abstain",
+  "question": "Who are Pratt Industries' ten largest customers?"
+ }
+]

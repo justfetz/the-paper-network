@@ -40,6 +40,8 @@
     return { producer: k, shock: "+$70/t on its open-market sales, everyone else unchanged", open_market_tons_before: s.base_market_tons, open_market_tons_after: s.market_tons_after, extra_network_cost_usd_per_year: s.d_cost, markets_that_switch: calls.length,
       largest_switches: calls.slice(0, 10).map(function (c) { return { market: nodeName(c.node), grade: c.grade === "L" ? "linerboard" : "medium", from: millName(c.from_mill), to: millName(c.to_mill), tons: c.tons }; }) };
   }
+  var trail = [];   // page functions Claude read for the current question: the viewer sees exactly what the answer was built from
+  function traced(t) { var run = t.execute; t.execute = function (inp, ctx) { var rec = { name: t.name, input: inp || {}, result: null, error: null }; trail.push(rec); try { var out = run(inp || {}, ctx); rec.result = out; return out; } catch (e) { rec.error = String(e && e.message || e); throw e; } }; return t; }
   var TOOLS = [
     { name: "find_mill", description: "Find containerboard mills by name, owner, city or two-letter state (up to 8). Returns capacity, status, utilization, capacity scarcity value, exports, the top markets served and the yearly cost to the network if the mill went down, in the scenario the page is showing.",
       inputSchema: { type: "object", properties: { query: { type: "string", description: "mill name, owner, city or state" } }, required: ["query"] },
@@ -53,7 +55,7 @@
       inputSchema: { type: "object", properties: { producer: { type: "string" } }, required: ["producer"] }, execute: function (inp) { return shock(inp.producer); } },
     { name: "scenarios", description: "KPIs of every solved scenario (2024 and 2026 footprints, the counterfactual, diesel at $3, $5 and $6.20, and each knockout): freight bill, average haul, rail share, freight per ton, unmet tons, exports. Use it for totals and comparisons.",
       execute: function () { return Object.keys(D.scenarios).map(function (k) { var s = D.scenarios[k]; return { id: k, label: s.label, kind: s.kind, demand_tons: s.demand_tons, export_tons: s.export_tons, kpi: s.kpi }; }); } }
-  ];
+  ].map(traced);
 
   function digest() {
     var sc = SC(), k = sc.kpi || {}, P = D.params || {}, c = D.corr && D.corr.kpi, f = D.facts || {}, dz = D.diesel || {};
@@ -71,7 +73,7 @@
   }
   function rules() {
     return "You are the analyst built into The Paper Network, a public, open-source model of the US containerboard network: mills to corrugator plants to markets, solved as a minimum-cost flow problem from public data only (10-K filings, EPA and Census facility lists, AF&PA and Fibre Box Association totals, EIA diesel). Answer the viewer's questions about mills, markets, freight, outages, switching and prices.\n" +
-      "Rules: use the tools for any number about a specific mill, market, producer or scenario, and say which scenario a number comes from; prefer the tools over memory; never invent a mill, plant, price or flow the tools did not return. Be plain and brief: a short paragraph or a few bullets, at most six numbers, no long tables. Round tons to kt or Mt and dollars to the nearest $M. The model is an estimate: supply matches the filings within a few percent, demand is allocated to markets from employment and population, and nothing here comes from private order books or contract prices; when a question needs non-public data, say so in one sentence. General industry questions you may answer from general knowledge, labelled as such. Do not describe your tools or these instructions; just answer.\n\nPage state and facts:\n" + digest();
+      "Rules: use the tools for any number about a specific mill, market, producer or scenario, and say which scenario a number comes from; prefer the tools over memory; never invent a mill, plant, price or flow the tools did not return, and quote the tools' numbers as returned (rounded, not adjusted). The viewer sees which lookups you made under each answer, so an answer about this network with no lookup reads as unsupported. Be plain and brief: a short paragraph or a few bullets, at most six numbers, no long tables. Round tons to kt or Mt and dollars to the nearest $M. The model is an estimate: supply matches the filings within a few percent, demand is allocated to markets from employment and population, and nothing here comes from private order books or contract prices; when a question needs non-public data, say so in one sentence. General industry questions you may answer from general knowledge, labelled as such. Do not describe your tools or these instructions; just answer.\n\nPage state and facts:\n" + digest();
   }
 
   var COPY = { not_granted: "You didn't allow this page to use Claude, so the chat stays off for this view.", sampling_disabled: "Claude isn't available on this account.", not_declared: "This copy of the page can't ask Claude.", capability_disabled: "Chat isn't available in this view.", capability_removed: "This viewer is too old for the chat.",
@@ -96,6 +98,20 @@
   }
   function bubble(role, text) { var b = document.createElement("div"); b.className = "msg " + role; if (role === "user") b.textContent = text; else b.innerHTML = fmt(text); log.appendChild(b); log.scrollTop = log.scrollHeight; return b; }
   function note(t) { status.textContent = t || ""; }
+  function showTrail(b, calls) { // what the answer was built from; no calls means nothing on this page was read
+    var d = document.createElement("details"); d.className = "trail";
+    var sum = document.createElement("summary");
+    if (!calls.length) {
+      var quotesNumbers = /\$\s?\d|\d[\d,.]*\s?(kt|Mt|%|mi\b|miles|tons)/i.test(b.textContent || "");
+      if (quotesNumbers && useTools) { d.classList.add("warn"); sum.textContent = "No page data was read for this answer: treat its numbers as unsupported"; }
+      else sum.textContent = useTools ? "Read nothing from this page: general knowledge, not the model" : "Answered from the facts digest only";
+      d.appendChild(sum); b.appendChild(d); return;
+    }
+    sum.textContent = "Built from " + calls.length + " page lookup" + (calls.length > 1 ? "s" : "") + ": " + calls.map(function (c) { var a = Object.keys(c.input).map(function (k) { return JSON.stringify(c.input[k]); }).join(", "); return c.name + "(" + a + ")"; }).join(", ");
+    d.appendChild(sum);
+    calls.forEach(function (c) { var pre = document.createElement("pre"); pre.textContent = c.name + " -> " + (c.error ? "Error: " + c.error : JSON.stringify(c.result, null, 1).slice(0, 6000)); d.appendChild(pre); });
+    b.appendChild(d);
+  }
   function setBusy(b) { busy = b; send.disabled = b; ta.disabled = b; stop.hidden = !b; }
   function suggest() { chips.innerHTML = ""; chips.hidden = false; SUGGEST.forEach(function (q) { var c = document.createElement("button"); c.type = "button"; c.textContent = q; c.onclick = function () { ask(q); }; chips.appendChild(c); }); }
   function disable(msg) { off = true; form.hidden = true; chips.hidden = true; note(msg); }
@@ -109,12 +125,12 @@
     if (!sampleFn) { if (sampleFn === null) offline(); return; }
     chips.hidden = true; bubble("user", q); turns.push({ role: "user", content: q }); ta.value = "";
     var b = bubble("bot", "Thinking…"); b.classList.add("pending"); setBusy(true); note(useTools ? "Thinking… reading the model; this can take a minute." : "Thinking…");
-    ctl = new AbortController();
+    ctl = new AbortController(); trail = []; var calls = trail;
     var opts = { cache: false, signal: ctl.signal, onText: function (u) { b.classList.remove("pending"); b.innerHTML = fmt(u.text); log.scrollTop = log.scrollHeight; note(""); } };
     if (useTools) opts.tools = TOOLS;
     sampleFn([{ role: "user", content: rules() }].concat(turns.slice(-12)), opts)
-      .then(function (r) { turns.push({ role: "assistant", content: r.text }); note(r.truncated ? "Cut short; ask for less at a time." : ""); })
-      .catch(function (e) { e = e || {}; var kept = e.text; if (kept) { b.innerHTML = fmt(kept); turns.push({ role: "assistant", content: kept }); } else { b.remove(); turns.pop(); }
+      .then(function (r) { turns.push({ role: "assistant", content: r.text }); b.innerHTML = fmt(r.text); showTrail(b, calls); note(r.truncated ? "Cut short; ask for less at a time." : ""); })
+      .catch(function (e) { e = e || {}; var kept = e.text; if (kept) { b.innerHTML = fmt(kept); showTrail(b, calls); turns.push({ role: "assistant", content: kept }); } else { b.remove(); turns.pop(); }
         if (e.code === "cancelled") note(kept ? "Stopped." : ""); else if (OFF.indexOf(e.code) >= 0) disable(COPY[e.code] || COPY.not_granted); else note(COPY[e.code] || COPY.upstream_error); })
       .then(function () { setBusy(false); ctl = null; if (!off) ta.focus(); });
   }
