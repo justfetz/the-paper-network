@@ -16,5 +16,6 @@ output schema so they can be run from any machine with network access.
 | `census_cbp_bulk.py` | Census CBP complete county and state files (no key) | `cbp_322211_county.csv`, `cbp_322211_state.csv` |
 | `edgar_10k.py` | SEC EDGAR full-text + filing index for IP, SW, PKG, GPK, SON | `10k_properties_<ticker>_<year>.txt` |
 | `jobs_signal.py` | job-posting CSV (title, company, city, state, date) | `plants_jobs_signal.csv`: company, city, state, has_corrugator, has_converting, first_seen |
+| `claude_verify.py` | `plants_frs_box.csv` (+ `ANTHROPIC_API_KEY`) | `plants_verified.csv`: operating, plant_type (corrugator / sheet_feeder / sheet_plant / mill / other), owner, shifts, hiring_signal, evidence_url, confidence, cost; `plants_verified_ledger.json` with the spend |
 
 Run order for a refresh: `epa_frs.py` → `census_cbp.py` → (optional) `google_places.py` → merge with `../model/merge_plants.py` (to be written with step 1 of the roadmap).

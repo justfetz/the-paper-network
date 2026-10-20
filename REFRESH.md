@@ -18,6 +18,17 @@ commits; the workflow then re-runs the model and redeploys on the push.
 | Annually | EPA Facility Registry Service (plant list) | EPA bulk CSV (no key) | machine (manual download) | plant layer |
 | On the day | Closure, conversion, acquisition, new machine, price increase announcements | company releases, trade press | judgment | mill table; price shocks |
 
+## On-demand workflows
+
+Run from the Actions tab when a source moves; each is skipped when its secret is absent and commits what it fetched.
+
+| Workflow | What it does | Needs | Cost |
+|---|---|---|---|
+| `plants.yml` | EPA FRS national facility file, filtered to NAICS 322211/322130/322120, geocoded sites | nothing | free |
+| `cbp.yml` | Census County Business Patterns bulk county and state files for NAICS 322211 | nothing | free |
+| `places.yml` | Google Places (New) text search around every demand point: names and addresses of box plants | `GOOGLE_MAPS_API_KEY` | 1,764 calls, inside the free 5,000-call Pro tier |
+| `verify.yml` | Claude reads the web for each EPA site: operating, corrugator or sheet plant, owner, shift hiring; resumable, stops at the budget input | `ANTHROPIC_API_KEY` | about $0.10 a site on Opus 5.5 (see `NEEDS.md`) |
+
 ## The Claude scheduled tasks
 
 Three recurring sessions, each with a narrow brief and a hard rule to change only data and notes, never the model:

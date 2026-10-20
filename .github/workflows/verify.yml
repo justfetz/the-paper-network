@@ -1,0 +1,54 @@
+# Check EPA box-plant sites with Claude + web search (ingest/claude_verify.py): operating or not, corrugator vs sheet plant,
+# owner today, shift hiring. Needs the ANTHROPIC_API_KEY repository secret. Run on demand; resumable; stops at the budget.
+name: verify
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Sites to check this run"
+        default: "100"
+      model:
+        description: "claude-opus-5-5 | claude-sonnet-5-5 | claude-haiku-5-5"
+        default: "claude-opus-5-5"
+      budget:
+        description: "Stop after this many USD (estimated from reported usage)"
+        default: "20"
+      state:
+        description: "Only this state, two letters (blank = all)"
+        default: ""
+      batch:
+        description: "Message Batches API: half-price tokens, slower"
+        type: boolean
+        default: false
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pandas anthropic
+      - name: Verify
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          IN_LIMIT: ${{ inputs.limit }}
+          IN_MODEL: ${{ inputs.model }}
+          IN_BUDGET: ${{ inputs.budget }}
+          IN_STATE: ${{ inputs.state }}
+          IN_BATCH: ${{ inputs.batch }}
+        run: |
+          [ -z "$ANTHROPIC_API_KEY" ] && { echo "no ANTHROPIC_API_KEY secret; nothing to do"; exit 0; }
+          ARGS="--limit $IN_LIMIT --model $IN_MODEL --budget $IN_BUDGET"
+          [ -n "$IN_STATE" ] && ARGS="$ARGS --state $IN_STATE"
+          [ "$IN_BATCH" = "true" ] && ARGS="$ARGS --batch"
+          python ingest/claude_verify.py data/plants_frs_box.csv data/plants_verified.csv $ARGS
+      - name: Commit
+        run: |
+          git config user.name "paper-network-bot" && git config user.email "bot@users.noreply.github.com"
+          git add data/plants_verified.csv data/plants_verified_ledger.json 2>/dev/null; git diff --cached --quiet && echo "no changes" && exit 0
+          git commit -m "verify: Claude web check of EPA box-plant sites, $(date -u +%Y-%m-%d)"
+          for i in 1 2 3 4; do git pull --rebase -q origin main && git push && break || sleep 15; done

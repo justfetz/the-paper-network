@@ -5,6 +5,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE);
 JSON_PATH = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "data", "paper_network.json")
 BM_PATH = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, "data", "basemap.json")
 D = json.load(open(JSON_PATH)); BM = json.load(open(BM_PATH))
+ARTIFACT_URL = "https://claude.ai/artifact/UCaPyJMWgrDAg94xakwn9w"   # the live copy, where the chat drawer can ask Claude
 CORR_PATH = os.path.join(os.path.dirname(JSON_PATH), "corrugators.json")
 PL_PATH = os.path.join(os.path.dirname(JSON_PATH), "plants_frs_box.csv"); PLN_PATH = os.path.join(os.path.dirname(JSON_PATH), "plants_by_node.json")
 D["plants"] = None; D["plant_layer"] = None
@@ -153,8 +154,9 @@ def render(extra):
     miss = re.findall(r"{{(\w+)}}", out)
     if miss: raise SystemExit("unfilled: " + ", ".join(miss))
     return out
-css = open(os.path.join(SRC, "ui.css")).read(); js = open(os.path.join(SRC, "ui_core.js")).read() + "\n" + open(os.path.join(SRC, "ui_corr.js")).read() + "\n" + open(os.path.join(SRC, "ui_thru.js")).read() + "\n" + open(os.path.join(SRC, "ui_tabs.js")).read()
-data_js = "window.PN_DATA=" + json.dumps(D, separators=(",", ":")) + ";\nwindow.PN_BASEMAP=" + json.dumps(BM, separators=(",", ":")) + ";\n"
+css = open(os.path.join(SRC, "ui.css")).read(); js = open(os.path.join(SRC, "ui_core.js")).read() + "\n" + open(os.path.join(SRC, "ui_corr.js")).read() + "\n" + open(os.path.join(SRC, "ui_thru.js")).read() + "\n" + open(os.path.join(SRC, "ui_tabs.js")).read() + "\n" + open(os.path.join(SRC, "ui_chat.js")).read()
+data_js = "window.PN_DATA=" + json.dumps(D, separators=(",", ":")) + ";\nwindow.PN_BASEMAP=" + json.dumps(BM, separators=(",", ":")) + ";\n" + "window.PN_ARTIFACT_URL=" + json.dumps(ARTIFACT_URL) + ";\n"
+
 D3 = '<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>'
 FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">'
 DESC = "A public, free model of the US containerboard and corrugated box market: every mill from the filings, box demand by county, the min-cost flows between them, prices, diesel, the recovered-fiber loop, maintenance calendars and who would switch supplier for how much."

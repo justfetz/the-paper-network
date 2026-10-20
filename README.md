@@ -7,6 +7,13 @@ Live site: `site/index.html` (enable GitHub Pages with source "GitHub Actions", 
 https://justfetz.github.io/the-paper-network/). A hosted copy of the same page is at
 https://claude.ai/artifact/UCaPyJMWgrDAg94xakwn9w. Everything on it is reproducible from this repo.
 
+**Ask the network.** The hosted copy on claude.ai has a chat drawer (bottom right) that answers questions about mills,
+markets, outages, switching and prices from the page's own numbers: it reads the solved scenarios through page
+functions and names the scenario each figure comes from. It runs on the viewer's own Claude account through the
+artifact runtime, so there is no API key in the page and nothing is sent anywhere else; the first question asks
+permission. The GitHub Pages copy shows the same drawer with a link to the live version, because a static page
+cannot hold a key.
+
 ## The idea
 
 The corrugated industry is a commodity business that behaves like a relationship business. Board moves
@@ -35,7 +42,8 @@ sales manager, a mill scheduler or a box buyer can read in a minute.
 | `model/` | `netmodel.py` (the LP: demand aggregation, freight, ownership-aware transshipment, duals, prospects, OCC loop), `export_json.py` (every scenario the site shows), `merge_mills.py`, `geocode_mills.py`. |
 | `data/` | `mills_final.csv` (90 mills, sourced), `counties.csv` (3,142 counties with population and centroids), `basemap.json`, the research files behind the mill table, and the scenario JSON the site reads. |
 | `notes/` | Calibration numbers with sources (`industry_calibration.md`, `market_anchors.md`), plant-footprint notes by company, methodology. |
-| `ingest/` | Scripts for the next data layer (EPA FRS plant list, Census CBP, Places, EIA diesel, EDGAR, Overpass, job-posting signals). See `NEEDS.md` for the keys. |
+| `ingest/` | Scripts for the next data layer (EPA FRS plant list, Census CBP, Places, EIA diesel, EDGAR, Overpass, job-posting signals, and `claude_verify.py`, which checks each EPA site with Claude and web search). See `NEEDS.md` for the keys. |
+| `.github/workflows/` | `refresh.yml` (scheduled: EIA diesel, FRED, BLS QCEW, plant layer, model, site, Pages deploy); on demand: `plants.yml` (EPA FRS national file), `cbp.yml` (Census bulk files), `places.yml` (Google Places text search, free Pro tier), `verify.yml` (Claude web check of the plant list, budget-capped). |
 | `NEEDS.md` | What the project needs from outside: API keys, downloads, memberships, and why. |
 | `ROADMAP.md` | What changes the picture most per hour of work, in order. |
 

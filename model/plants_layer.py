@@ -45,6 +45,13 @@ def main(frs_csv, cbp_csv, pn_json, dst):
         box["site_key"] = box.lat.round(3).astype(str) + "," + box.lon.round(3).astype(str)
         n_records = len(box); box = box.sort_values("name").drop_duplicates("site_key"); n_sites = len(box)
         out["sources"]["frs_dedupe"] = dict(records=int(n_records), distinct_sites=int(n_sites), note="FRS has no operating-status field in the facility file; closed plants and mis-coded sites remain, so the list is a superset of the ~1,100 operating plants the FBA and Census count")
+        vpath = os.path.join(os.path.dirname(os.path.abspath(frs_csv)), "plants_verified.csv")   # ingest/claude_verify.py output, when it exists
+        if os.path.exists(vpath):
+            v = pd.read_csv(vpath, dtype=str).fillna(""); closed = set(v[v.operating == "no"].registry_id)
+            n_closed = int(box.registry_id.isin(closed).sum()); box = box[~box.registry_id.isin(closed)]
+            out["sources"]["verified"] = dict(checked=int(len(v)), operating_no=int((v.operating == "no").sum()), removed_from_layer=n_closed,
+                                              plant_types=v.plant_type.value_counts().to_dict(), shifts=v.shifts.value_counts().to_dict())
+            print(f"verified sites: {len(v)} checked, {n_closed} closed removed from the layer")
         mills = f[f.naics.isin(["322130", "322120"])].drop_duplicates("registry_id")
         d = haversine(box.lat.values[:, None], box.lon.values[:, None], nodes.lat.values[None, :], nodes.lon.values[None, :])
         box["node"] = d.argmin(axis=1); box["node_mi"] = d.min(axis=1) * 1.2

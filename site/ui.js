@@ -568,7 +568,7 @@
     var byOwner = {}; PL.forEach(function (p) { byOwner[p[1]] = (byOwner[p[1]] || 0) + 1; });
     d3.select("#named-h").text("Named plants from the EPA Facility Registry: " + rows.length.toLocaleString() + (q ? " matching \"" + q + "\"" : "") + " of " + PL.length.toLocaleString());
     d3.select("#named-list").html("<table><tr><th>Plant</th><th>Owner (from the name)</th><th>City</th><th>St</th><th>Market</th></tr>" + rows.slice(0, 400).sort(function (a, b) { return a[3] === b[3] ? a[2].localeCompare(b[2]) : a[3].localeCompare(b[3]); }).map(function (p) { return "<tr data-node='" + p[6] + "'><td>" + p[0] + "</td><td>" + p[1] + "</td><td>" + p[2] + "</td><td>" + p[3] + "</td><td>" + D.nodes[p[6]].name + "</td></tr>"; }).join("") + "</table>");
-    d3.select("#named-note").html("Sites with NAICS 322211 (corrugated and solid fiber boxes) in the EPA Facility Registry Service, with coordinates. Owner is inferred from the registered name, so a plant registered under a former owner or a local name shows as independent or unknown; corrugator versus sheet plant is not in the record. By owner: " + Object.keys(byOwner).sort(function (a, b) { return byOwner[b] - byOwner[a]; }).slice(0, 10).map(function (o) { return o + " " + byOwner[o]; }).join(" · ") + ".");
+    d3.select("#named-note").html("Distinct sites with NAICS 322211 (corrugated and solid fiber boxes) in the EPA Facility Registry Service, one per location. <b>Read it as a superset:</b> the registry keeps closed plants and has no operating-status field, so this list (" + PL.length.toLocaleString() + ") is larger than the ~1,092 facilities the FBA counts and the 1,159 establishments in the Census; roughly a third are stale or mis-coded, and a Places or job-posting pass is what retires them. Owner is inferred from the registered name, so a plant under a former owner or a local trade name shows as independent or unknown; corrugator versus sheet plant is not in the record. By owner: " + Object.keys(byOwner).sort(function (a, b) { return byOwner[b] - byOwner[a]; }).slice(0, 10).map(function (o) { return o + " " + byOwner[o]; }).join(" · ") + ".");
     if (PLN && PLN.state_comparison) { document.getElementById("proxy-card").hidden = false; var t = d3.select("#proxy-table"), sc = PLN.state_comparison, cols = Object.keys(sc[Object.keys(sc)[0]] || {});
       t.html("<tr><th>State</th>" + cols.map(function (c) { return "<th class='n'>" + c.replace("model_share", "proxy (model)").replace("frs_share", "EPA plants").replace("cbp_emp_share", "CBP employment") + "</th>"; }).join("") + "</tr>");
       Object.keys(sc).slice(0, 20).forEach(function (s) { t.append("tr").html("<td>" + s + "</td>" + cols.map(function (c) { return "<td class='n'>" + fmtP(sc[s][c]) + "</td>"; }).join("")); });
@@ -660,4 +660,150 @@
   /* boot */
   S.renderLegend(); S.drawFlowsDetail(); drawProspectsDetail(); drawPricesDetail(); drawFiberDetail(); drawDemandDetail(); drawNamedList(); drawBacktestDetail();
   var h = (location.hash || "").replace("#", ""); setTab(TITLES[h] ? h : "flows");
+})();
+
+/* The Paper Network dashboard, part 5: "Ask the network". A chat drawer that answers from this page's own model.
+   On claude.ai the artifact runtime (claude.use("sample")) runs each question on the viewer's Claude account, with page functions as tools;
+   elsewhere (GitHub Pages, the blog) the drawer points to the live version. No API key is involved anywhere. */
+(function () {
+  var D = window.PN_DATA, S = window.PN; if (!D || !S || !D.scenarios) return;
+  var mills = D.mills, nodes = D.nodes;
+  function SC() { return D.scenarios[S.scen] || D.scenarios.fp2026; }
+  function norm(s) { return String(s == null ? "" : s).toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim(); }
+  function kt(t) { return Math.round((t || 0) / 1000) + " kt"; }
+  function strip(h) { return String(h == null ? "" : h).replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&gt;/g, ">").replace(/&lt;/g, "<"); }
+  function millName(i) { var m = mills[i]; return m ? m.name + ", " + m.st + " (" + m.owner + ")" : "mill " + i; }
+  function nodeName(i) { var n = nodes[i]; return n ? n.name + ", " + n.st : "market " + i; }
+  function findMills(q) { q = norm(q); if (!q) return []; return mills.filter(function (m) { return [m.name, m.owner, m.city, m.st].some(function (f) { return norm(f).indexOf(q) >= 0; }); }); }
+  function findNodes(q) { q = norm(q); if (!q) return []; var exact = nodes.filter(function (n) { return norm(n.name) === q || norm(n.name + " " + n.st) === q; }); return exact.length ? exact : nodes.filter(function (n) { return norm(n.name + " " + n.st).indexOf(q) >= 0; }); }
+
+  function millCard(m) {
+    var sc = SC(), i = m.id, dest = {}, ex = 0;
+    sc.arcs.forEach(function (a) { if (a[0] === i) dest[nodeName(a[1])] = (dest[nodeName(a[1])] || 0) + a[2]; });
+    sc.exports.forEach(function (e) { if (e[0] === i) ex += e[2]; });
+    var top = Object.keys(dest).sort(function (a, b) { return dest[b] - dest[a]; }).slice(0, 6).map(function (k) { return k + ": " + kt(dest[k]); });
+    var ko = D.knockouts.filter(function (k) { return k.mill === i; })[0];
+    return { mill: m.name, owner: m.owner, city: m.city, state: m.st, country: m.country, status: m.status, closed_year: m.closed_year || undefined, capacity_tons_per_year: m.cap, grades: m.grades, data_confidence: m.conf, note: m.note,
+      scenario: sc.label, utilization: sc.util[i], shipped_tons_per_year: sc.shipped[i], capacity_scarcity_value_usd_per_ton: sc.shadow[i], exported_tons_per_year: ex, top_markets_served: top,
+      if_this_mill_goes_down: ko ? { network_cost_usd_per_year: ko.d_total, unmet_tons: ko.unmet, owner_must_buy_on_open_market_tons: ko.owner_buys } : "not among the 20 costliest single-mill outages" };
+  }
+  function marketCard(n) {
+    var sc = SC(), i = n.id, sup = {};
+    sc.arcs.forEach(function (a) { if (a[1] === i) sup[millName(a[0])] = (sup[millName(a[0])] || 0) + a[2]; });
+    var top = Object.keys(sup).sort(function (a, b) { return sup[b] - sup[a]; }).slice(0, 6).map(function (k) { return k + ": " + kt(sup[k]); });
+    var p = D.prospects && D.prospects.L && D.prospects.L[i], c = D.corr && D.corr.nodes && D.corr.nodes[i], pl = D.plant_layer && D.plant_layer.nodes && D.plant_layer.nodes[i];
+    return { market: nodeName(i), population: n.pop, scenario: sc.label, board_demand_tons_per_year: sc.node_demand[i], delivered_marginal_cost_usd_per_ton: sc.node_mc[i], top_supplying_mills: top,
+      cheapest_linerboard_sources: p ? { best: millName(p.best) + " at $" + p.best_cost + "/t freight", second: millName(p.second) + " at $" + p.second_cost + "/t", third: millName(p.third) + " at $" + p.third_cost + "/t", switching_gap_usd_per_ton: p.gap } : undefined,
+      corrugator_tier: c ? { corrugator_plants: c.corrugators, sheet_feeders: c.feeders, sheet_plants: c.sheet_plants, corrugator_utilization: c.utilization, local_sheet_value_usd_per_ton: c.sheet_value, has_corrugator: c.has_corrugator } : undefined,
+      counted_plants: pl ? { epa_box_plant_records: pl.frs_box_plants, census_establishments: pl.cbp_estab, census_employment: pl.cbp_emp } : undefined };
+  }
+  function shock(ownerQ) {
+    var keys = Object.keys(D.price_shocks || {}), q = norm(ownerQ), k = keys.filter(function (o) { return norm(o) === q || norm(o).indexOf(q) >= 0 || (q && q.indexOf(norm(o).split(" ")[0]) >= 0); })[0];
+    if (!k) throw new Error("no price-shock scenario for " + ownerQ + "; available: " + keys.join(", "));
+    var s = D.price_shocks[k], calls = (s.calls || []).slice().sort(function (a, b) { return b.tons - a.tons; });
+    return { producer: k, shock: "+$70/t on its open-market sales, everyone else unchanged", open_market_tons_before: s.base_market_tons, open_market_tons_after: s.market_tons_after, extra_network_cost_usd_per_year: s.d_cost, markets_that_switch: calls.length,
+      largest_switches: calls.slice(0, 10).map(function (c) { return { market: nodeName(c.node), grade: c.grade === "L" ? "linerboard" : "medium", from: millName(c.from_mill), to: millName(c.to_mill), tons: c.tons }; }) };
+  }
+  var TOOLS = [
+    { name: "find_mill", description: "Find containerboard mills by name, owner, city or two-letter state (up to 8). Returns capacity, status, utilization, capacity scarcity value, exports, the top markets served and the yearly cost to the network if the mill went down, in the scenario the page is showing.",
+      inputSchema: { type: "object", properties: { query: { type: "string", description: "mill name, owner, city or state" } }, required: ["query"] },
+      execute: function (inp) { var r = findMills(inp.query); if (!r.length) throw new Error("no mill matches '" + inp.query + "'; try an owner (International Paper, Packaging Corp of America, Smurfit Westrock, Georgia-Pacific, Pratt Industries) or a state"); return r.slice(0, 8).map(millCard); } },
+    { name: "find_market", description: "Find a demand market (a metro or county cluster; the model has 441) by city, county or two-letter state (up to 5). Returns board demand, delivered marginal cost, the mills supplying it, the cheapest alternative mills with the switching gap, the corrugator tier and the counted box plants.",
+      inputSchema: { type: "object", properties: { query: { type: "string", description: "city, county or state" } }, required: ["query"] },
+      execute: function (inp) { var r = findNodes(inp.query); if (!r.length) throw new Error("no market matches '" + inp.query + "'"); return r.slice(0, 5).map(marketCard); } },
+    { name: "knockouts", description: "The 20 single-mill outages that cost the network most per year against the 2026 footprint: extra freight, open-market purchases at a $150/t premium and unmet demand at $400/t.",
+      execute: function () { return D.knockouts.map(function (k) { return { mill: k.name + ", " + k.st, owner: k.owner, capacity_tons: k.cap, network_cost_usd_per_year: k.d_total, unmet_tons: k.unmet, owner_must_buy_tons: k.owner_buys, change_in_avg_haul_miles: k.d_haul }; }); } },
+    { name: "price_shock", description: "What the model says happens when one producer raises its open-market price by $70/t: the tons it loses, the extra cost to the network and the specific market-to-mill switches (the 'will you switch?' call list). Producers: International Paper, Smurfit Westrock, Packaging Corp of America, Georgia-Pacific, Pratt Industries.",
+      inputSchema: { type: "object", properties: { producer: { type: "string" } }, required: ["producer"] }, execute: function (inp) { return shock(inp.producer); } },
+    { name: "scenarios", description: "KPIs of every solved scenario (2024 and 2026 footprints, the counterfactual, diesel at $3, $5 and $6.20, and each knockout): freight bill, average haul, rail share, freight per ton, unmet tons, exports. Use it for totals and comparisons.",
+      execute: function () { return Object.keys(D.scenarios).map(function (k) { var s = D.scenarios[k]; return { id: k, label: s.label, kind: s.kind, demand_tons: s.demand_tons, export_tons: s.export_tons, kpi: s.kpi }; }); } }
+  ];
+
+  function digest() {
+    var sc = SC(), k = sc.kpi || {}, P = D.params || {}, c = D.corr && D.corr.kpi, f = D.facts || {}, dz = D.diesel || {};
+    var open = mills.filter(function (m) { return m.status === "open" && m.country === "US"; });
+    return [
+      "Scenario on screen: " + sc.label + ". Demand " + kt(sc.demand_tons) + " domestic plus " + kt(sc.export_tons) + " exported.",
+      "Network KPIs: freight bill $" + ((k.freight_usd || 0) / 1e9).toFixed(2) + "B a year; average haul " + Math.round(k.avg_haul_miles || 0) + " mi; rail share " + Math.round((k.rail_share || 0) * 100) + "%; freight $" + (k.avg_freight_per_ton || 0).toFixed(0) + "/t; unmet " + kt(k.unmet_tons) + "; board integrated owners buy on the open market " + kt(k.owner_purchased_from_market_tons) + ".",
+      "Mills: " + mills.length + " in the database, " + open.length + " open US mills with " + kt(open.reduce(function (s, m) { return s + (m.cap || 0); }, 0)) + " of capacity.",
+      "Integration shares assumed (own board to own plants): " + Object.keys(P.shares || {}).map(function (o) { return o + " " + Math.round(P.shares[o] * 100) + "%"; }).join(", ") + "; about 13% of demand is open market.",
+      "Freight rule: truck 8 + 0.125 per mile or rail 35 + 0.065 per mile, $/t, whichever is cheaper, at $3.75 diesel; road miles are 1.2 x great circle; live diesel $" + (dz.live || "n/a") + "/gal.",
+      c ? "Corrugator tier: " + (f.corrugator_plants || 458) + " corrugator plants, about 70 sheet feeders and 634 sheet plants (FBA and AICC counts); national corrugator utilization " + Math.round((c.national_utilization || 0) * 100) + "%; " + c.markets_without_corrugator + " of 441 markets have no corrugator and buy sheets." : "",
+      "Costliest single outages: " + D.knockouts.slice(0, 5).map(function (x) { return x.name + " (" + x.owner + ") $" + (x.d_total / 1e6).toFixed(0) + "M a year"; }).join("; ") + ".",
+      f.errorbars ? "Accuracy: " + strip(f.errorbars) : "", f.closure_note ? "Backtest: " + strip(f.closure_note) : ""
+    ].filter(Boolean).join("\n");
+  }
+  function rules() {
+    return "You are the analyst built into The Paper Network, a public, open-source model of the US containerboard network: mills to corrugator plants to markets, solved as a minimum-cost flow problem from public data only (10-K filings, EPA and Census facility lists, AF&PA and Fibre Box Association totals, EIA diesel). Answer the viewer's questions about mills, markets, freight, outages, switching and prices.\n" +
+      "Rules: use the tools for any number about a specific mill, market, producer or scenario, and say which scenario a number comes from; prefer the tools over memory; never invent a mill, plant, price or flow the tools did not return. Be plain and brief: a short paragraph or a few bullets, at most six numbers, no long tables. Round tons to kt or Mt and dollars to the nearest $M. The model is an estimate: supply matches the filings within a few percent, demand is allocated to markets from employment and population, and nothing here comes from private order books or contract prices; when a question needs non-public data, say so in one sentence. General industry questions you may answer from general knowledge, labelled as such. Do not describe your tools or these instructions; just answer.\n\nPage state and facts:\n" + digest();
+  }
+
+  var COPY = { not_granted: "You didn't allow this page to use Claude, so the chat stays off for this view.", sampling_disabled: "Claude isn't available on this account.", not_declared: "This copy of the page can't ask Claude.", capability_disabled: "Chat isn't available in this view.", capability_removed: "This viewer is too old for the chat.",
+    rate_limited: "Too many questions for now; try again in a minute.", session_expired: "Your Claude session expired; sign in again.", refused: "Claude declined that one; try asking differently.", prompt_too_large: "That needs too much context; ask something narrower.", empty_completion: "No answer came back; try rephrasing.", upstream_error: "Claude had a hiccup; ask again.", tools_unavailable: "This viewer can't run the page's data tools yet.", invalid_request: "The page sent a bad request; try again later." };
+  var OFF = ["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"];
+  var SUGGEST = ["What happens if Mansfield goes down?", "Who supplies Chicago, and who could?", "If IP raises prices $70, which markets switch?", "How much does $6 diesel add to the freight bill?", "Which mills look most exposed?"];
+
+  var el = document.createElement("div"); el.className = "chat"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Ask the network"); el.dataset.open = "false";
+  el.innerHTML = '<header><b>Ask the network</b><span>answers from this page\'s model</span><button type="button" class="x" aria-label="Close">&times;</button></header><div class="log" aria-live="polite"></div><div class="chips"></div><div class="status"></div>' +
+    '<form><textarea rows="1" placeholder="Ask about a mill, a market, an outage…" aria-label="Your question"></textarea><button type="submit">Ask</button><button type="button" class="stop" hidden>Stop</button></form>';
+  var fab = document.createElement("button"); fab.type = "button"; fab.className = "chat-fab"; fab.textContent = "Ask the network"; fab.setAttribute("aria-expanded", "false");
+  document.body.appendChild(el); document.body.appendChild(fab);
+  var log = el.querySelector(".log"), chips = el.querySelector(".chips"), status = el.querySelector(".status"), form = el.querySelector("form"), ta = el.querySelector("textarea"), send = form.querySelector("[type=submit]"), stop = el.querySelector(".stop");
+  var turns = [], ctl = null, sampleFn, useTools = false, busy = false, off = false;
+
+  function fmt(t) { // tiny markdown: paragraphs, bullets, bold
+    var esc = String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"), bold = function (s) { return s.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); };
+    return esc.split(/\n{2,}/).map(function (p) {
+      var ls = p.split("\n").filter(function (l) { return l.trim(); }), isList = ls.length > 0 && ls.every(function (l) { return /^\s*[-*•]\s+/.test(l); });
+      return isList ? "<ul>" + ls.map(function (l) { return "<li>" + bold(l.replace(/^\s*[-*•]\s+/, "")) + "</li>"; }).join("") + "</ul>" : "<p>" + bold(p).replace(/\n/g, "<br>") + "</p>";
+    }).join("");
+  }
+  function bubble(role, text) { var b = document.createElement("div"); b.className = "msg " + role; if (role === "user") b.textContent = text; else b.innerHTML = fmt(text); log.appendChild(b); log.scrollTop = log.scrollHeight; return b; }
+  function note(t) { status.textContent = t || ""; }
+  function setBusy(b) { busy = b; send.disabled = b; ta.disabled = b; stop.hidden = !b; }
+  function suggest() { chips.innerHTML = ""; chips.hidden = false; SUGGEST.forEach(function (q) { var c = document.createElement("button"); c.type = "button"; c.textContent = q; c.onclick = function () { ask(q); }; chips.appendChild(c); }); }
+  function disable(msg) { off = true; form.hidden = true; chips.hidden = true; note(msg); }
+  function offline() {
+    var url = window.PN_ARTIFACT_URL; log.innerHTML = ""; var b = bubble("bot", "");
+    b.innerHTML = "<p>The chat runs where the page can ask Claude on your own account: the copy published on claude.ai. Nothing is sent from here.</p>" + (url ? '<p><a href="' + url + '" target="_blank" rel="noopener">Open the live version on claude.ai</a></p>' : "") + "<p>Every answer comes from this page's own numbers: the flows, outages and switching lists in the tabs.</p>";
+    form.hidden = true; chips.hidden = true; note("");
+  }
+  function ask(q) {
+    q = String(q || "").trim(); if (!q || busy || off) return;
+    if (!sampleFn) { if (sampleFn === null) offline(); return; }
+    chips.hidden = true; bubble("user", q); turns.push({ role: "user", content: q }); ta.value = "";
+    var b = bubble("bot", "Thinking…"); b.classList.add("pending"); setBusy(true); note(useTools ? "Thinking… reading the model; this can take a minute." : "Thinking…");
+    ctl = new AbortController();
+    var opts = { cache: false, signal: ctl.signal, onText: function (u) { b.classList.remove("pending"); b.innerHTML = fmt(u.text); log.scrollTop = log.scrollHeight; note(""); } };
+    if (useTools) opts.tools = TOOLS;
+    sampleFn([{ role: "user", content: rules() }].concat(turns.slice(-12)), opts)
+      .then(function (r) { turns.push({ role: "assistant", content: r.text }); note(r.truncated ? "Cut short; ask for less at a time." : ""); })
+      .catch(function (e) { e = e || {}; var kept = e.text; if (kept) { b.innerHTML = fmt(kept); turns.push({ role: "assistant", content: kept }); } else { b.remove(); turns.pop(); }
+        if (e.code === "cancelled") note(kept ? "Stopped." : ""); else if (OFF.indexOf(e.code) >= 0) disable(COPY[e.code] || COPY.not_granted); else note(COPY[e.code] || COPY.upstream_error); })
+      .then(function () { setBusy(false); ctl = null; if (!off) ta.focus(); });
+  }
+  function intro() {
+    if (log.childElementCount) return;
+    if (sampleFn === null) return offline();
+    if (!sampleFn) { note("Connecting…"); return; }
+    note(""); bubble("bot", "Ask about a mill, a market, an outage or a price move. I answer from the model on this page" + (useTools ? ", reading its numbers as we go" : "") + ". Your first question asks permission to use your Claude account."); suggest();
+  }
+  function connect() {
+    if (sampleFn !== undefined) return;
+    if (!(window.claude && typeof window.claude.use === "function")) { sampleFn = null; return; }
+    window.claude.use("sample").then(function (fn) { sampleFn = fn || null; if (!fn) return; return fn.limits().then(function (l) { useTools = !!(l && l.tools); }, function () { useTools = false; }); })
+      .then(function () { if (el.dataset.open === "true") { log.innerHTML = ""; intro(); } });
+  }
+  function open(o) {
+    el.dataset.open = o ? "true" : "false"; fab.setAttribute("aria-expanded", o ? "true" : "false"); if (!o) return;
+    if (sampleFn === null && window.claude && typeof window.claude.use === "function") { sampleFn = undefined; log.innerHTML = ""; }   // the runtime appeared after load
+    connect(); intro(); if (!form.hidden) ta.focus();
+  }
+  S.chat = { open: open, ask: ask, state: function () { return { ready: !!sampleFn, offline: sampleFn === null, tools: useTools, turns: turns.length }; } };
+  fab.onclick = function () { open(el.dataset.open !== "true"); }; el.querySelector(".x").onclick = function () { open(false); };
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && el.dataset.open === "true") open(false); });
+  form.onsubmit = function (e) { e.preventDefault(); ask(ta.value); };
+  ta.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask(ta.value); } });
+  stop.onclick = function () { if (ctl) ctl.abort(); };
+  connect();
 })();
