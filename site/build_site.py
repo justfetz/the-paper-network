@@ -194,6 +194,7 @@ page = f"""<!doctype html>
 </html>
 """
 open(os.path.join(HERE, "index.html"), "w").write(page); open(os.path.join(HERE, "data.js"), "w").write(data_js); open(os.path.join(HERE, "ui.js"), "w").write(js)
+json.dump({"schemaVersion": 1, "label": "model run", "message": D["generated"], "color": "1f5f4e"}, open(os.path.join(HERE, "badge.json"), "w"))   # shields.io endpoint badge in the README
 artifact = f"""<title>The Paper Network</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 {FONTS}
