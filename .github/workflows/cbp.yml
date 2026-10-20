@@ -19,13 +19,16 @@ jobs:
           set -e
           for y in 2024 2023 2022; do yy=${y:2:2}; if curl -fL --retry 3 -o cbp.zip "https://www2.census.gov/programs-surveys/cbp/datasets/${y}/cbp${yy}co.zip"; then echo "$y" > year.txt; break; fi; done
           ls -la cbp.zip && cat year.txt
-      - name: Keep the paper industry
+      - name: Keep the paper industry (county file)
         run: python ingest/census_cbp_bulk.py cbp.zip data/cbp_322211_county.csv "$(cat year.txt)"
+      - name: State file (complete state totals; county cells are thinned by disclosure rules)
+        run: |
+          y=$(cat year.txt); yy=${y:2:2}; curl -fL --retry 3 -o cbpst.zip "https://www2.census.gov/programs-surveys/cbp/datasets/${y}/cbp${yy}st.zip" && python ingest/census_cbp_bulk.py cbpst.zip data/cbp_322211_state.csv "$y"
       - uses: actions/upload-artifact@v4
-        with: { name: cbp-layer, path: "data/cbp_322211_county*.csv" }
+        with: { name: cbp-layer, path: "data/cbp_322211_*.csv" }
       - name: Commit
         run: |
           git config user.name "paper-network-bot" && git config user.email "bot@users.noreply.github.com"
-          git add data/cbp_322211_county*.csv; git diff --cached --quiet && echo "no changes" && exit 0
+          git add data/cbp_322211_*.csv; git diff --cached --quiet && echo "no changes" && exit 0
           git commit -m "cbp: County Business Patterns $(cat year.txt), paper codes by county"
           for i in 1 2 3 4; do git pull --rebase -q origin main && git push && break || sleep 15; done

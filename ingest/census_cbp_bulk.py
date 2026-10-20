@@ -8,7 +8,8 @@ def main(zip_path, dst, year="2023"):
     z = zipfile.ZipFile(zip_path); name = next(n for n in z.namelist() if n.lower().endswith((".txt", ".csv")))
     d = pd.read_csv(io.BytesIO(z.read(name)), dtype=str, low_memory=False); d.columns = [c.lower() for c in d.columns]
     d = d[d.naics.isin(CODES)].copy()
-    d["fips"] = d.fipstate.str.zfill(2) + d.fipscty.str.zfill(3)
+    if "lfo" in d.columns: d = d[d.lfo.fillna("-").str.strip().isin(["-", ""])]          # state files carry legal-form rows; keep the total
+    d["fips"] = d.fipstate.str.zfill(2) + (d.fipscty.str.zfill(3) if "fipscty" in d.columns else "")
     for c in ("emp", "est", "ap", "qp1"): d[c] = pd.to_numeric(d[c], errors="coerce").fillna(0).astype(int)
     out = d.rename(columns={"est": "estab", "ap": "payann"})[["fips", "naics", "estab", "emp", "payann", "emp_nf"]]
     out["naics_desc"] = out.naics.map(CODES); out["year"] = year

@@ -6,7 +6,7 @@ Usage: python plants_layer.py ../data/plants_frs.csv ../data/cbp_322211_county.c
 """
 import sys, json, os, numpy as np, pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from netmodel import haversine, county_weights, aggregate_demand_nodes
+from netmodel import haversine, county_weights, aggregate_demand_nodes, STATE_ABBR
 
 OWNER_PATTERNS = [("International Paper", r"international paper|\bIP\b|temple.?inland|weyerhaeuser"), ("Smurfit Westrock", r"westrock|west rock|rock.?tenn|smurfit|kapstone|mead ?westvaco|meadwestvaco"),
     ("Packaging Corp of America", r"packaging corp|\bPCA\b|boise (packaging|inc|cascade)|greif|corrchoice"), ("Georgia-Pacific", r"georgia.?pacific|\bGP\b|color.?box"), ("Pratt Industries", r"\bpratt\b"),
@@ -19,6 +19,12 @@ def owner_guess(name):
     for o, rx in OWNER_PATTERNS:
         if re.search(rx, n, re.I): return o
     return "Independent / unknown"
+
+def fips_to_abbr():
+    m = {}
+    for name, ab in STATE_ABBR.items(): m[name] = ab
+    codes = {"01":"AL","02":"AK","04":"AZ","05":"AR","06":"CA","08":"CO","09":"CT","10":"DE","11":"DC","12":"FL","13":"GA","15":"HI","16":"ID","17":"IL","18":"IN","19":"IA","20":"KS","21":"KY","22":"LA","23":"ME","24":"MD","25":"MA","26":"MI","27":"MN","28":"MS","29":"MO","30":"MT","31":"NE","32":"NV","33":"NH","34":"NJ","35":"NM","36":"NY","37":"NC","38":"ND","39":"OH","40":"OK","41":"OR","42":"PA","44":"RI","45":"SC","46":"SD","47":"TN","48":"TX","49":"UT","50":"VT","51":"VA","53":"WA","54":"WV","55":"WI","56":"WY"}
+    return codes
 
 def main(frs_csv, cbp_csv, pn_json, dst):
     D = json.load(open(pn_json)); nodes = pd.DataFrame(D["nodes"]); dem = np.array(D["scenarios"]["fp2026"]["node_demand"], dtype=float)
@@ -44,7 +50,7 @@ def main(frs_csv, cbp_csv, pn_json, dst):
         c = pd.read_csv(cbp_csv, dtype={"fips": str}); c["fips"] = c.fips.str.zfill(5)
         for col in ("estab", "emp", "payann"): c[col] = pd.to_numeric(c[col], errors="coerce").fillna(0)
         counties = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "counties.csv"), dtype={"fips": str})
-        c = c.merge(counties[["fips", "lat", "lon", "state"]], on="fips", how="inner")
+        c = c.merge(counties[["fips", "lat", "lon", "state"]], on="fips", how="inner"); c["state"] = c.state.map(STATE_ABBR).fillna(c.state)
         d = haversine(c.lat.values[:, None], c.lon.values[:, None], nodes.lat.values[None, :], nodes.lon.values[None, :]); c["node"] = d.argmin(axis=1)
         g = c.groupby("node").agg(estab=("estab", "sum"), emp=("emp", "sum"), payann=("payann", "sum"))
         for j in range(len(nodes)): out["nodes"][j].update(cbp_estab=int(g.estab.get(j, 0)), cbp_emp=int(g.emp.get(j, 0)))
@@ -54,15 +60,35 @@ def main(frs_csv, cbp_csv, pn_json, dst):
         w = np.array([max(out["nodes"][j].get("cbp_emp", 0), out["nodes"][j].get("cbp_estab", 0) * avg_emp) for j in range(len(nodes))], dtype=float)
         out["emp_weights"] = [round(float(v), 1) for v in w]
         out["cbp_by_state"] = c.groupby("state").agg(estab=("estab", "sum"), emp=("emp", "sum")).to_dict("index")
+    # ---- CBP state file: complete state totals -> state weights; within-state split by FRS plant counts, else CBP county, else the proxy
+    st_csv = os.path.join(os.path.dirname(cbp_csv or dst), "cbp_322211_state.csv") if (cbp_csv or dst) else None
+    if st_csv and os.path.exists(st_csv):
+        s = pd.read_csv(st_csv, dtype={"fips": str}); s["st"] = s.fips.str[:2].map({v: k for k, v in __import__("us").states.mapping("fips", "abbr").items()} if False else fips_to_abbr())
+        s = s.groupby("st").agg(estab=("estab", "sum"), emp=("emp", "sum"))
+        out["sources"]["cbp_state"] = dict(establishments=int(s.estab.sum()), employment=int(s.emp.sum()), states=int(len(s)))
+        out["cbp_state"] = {k: dict(estab=int(v.estab), emp=int(v.emp)) for k, v in s.iterrows()}
+        state_w = (s.emp / s.emp.sum()).to_dict()
+        node_st = nodes.st.values
+        within = np.array([out["nodes"][j].get("frs_box_plants", 0) for j in range(len(nodes))], dtype=float)
+        if within.sum() == 0: within = np.array([out["nodes"][j].get("cbp_emp", 0) for j in range(len(nodes))], dtype=float)
+        proxy = dem / dem.sum()
+        w = np.zeros(len(nodes))
+        for stt in set(node_st):
+            idx = np.where(node_st == stt)[0]; share = state_w.get(stt, 0.0)
+            inner = within[idx]; inner = inner / inner.sum() if inner.sum() > 0 else proxy[idx] / proxy[idx].sum()
+            w[idx] = share * (0.7 * inner + 0.3 * proxy[idx] / proxy[idx].sum())           # keep 30% of the proxy inside a state so single-plant counties do not zero out
+        out["emp_weights"] = [round(float(v), 6) for v in w]
+        out["weighting_note"] = "state totals: CBP state file employment (complete); within state: 70% EPA FRS plant counts + 30% population proxy"
     # ---- comparison: model demand share vs measured shares, by state
     st = nodes.st.values; model_share = pd.Series(dem).groupby(st).sum(); model_share = model_share / model_share.sum()
     comp = pd.DataFrame({"model_share": model_share})
     if "frs_by_state" in out: s = pd.Series(out["frs_by_state"]); comp["frs_share"] = (s / s.sum()).reindex(comp.index).fillna(0)
-    if "cbp_by_state" in out: s = pd.Series({k: v["emp"] for k, v in out["cbp_by_state"].items()}); comp["cbp_emp_share"] = (s / s.sum()).reindex(comp.index).fillna(0)
+    if "cbp_by_state" in out: s = pd.Series({k: v["emp"] for k, v in out["cbp_by_state"].items()}); comp["cbp_county_emp_share"] = (s / s.sum()).reindex(comp.index).fillna(0)
+    if "cbp_state" in out: s = pd.Series({k: v["emp"] for k, v in out["cbp_state"].items()}); comp["cbp_state_emp_share"] = (s / s.sum()).reindex(comp.index).fillna(0)
     comp = comp.sort_values("model_share", ascending=False)
     out["state_comparison"] = {k: {a: round(float(b), 4) for a, b in v.items()} for k, v in comp.to_dict("index").items()}
     for col in [c for c in comp.columns if c != "model_share"]:
-        both = comp[(comp[col] > 0) & (comp.model_share > 0)]
+        both = comp[(comp[col] > 0.002) & (comp.model_share > 0.002)]
         le = np.log(both.model_share / both[col]); out[f"log_error_vs_{col}"] = dict(rms=round(float(np.sqrt((le ** 2).mean())), 3), weighted_rms=round(float(np.sqrt(((le ** 2) * both[col]).sum() / both[col].sum())), 3), n_states=int(len(both)))
     json.dump(out, open(dst, "w"), separators=(",", ":"))
     print("sources:", out["sources"]); print({k: v for k, v in out.items() if k.startswith("log_error")})
