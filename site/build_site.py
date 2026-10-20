@@ -12,7 +12,10 @@ if os.path.exists(PL_PATH):
     import csv
     rows = list(csv.DictReader(open(PL_PATH, encoding="utf-8", errors="ignore")))
     D["plants"] = [[r["name"][:48], r["owner_guess"], r["city"].title() if r["city"] else "", r["state"], round(float(r["lat"]), 3), round(float(r["lon"]), 3), int(float(r["node"]))] for r in rows if r.get("lat") and r.get("lon")]
-if os.path.exists(PLN_PATH): D["plant_layer"] = json.load(open(PLN_PATH))
+if os.path.exists(PLN_PATH):
+    D["plant_layer"] = json.load(open(PLN_PATH))
+    if D["plant_layer"].get("weighting_note") and D.get("params", {}).get("demand_weighting", "").startswith("85%"):
+        D["params"]["demand_weighting"] = "85% measured (" + D["plant_layer"]["weighting_note"] + ") + 15% population proxy"
 D["corr"] = json.load(open(CORR_PATH)) if os.path.exists(CORR_PATH) else None
 mills, S, P, nodes = D["mills"], D["scenarios"], D["params"], D["nodes"]
 kt = lambda v: f"{v/1e6:.2f} Mt" if v >= 950000 else f"{round(v/1e3):,} kt"
