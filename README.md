@@ -43,7 +43,8 @@ sales manager, a mill scheduler or a box buyer can read in a minute.
 
 ```bash
 pip install numpy pandas scipy zipcodes geonamescache
-cd model && python export_json.py ../data/mills_final.csv ../data/paper_network.json   # ~6 min: ~60 LP solves + 1 small MILP
+cd model && python export_json.py ../data/mills_final.csv ../data/paper_network.json   # ~4 min: ~60 LP solves + 1 small MILP
+python corrugators.py ../data/paper_network.json ../data/corrugators.json                 # the corrugator / sheet-feeder tier, seconds
 cd ../site && python build_site.py                                                     # writes index.html and data.js
 ```
 

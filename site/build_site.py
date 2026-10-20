@@ -5,6 +5,8 @@ HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE);
 JSON_PATH = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "data", "paper_network.json")
 BM_PATH = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, "data", "basemap.json")
 D = json.load(open(JSON_PATH)); BM = json.load(open(BM_PATH))
+CORR_PATH = os.path.join(os.path.dirname(JSON_PATH), "corrugators.json")
+D["corr"] = json.load(open(CORR_PATH)) if os.path.exists(CORR_PATH) else None
 mills, S, P, nodes = D["mills"], D["scenarios"], D["params"], D["nodes"]
 kt = lambda v: f"{v/1e6:.2f} Mt" if v >= 950000 else f"{round(v/1e3):,} kt"
 MT1 = lambda v: f"{v/1e6:.1f}"
@@ -68,6 +70,7 @@ D["facts"] = {
                     ["Board shipped by US mills, 2024 scenario", f"{MT1(ship_us('fp2024'))} Mt", "37.7 Mt produced", "AF&amp;PA 2024 production; 2025 was 36.1 Mt"], ["Box shipments 2024", f"{MT1(P['demand_2024'])} Mt of board demanded", "381 BSF", "Fibre Box Association; ~0.08 Mt of board per BSF"],
                     ["Imports 2024", "Canadian mills sell 35% of capacity south", "1.4 Mt", "AF&amp;PA/trade data as reported"], ["Operating rate 2026", f"{ship_us('fp2026')/cap_us_2026:.0%}", "~95% (Q2 2026)", "AF&amp;PA quarterly report"],
                     ["Integration, IP", f"{ip['internal']/ip_tot:.0%} own, {ip['exports']/ip_tot:.0%} exported", "~80% own", "IP 10-K"], ["Integration, Smurfit Westrock", f"{sw['internal']/sw_tot:.0%} own", "~81% implied", "Fastmarkets pre-merger analysis"]],
+ "corr_note": "Counts are public (FBA 2024: 458 corrugator plants in 1,092 facilities; AICC: 634 sheet plants, 86% independent, and about 70 sheet feeders, half of them owned by integrated producers). Where they sit is not: this layer allocates corrugators to markets with at least 35 kt of local board a year in proportion to demand, sheet feeders to the 45 largest markets, and sheet plants by population, then prices the sheet trade at 1.8× roll freight because sheets cube out a trailer at 12–14 tons. The FBA's split of shipments, 84% from corrugator plants and 16% from sheet plants, sets the sheet share. The EPA facility list and a job-posting feed (corrugator operator postings) would place the real machines; see Method.",
  "closure_note": (f"Freight position does not predict the closures. The mills that actually closed were running {min(r['utilization'] for r in closed):.0%}–{max(r['utilization'] for r in closed):.0%} loaded in the LP and rank {', '.join(str(rank[r['mill']]) for r in closed)} of {len(bt)} on the idle list, because they sit in the Southeast and on the Gulf, next to the demand and the export docks. "
                   f"The surplus column is closer: capacity within 300 miles of those mills ran {min(local_surplus.get(r['mill'],0) or 0 for r in closed):.1f}–{max(local_surplus.get(r['mill'],0) or 0 for r in closed):.1f}× the demand there (ranks {', '.join(str(ls_rank.get(r['mill'],'—')) for r in closed)}). "
                   "What the closed mills shared is not in any free dataset: age, cash cost per ton and the capital they needed. The LP's own idle list is the small recycled and Canadian mills whose only edge is a short haul, which is what a freight-only model will always say and what the market did not do. The lesson for the model is a cost column per mill; the lesson for the industry is that the map shows where the surplus is, and the surplus is where the next closure comes from."),
@@ -117,7 +120,7 @@ def render(extra):
     miss = re.findall(r"{{(\w+)}}", out)
     if miss: raise SystemExit("unfilled: " + ", ".join(miss))
     return out
-css = open(os.path.join(SRC, "ui.css")).read(); js = open(os.path.join(SRC, "ui_core.js")).read() + "\n" + open(os.path.join(SRC, "ui_tabs.js")).read()
+css = open(os.path.join(SRC, "ui.css")).read(); js = open(os.path.join(SRC, "ui_core.js")).read() + "\n" + open(os.path.join(SRC, "ui_corr.js")).read() + "\n" + open(os.path.join(SRC, "ui_tabs.js")).read()
 data_js = "window.PN_DATA=" + json.dumps(D, separators=(",", ":")) + ";\nwindow.PN_BASEMAP=" + json.dumps(BM, separators=(",", ":")) + ";\n"
 D3 = '<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>'
 FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">'

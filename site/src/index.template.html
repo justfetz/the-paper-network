@@ -3,6 +3,7 @@
   {{theme_button}}
   <nav class="tabs" role="tablist" aria-label="Views">
     <button role="tab" data-tab="flows" aria-selected="true">Flows</button>
+    <button role="tab" data-tab="corr" aria-selected="false">Corrugators</button>
     <button role="tab" data-tab="prospects" aria-selected="false">Will you switch?</button>
     <button role="tab" data-tab="prices" aria-selected="false">Prices &amp; delivered cost</button>
     <button role="tab" data-tab="fiber" aria-selected="false">Fiber loop</button>
@@ -42,6 +43,14 @@
         <div class="bar"><span class="lbl">Min flow</span><input type="range" id="minflow" min="0" max="50000" step="1000" value="2000" aria-label="Minimum flow to draw"><span id="minflow-v" class="pill">2 kt</span></div>
         <h2>This scenario</h2>
         <div class="kpis" id="kpis"></div>
+      </section>
+      <section class="card" id="panel-corr" hidden>
+        <h2>The middle tier</h2>
+        <p>Corrugator plants buy the rolls, make the board and convert most of it. What they do not convert goes out as sheets, with the ~70 sheet feeders, to ~630 sheet plants. Capacity here is width × speed × hours × OEE; the sheet trade is the same min-cost flow, one layer down.</p>
+        <div class="bar" id="corr-layers"><button type="button" data-clayer="util" aria-pressed="true">Markets by corrugator load</button><button type="button" data-clayer="sheets" aria-pressed="true">Sheet flows</button><button type="button" data-clayer="value" aria-pressed="false">Markets by sheet value</button></div>
+        <div class="kpis" id="kpis-corr"></div>
+        <h2>Where corrugator hours are worth most</h2>
+        <div class="list" id="corr-rank"></div>
       </section>
       <section class="card" id="panel-prospects" hidden>
         <h2>Contestability</h2>
@@ -97,6 +106,17 @@
     <section class="card"><h2>Planned outages: capacity offline (kt per month, mills down)</h2><div class="bar"><button type="button" data-cal="m" aria-pressed="true">Staggered calendar</button><button type="button" data-cal="o" aria-pressed="false">Dual-priced assignment</button></div><div id="months-off"></div></section>
     <section class="card"><h2>Network cost of that month's outages ($M, monthly rate)</h2><div id="months-cost"></div><p class="note" id="cal-note"></p></section>
     <section class="card wide"><h2>Knock out one mill: extra network cost per year</h2><div id="ko-chart"></div><p class="note">Network cost is freight plus outside purchases valued at $150/t plus unmet demand at $400/t. Click a bar to see the re-routed map.</p></section>
+  </div>
+  <div class="detail" id="detail-corr" hidden>
+    <section class="card wide2"><h2>One corrugator, in numbers</h2>
+      <div class="bar"><span class="lbl">Width</span><button type="button" data-cw="87" aria-pressed="false">87 in</button><button type="button" data-cw="98" aria-pressed="true">98 in</button><button type="button" data-cw="110" aria-pressed="false">110 in</button>
+        <span class="lbl">Avg speed</span><input type="number" id="c-fpm" value="1000" step="50" aria-label="average running speed, feet per minute"><span class="lbl">fpm</span></div>
+      <div class="bar"><span class="lbl">Hours/yr</span><input type="number" id="c-hours" value="4000" step="250"><span class="lbl">OEE</span><input type="number" id="c-oee" value="55" step="5" min="10" max="95"><span class="lbl">%</span><span class="lbl">Trim</span><input type="number" id="c-trim" value="6" step="1" min="0" max="20"><span class="lbl">%</span></div>
+      <div class="bar"><span class="lbl">Convert $/MSF</span><input type="number" id="c-conv" value="14" step="1"><span class="lbl">Sheet $/MSF</span><input type="number" id="c-sheet" value="80" step="1"></div>
+      <div class="kpis" id="kpis-calc"></div>
+      <p class="note" id="calc-note"></p></section>
+    <section class="card"><h2>Width classes at these settings</h2><div class="tblwrap"><table class="rec" id="width-table"></table></div></section>
+    <section class="card wide"><h2>Markets that import sheets</h2><div class="tblwrap"><table class="rec" id="sheet-table"></table></div><p class="note" id="corr-note"></p></section>
   </div>
   <div class="detail" id="detail-prospects" hidden>
     <section class="card wide"><h2>What a unilateral $70/t increase does to open-market volume</h2><div class="tblwrap"><table class="rec" id="shock-table"></table></div><p class="note">Integrated tonnage does not move: a company's own box plants keep buying from its own mills. The open-market tons are the ones that can walk, and in a market where the next mill is $5/t away, they all do. Real increases hold because the producers announce them together and the index follows.</p></section>
