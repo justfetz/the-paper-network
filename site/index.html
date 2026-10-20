@@ -45,8 +45,9 @@ nav.tabs button:focus-visible,.bar button:focus-visible,.bar select:focus-visibl
 h1{font-size:clamp(22px,3vw,30px);line-height:1.2;font-weight:500;letter-spacing:-.4px;margin:22px 0 6px;text-wrap:balance}
 .lede{color:var(--ink-2);font-size:16px;margin:0 0 18px;max-width:70ch}
 .grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,.9fr);gap:16px;align-items:start}
-@media (max-width:980px){.grid{grid-template-columns:1fr}}
-.card{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;min-width:0;position:relative}
+@media (max-width:980px){.grid{grid-template-columns:minmax(0,1fr)}.bar select{width:100%}}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;min-width:0;max-width:100%;position:relative}
+.stack{min-width:0}
 .card h2{font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:0 0 10px}
 .card h3{font-size:15px;font-weight:600;margin:14px 0 6px}
 .card p{margin:0 0 10px;color:var(--ink-2);font-size:14px}
@@ -100,6 +101,7 @@ h1{font-size:clamp(22px,3vw,30px);line-height:1.2;font-weight:500;letter-spacing
 .list tr[data-node]:hover td{background:var(--code-bg)}
 .detail{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-top:16px}
 .detail .card.wide{grid-column:1/-1}
+@media (min-width:900px){.detail .card.wide2{grid-column:span 2}}
 .legend{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);display:flex;gap:14px;flex-wrap:wrap;margin-top:6px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
 .grid-ax line,.grid-ax path{stroke:var(--rule)}.grid-ax path{display:none}.grid-ax text,.axis text{fill:var(--ink-3);font-size:10.5px}.axis path,.axis line{stroke:var(--rule)}
@@ -224,7 +226,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--rule);font-fa
 
   <div class="detail" id="detail-flows">
     <section class="card"><h2>Board moved by distance band, October 2026 (Mt)</h2><div id="haul"></div><div class="legend"><span><i style="background:var(--s1)"></i>truck</span><span><i style="background:var(--s2)"></i>rail</span></div></section>
-    <section class="card"><h2>Integration: model vs disclosed</h2><div class="tblwrap"><table class="rec" id="integ"></table></div></section>
+    <section class="card wide2"><h2>Integration: model vs disclosed</h2><div class="tblwrap"><table class="rec" id="integ"></table></div></section>
     <section class="card"><h2>Planned outages: capacity offline (kt per month, mills down)</h2><div class="bar"><button type="button" data-cal="m" aria-pressed="true">Staggered calendar</button><button type="button" data-cal="o" aria-pressed="false">Dual-priced assignment</button></div><div id="months-off"></div></section>
     <section class="card"><h2>Network cost of that month's outages ($M, monthly rate)</h2><div id="months-cost"></div><p class="note" id="cal-note"></p></section>
     <section class="card wide"><h2>Knock out one mill: extra network cost per year</h2><div id="ko-chart"></div><p class="note">Network cost is freight plus outside purchases valued at $150/t plus unmet demand at $400/t. Click a bar to see the re-routed map.</p></section>
@@ -237,7 +239,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--rule);font-fa
   <div class="detail" id="detail-prices" hidden>
     <section class="card wide"><h2>Published price points</h2><div id="price-charts" class="detail" style="margin-top:0"></div><p class="note" id="price-note"></p></section>
     <section class="card"><h2>Mullen to ECT, in board weight</h2><div class="tblwrap"><table class="rec" id="ect-table"></table></div><p class="note">The 1991 change to Rule 41 / Item 222 let boxes be specified by edge crush instead of burst. Lighter liners carry the same stacking load, and the industry's tons per thousand square feet fell. The calculator prices both specs so the gap is visible by market.</p></section>
-    <section class="card"><h2>Diesel and the freight bill</h2><div class="tblwrap"><table class="rec" id="diesel-table"></table></div></section>
+    <section class="card wide2"><h2>Diesel and the freight bill</h2><div class="tblwrap"><table class="rec" id="diesel-table"></table></div></section>
   </div>
   <div class="detail" id="detail-fiber" hidden>
     <section class="card wide"><h2>The loop in numbers</h2><div class="tblwrap"><table class="rec" id="fiber-table"></table></div><p class="note" id="fiber-note"></p></section>
@@ -260,8 +262,8 @@ s.t. Σ_{j,g} (x_ijg + y_ijg) + Σ_p z_ip  ≤  c_i a_i          <span class="c"
      Σ_i y_ijg − Σ_k v_kjg + u_jg  =  s_open φ_g D_j         <span class="c"># open market at j</span><br>
      Σ_i z_ip  =  E_p                                        <span class="c"># exports through gateway p (kraft mills only)</span><br>
      f(d) = min(8 + 0.125 d·ft, 35 + 0.065 d·fr) $/ton,  d = 1.2 × great-circle miles, ft/fr = diesel factors (22% / 12% fuel share at $3.75)<br>
-<span class="c"># October 2026 instance: 102,243 variables, 7,145 constraints, 2.0 s with HiGHS. 55 scenarios on this page.</span></div>
-<p><b>Duals.</b> The multiplier on a mill's capacity row is what one more ton of that mill saves the network (the scarcity layer). The multiplier on a demand row is the delivered cost of the marginal ton in that county (the delivered-cost layer and the calculator's freight). <b>Prospects</b> rank, for every market, the active mills by delivered freight; the gap between the first two is the switching threshold. <b>Price shocks</b> add $70/t to one owner's open-market arcs only. <b>The fiber loop</b> is a second transportation LP: counties supply recovered OCC (92% of consumption, plus 3% for imported goods), recycled mills demand 1.15 t per ton of recycled board they ship, export docks take the AF&amp;PA/USITC export tonnage, and freight decides. <b>The maintenance calendar</b> is an assignment problem: for each mill and month the cost of an outage is estimated as capacity dual × tons lost, from twelve no-outage solves, then assigned with at most 10 mills per month and two per owner (a small MILP), and re-solved month by month to measure the true penalty. <b>Knockouts</b> remove one mill and re-solve. <b>The backtest</b> puts 2026 demand on the 2024 mill set and asks which mills the LP leaves idle.</p>
+<span class="c"># October 2026 instance: 93,423 variables, 7,139 constraints, 2.3 s with HiGHS. 55 scenarios on this page.</span></div>
+<p><b>Duals.</b> The multiplier on a mill's capacity row is what one more ton of that mill saves the network (the scarcity layer). The multiplier on a demand row is the delivered cost of the marginal ton in that county (the delivered-cost layer and the calculator's freight). <b>Prospects</b> rank, for every market, the active mills by delivered freight; the gap between the first two is the switching threshold. <b>Price shocks</b> add $70/t to one owner's open-market arcs only. <b>The fiber loop</b> is a second transportation LP: counties supply recovered OCC (92% of consumption, plus 3% for imported goods), recycled mills demand 1.15 t per ton of recycled board they ship, export docks take the AF&amp;PA/USITC export tonnage, and freight decides. <b>The maintenance calendar</b> is an assignment problem: for each mill and month the cost of an outage is estimated as capacity dual × tons lost, from twelve no-outage solves, then assigned with at most 9 mills per month and two per owner (a small MILP), and re-solved month by month to measure the true penalty. <b>Knockouts</b> remove one mill and re-solve. <b>The backtest</b> puts 2026 demand on the 2024 mill set and asks which mills the LP leaves idle.</p>
 <h3>Assumptions that matter</h3>
 <ul style="color:var(--ink-2);font-size:14px;padding-left:20px"><li>Demand geography is population tilted by state manufacturing share, rolled up to 441 points; two thirds liner, one third medium; 34.5 Mt domestic + 4.6 Mt exports in 2024, 32.2 + 3.6 in 2026. Canadian mills sell 35% of capacity south; Mexican mills are listed, not modeled.</li>
 <li>Owner shares of the box market are national; a state-level plant count by owner (in the 10-K property lists) would make them regional.</li>
@@ -563,7 +565,7 @@ res = linprog(np.array(c_obj), A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bound
     var r = g.selectAll("g.r").data(rows).enter().append("g").attr("class", "r").attr("transform", function (d) { return "translate(0," + y(d.mill) + ")"; });
     r.append("rect").attr("x", 0).attr("width", function (d) { return Math.max(0, x(Math.max(0, d.d_total))); }).attr("height", y.bandwidth()).attr("rx", 2).style("fill", function (d) { return ownerVar(d.owner); });
     r.append("text").attr("class", "lab").attr("x", -8).attr("y", y.bandwidth() / 2 + 4).attr("text-anchor", "end").text(function (d) { return d.name + ", " + d.st; });
-    r.append("text").attr("class", "val").attr("x", function (d) { return Math.max(0, x(Math.max(0, d.d_total))) + 5; }).attr("y", y.bandwidth() / 2 + 4).text(function (d) { return kt(d.cap) + (d.unmet > 0 ? " · " + kt(d.unmet) + " unmet" : ""); });
+    r.append("text").attr("class", "val").attr("x", function (d) { return Math.max(0, x(Math.max(0, d.d_total))) + 5; }).attr("y", y.bandwidth() / 2 + 4).text(function (d) { return "+" + musd(d.d_total) + " · " + kt(d.cap) + (d.unmet > 0 ? " · " + kt(d.unmet) + " unmet" : ""); });
     r.on("mousemove", function (ev, d) { showTipAt("#ko-chart", ev, "<b>" + d.name + ", " + d.st + "</b> (" + d.owner + ", " + kt(d.cap) + ")<br>network cost if it vanished: +" + musd(d.d_total) + "/yr<br>freight " + (d.d_freight >= 0 ? "+" : "−") + musd(d.d_freight) + "; owner buys " + kt(d.owner_buys) + " outside<br>average haul " + (d.d_haul >= 0 ? "+" : "") + d.d_haul + " mi" + (d.unmet > 0 ? "<br>" + kt(d.unmet) + " cannot be served" : "")); })
      .on("mouseleave", function () { hideTipAt("#ko-chart"); })
      .on("click", function (ev, d) { d3.select("#ko").property("value", "ko" + d.mill); d3.select("#month").property("value", ""); d3.selectAll("#scen button").attr("aria-pressed", "false"); S.scen = "ko" + d.mill; S.render(); document.getElementById("mapcard").scrollIntoView({ behavior: "smooth", block: "center" }); });
