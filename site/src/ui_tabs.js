@@ -62,7 +62,8 @@
 
   /* ---------- prices and delivered cost ---------- */
   var SPECS = { ect32: { name: "32 ECT single wall, 35-26-35 C-flute", liner: 70, medium: 26 * 1.43, extra: 3 }, mullen200: { name: "200# Mullen single wall, 42-26-42 C-flute", liner: 84, medium: 26 * 1.43, extra: 3 } };
-  function dieselScen() { return S.diesel === "3.75" ? base : (D.scenarios["dz" + parseInt(S.diesel, 10)] || base); }
+  function dieselScen() { if (S.diesel === "live") return D.scenarios.dzlive || base; return S.diesel === "3.75" ? base : (D.scenarios["dz" + parseInt(S.diesel, 10)] || base); }
+  if (D.scenarios.dzlive) { var dsel = document.getElementById("diesel"), opt = document.createElement("option"); opt.value = "live"; opt.textContent = "$" + D.scenarios.dzlive.diesel.toFixed(2) + "/gal · EIA latest week"; dsel.appendChild(opt); }
   function deliveredPerMSF(i, spec) { var sp = SPECS[spec], lb = sp.liner + sp.medium + sp.extra, paper = (sp.liner * S.pLiner + sp.medium * S.pMedium) / 2000, frt = dieselScen().node_mc[i] * lb / 2000; return { paper: paper, freight: frt, total: paper + frt, lb: lb }; }
   function renderPrices() {
     S.clearLayers();
@@ -107,8 +108,10 @@
       var liner = r[2] - 3 - (r[1].indexOf("23") > 0 ? 23 * 1.43 : 26 * 1.43), med = r[2] - 3 - liner, cost = (liner * S.pLiner + med * S.pMedium) / 2000;
       t.append("tr").html("<td>" + r[0] + "</td><td>" + r[1] + "</td><td class='n'>" + r[2].toFixed(0) + "</td><td class='n'>$" + cost.toFixed(2) + "</td><td class='n'>" + (r[2] / 2).toFixed(1) + "</td>"); });
     var dt = d3.select("#diesel-table"); dt.html("<tr><th>Diesel</th><th class='n'>Network freight</th><th class='n'>$/ton</th><th class='n'>By rail</th><th>Context</th></tr>");
-    [["3.0", "$3.00", "2023–25 Gulf Coast range"], ["3.75", "$3.75", "2024 US average (EIA $3.76)"], ["5.0", "$5.00", "2022 average (EIA $4.99); 2026 YTD $5.07"], ["6.2", "$6.20", "week of Oct 12, 2026: US $6.18, West Coast $7.24"]].forEach(function (r) {
-      var k = (r[0] === "3.75" ? base : D.scenarios["dz" + parseInt(r[0], 10)]); if (!k) return;
+    var drows = [["3.0", "$3.00", "2023–25 Gulf Coast range"], ["3.75", "$3.75", "2024 US average (EIA $3.76)"], ["5.0", "$5.00", "2022 average (EIA $4.99); 2026 YTD $5.07"], ["6.2", "$6.20", "week of Oct 12, 2026: US $6.18, West Coast $7.24"]];
+    if (D.scenarios.dzlive) drows.push(["live", "$" + D.scenarios.dzlive.diesel.toFixed(2), "EIA latest week" + (D.prices.diesel_latest ? " (" + D.prices.diesel_latest.date + ")" : "")]);
+    drows.forEach(function (r) {
+      var k = (r[0] === "3.75" ? base : r[0] === "live" ? D.scenarios.dzlive : D.scenarios["dz" + parseInt(r[0], 10)]); if (!k) return;
       dt.append("tr").html("<td>" + r[1] + "/gal</td><td class='n'>" + musd(k.kpi.freight_usd) + "</td><td class='n'>$" + fmt1(k.kpi.avg_freight_per_ton) + "</td><td class='n'>" + fmtP(k.kpi.rail_share) + "</td><td>" + r[2] + "</td>"); });
   }
 

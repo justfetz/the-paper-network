@@ -154,10 +154,18 @@ def main(mills_csv, out_json, demand_2024=34.5e6, exports_2024=4.6e6, demand_202
             for k in ("best", "second", "third"): p[k] = int(fp26.gid.values[p[k]])
     # ---- diesel sensitivity
     diesel = {}
-    for dz in (3.0, 5.0, 6.2):
+    live = None
+    dpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "diesel_weekly.csv")
+    if os.path.exists(dpath):
+        try:
+            dw = pd.read_csv(dpath); dw = dw[dw.region == "US"].sort_values("date"); live = round(float(dw.usd_per_gal.iloc[-1]), 2); print("live diesel (EIA):", live, dw.date.iloc[-1])
+        except Exception as ex: print("diesel file unreadable:", ex)
+    for dz in (3.0, 5.0, 6.2) + ((live,) if live and abs(live - 6.2) > 0.15 and live not in (3.0, 5.0) else ()):
         r = build_and_solve(fp26, nodes, demand_2026, shares, exports_2026, premium=premium, verbose=False, diesel=dz)
-        scen[f"dz{int(dz)}"] = pack(r, fp26, f"Diesel at ${dz:.2f}/gal", "diesel", base=scen["fp2026"], extra=dict(diesel=dz))
+        key = f"dz{int(dz)}" if dz in (3.0, 5.0, 6.2) else "dzlive"
+        scen[key] = pack(r, fp26, f"Diesel at ${dz:.2f}/gal" + ("" if key != "dzlive" else " (EIA, latest week)"), "diesel", base=scen["fp2026"], extra=dict(diesel=dz, live=(key == "dzlive")))
         diesel[str(dz)] = dict(freight_usd=r["kpi"]["freight_usd"], rail_share=r["kpi"]["rail_share"], avg_haul=r["kpi"]["avg_haul_miles"], avg_freight_per_ton=r["kpi"]["avg_freight_per_ton"])
+    diesel["live"] = live
     diesel["3.75"] = dict(freight_usd=r26["kpi"]["freight_usd"], rail_share=r26["kpi"]["rail_share"], avg_haul=r26["kpi"]["avg_haul_miles"], avg_freight_per_ton=r26["kpi"]["avg_freight_per_ton"])
     print(f"diesel done {time.time()-t0:.0f}s")
     # ---- the fiber loop

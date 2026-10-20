@@ -59,6 +59,19 @@ D["prices"] = {
            "diesel": "EIA weekly US on-highway diesel: annual averages 2022–2025, monthly 2026 (Aug $5.46, Sep $6.29, week of Oct 12 $6.18; West Coast $7.24).",
            "recycled": "26-lb semichemical medium, East: $830–840 at Feb-2025, then the 2026 index moves (−20, +40, +30, +50, +100) → about $1,035 by Sep-2026, derived. 30/31-lb recycled liner East was $940–950 in Aug-2026.",
            "general": "Price points are the ones that appear in trade press and company releases; they are not a licensed index. Freight is the flow model's delivered marginal cost at the chosen diesel price. See notes/market_anchors.md for every figure's source."}}
+DW_PATH = os.path.join(os.path.dirname(JSON_PATH), "diesel_weekly.csv")
+if os.path.exists(DW_PATH):
+    import csv as _csv
+    from collections import defaultdict
+    rows = [r for r in _csv.DictReader(open(DW_PATH)) if r.get("region") == "US" and r.get("usd_per_gal")]
+    monthly = defaultdict(list)
+    for r in rows: monthly[r["date"][:7]].append(float(r["usd_per_gal"]))
+    months = sorted(monthly)[-42:]
+    D["prices"]["diesel"] = [[m, round(sum(v) / len(v), 2)] for m, v in ((m, monthly[m]) for m in months)]
+    latest = sorted(rows, key=lambda r: r["date"])[-1]
+    reg = {r["region"]: float(r["usd_per_gal"]) for r in _csv.DictReader(open(DW_PATH)) if r["date"] == latest["date"]}
+    D["prices"]["diesel_latest"] = {"date": latest["date"], **{k: round(v, 2) for k, v in reg.items()}}
+    D["prices"]["notes"]["diesel"] = f"EIA weekly US on-highway diesel, monthly averages of the weekly series; latest week {latest['date']}: " + ", ".join(f"{k} ${v:.2f}" for k, v in sorted(reg.items())) + "."
 D["reported_integration"] = {"International Paper": "~80% to own plants (10-K FY2019–22)", "Smurfit Westrock": "~81% implied: WestRock ~23% long on board vs its plants (Fastmarkets)", "Packaging Corp of America": "\"majority\" in the 10-K; ~96% in secondary sources", "Georgia-Pacific": "not disclosed", "Pratt Industries": "not disclosed", "Green Bay Packaging": "not disclosed", "Cascades": "not disclosed"}
 D["enduse"] = [{"name": "Food & beverage", "share": 0.36}, {"name": "Retail, e-commerce & general merchandise", "share": 0.18}, {"name": "Durables: furniture, appliances, metal, electrical", "share": 0.12}, {"name": "Paper & allied products", "share": 0.09}, {"name": "Chemicals, plastics & pharma", "share": 0.09}, {"name": "Other nondurables", "share": 0.13}, {"name": "Glass, ceramics & stone", "share": 0.03}]
 D["facts"] = {
