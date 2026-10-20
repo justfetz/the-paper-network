@@ -1,0 +1,887 @@
+fips,naics,estab,emp,payann,emp_nf,naics_desc,year
+01003,322///,4,338,16296,H,paper manufacturing (all),2023
+01003,3222//,4,338,16296,H,converted paper products (all),2023
+01043,322///,4,643,49354,H,paper manufacturing (all),2023
+01043,3222//,4,643,49354,H,converted paper products (all),2023
+01043,322211,3,540,44267,G,corrugated and solid fiber box,2023
+01073,322///,7,175,12614,G,paper manufacturing (all),2023
+01073,3222//,7,175,12614,G,converted paper products (all),2023
+01081,322///,3,112,5555,J,paper manufacturing (all),2023
+01089,322///,3,217,17266,G,paper manufacturing (all),2023
+01089,3222//,3,217,17266,G,converted paper products (all),2023
+01101,322///,3,252,16724,J,paper manufacturing (all),2023
+01101,3222//,3,252,16724,J,converted paper products (all),2023
+01103,322///,3,282,13968,G,paper manufacturing (all),2023
+01103,3222//,3,282,13968,G,converted paper products (all),2023
+04013,322///,33,3266,207061,H,paper manufacturing (all),2023
+04013,3222//,30,3032,194107,H,converted paper products (all),2023
+04013,322211,7,551,38077,G,corrugated and solid fiber box,2023
+04019,322///,3,130,5140,J,paper manufacturing (all),2023
+04019,3222//,3,130,5140,J,converted paper products (all),2023
+05003,322///,4,731,62700,H,paper manufacturing (all),2023
+05003,3222//,3,175,10178,J,converted paper products (all),2023
+05029,322///,3,461,45057,J,paper manufacturing (all),2023
+05045,322///,6,861,57683,H,paper manufacturing (all),2023
+05045,3222//,6,861,57683,H,converted paper products (all),2023
+05045,322211,3,369,18948,G,corrugated and solid fiber box,2023
+05069,322///,4,1063,88260,H,paper manufacturing (all),2023
+05069,3222//,3,313,25308,J,converted paper products (all),2023
+05103,322///,3,54,2518,H,paper manufacturing (all),2023
+05131,322///,9,1157,88465,G,paper manufacturing (all),2023
+05131,3222//,9,1157,88465,G,converted paper products (all),2023
+05131,322211,5,349,20278,J,corrugated and solid fiber box,2023
+05131,322212,3,398,38033,H,folding paperboard box,2023
+06001,322///,12,643,52202,J,paper manufacturing (all),2023
+06001,3222//,12,643,52202,J,converted paper products (all),2023
+06001,322211,4,414,37285,J,corrugated and solid fiber box,2023
+06013,322///,3,195,10484,J,paper manufacturing (all),2023
+06013,3222//,3,195,10484,J,converted paper products (all),2023
+06019,322///,10,1142,79292,G,paper manufacturing (all),2023
+06019,3222//,10,1142,79292,G,converted paper products (all),2023
+06019,322211,4,671,53100,G,corrugated and solid fiber box,2023
+06019,322212,4,447,24609,J,folding paperboard box,2023
+06029,322///,4,58,3523,J,paper manufacturing (all),2023
+06029,3222//,4,58,3523,J,converted paper products (all),2023
+06037,322///,118,6247,477702,G,paper manufacturing (all),2023
+06037,322130,3,168,12219,H,paperboard mill,2023
+06037,3222//,112,6043,462683,G,converted paper products (all),2023
+06037,322211,35,2765,241484,G,corrugated and solid fiber box,2023
+06037,322212,24,1484,103078,H,folding paperboard box,2023
+06039,322///,3,344,26013,J,paper manufacturing (all),2023
+06039,3222//,3,344,26013,J,converted paper products (all),2023
+06039,322211,3,344,26013,J,corrugated and solid fiber box,2023
+06053,322///,3,314,24448,G,paper manufacturing (all),2023
+06053,3222//,3,314,24448,G,converted paper products (all),2023
+06059,322///,34,1661,144600,G,paper manufacturing (all),2023
+06059,3222//,33,1623,142772,G,converted paper products (all),2023
+06059,322211,10,733,79830,G,corrugated and solid fiber box,2023
+06059,322212,8,614,46011,G,folding paperboard box,2023
+06065,322///,17,921,67747,G,paper manufacturing (all),2023
+06065,3222//,17,921,67747,G,converted paper products (all),2023
+06065,322211,3,191,15784,J,corrugated and solid fiber box,2023
+06065,322212,3,165,10794,J,folding paperboard box,2023
+06067,322///,9,666,52796,G,paper manufacturing (all),2023
+06067,3222//,9,666,52796,G,converted paper products (all),2023
+06067,322211,5,472,38786,H,corrugated and solid fiber box,2023
+06071,322///,32,1607,112253,G,paper manufacturing (all),2023
+06071,3222//,31,1526,107252,G,converted paper products (all),2023
+06071,322211,12,770,61956,G,corrugated and solid fiber box,2023
+06071,322212,5,201,12643,J,folding paperboard box,2023
+06073,322///,26,545,25372,G,paper manufacturing (all),2023
+06073,3222//,22,531,24569,H,converted paper products (all),2023
+06073,322211,4,6,1496,J,corrugated and solid fiber box,2023
+06073,322212,3,159,8374,J,folding paperboard box,2023
+06075,322///,3,32,5538,J,paper manufacturing (all),2023
+06075,3222//,3,32,5538,J,converted paper products (all),2023
+06077,322///,13,895,55636,H,paper manufacturing (all),2023
+06077,3222//,13,895,55636,H,converted paper products (all),2023
+06077,322211,5,269,18691,G,corrugated and solid fiber box,2023
+06085,322///,11,459,38789,G,paper manufacturing (all),2023
+06085,3222//,10,414,35396,G,converted paper products (all),2023
+06085,322211,4,344,29294,G,corrugated and solid fiber box,2023
+06099,322///,6,773,53088,H,paper manufacturing (all),2023
+06099,3222//,6,773,53088,H,converted paper products (all),2023
+06099,322211,4,631,44543,H,corrugated and solid fiber box,2023
+06107,322///,9,971,71358,H,paper manufacturing (all),2023
+06107,3222//,9,971,71358,H,converted paper products (all),2023
+06107,322211,6,637,50525,H,corrugated and solid fiber box,2023
+06111,322///,12,664,57766,J,paper manufacturing (all),2023
+06111,3222//,10,379,28057,J,converted paper products (all),2023
+06111,322212,3,241,14924,J,folding paperboard box,2023
+08001,322///,5,294,18158,J,paper manufacturing (all),2023
+08001,3222//,5,294,18158,J,converted paper products (all),2023
+08013,322///,3,483,39532,H,paper manufacturing (all),2023
+08013,3222//,3,483,39532,H,converted paper products (all),2023
+08031,322///,6,483,38676,G,paper manufacturing (all),2023
+08031,3222//,6,483,38676,G,converted paper products (all),2023
+08031,322211,4,414,34185,G,corrugated and solid fiber box,2023
+09110,322///,16,970,81538,H,paper manufacturing (all),2023
+09110,3222//,14,584,43363,G,converted paper products (all),2023
+09110,322212,4,176,11630,H,folding paperboard box,2023
+09140,322///,8,323,20868,J,paper manufacturing (all),2023
+09140,3222//,7,277,14276,H,converted paper products (all),2023
+09150,322///,3,271,15794,J,paper manufacturing (all),2023
+09150,3222//,3,271,15794,J,converted paper products (all),2023
+09170,322///,10,278,22409,H,paper manufacturing (all),2023
+09170,3222//,10,278,22409,H,converted paper products (all),2023
+09190,322///,5,607,56505,H,paper manufacturing (all),2023
+09190,3222//,4,239,18136,G,converted paper products (all),2023
+12011,322///,12,80,5320,G,paper manufacturing (all),2023
+12011,3222//,12,80,5320,G,converted paper products (all),2023
+12011,322211,3,33,2990,J,corrugated and solid fiber box,2023
+12011,322212,4,34,1854,G,folding paperboard box,2023
+12031,322///,12,703,61240,H,paper manufacturing (all),2023
+12031,3222//,11,488,40465,J,converted paper products (all),2023
+12031,322211,4,85,4745,J,corrugated and solid fiber box,2023
+12057,322///,10,739,45964,H,paper manufacturing (all),2023
+12057,3222//,10,739,45964,H,converted paper products (all),2023
+12057,322211,6,451,27944,J,corrugated and solid fiber box,2023
+12086,322///,34,1323,75635,G,paper manufacturing (all),2023
+12086,3222//,30,1045,64267,G,converted paper products (all),2023
+12086,322211,8,439,33788,H,corrugated and solid fiber box,2023
+12086,322212,5,229,11017,H,folding paperboard box,2023
+12089,322///,4,851,82910,H,paper manufacturing (all),2023
+12095,322///,7,390,28014,H,paper manufacturing (all),2023
+12095,3222//,7,390,28014,H,converted paper products (all),2023
+12099,322///,4,83,4505,J,paper manufacturing (all),2023
+12099,3222//,3,10,485,J,converted paper products (all),2023
+12103,322///,6,838,65038,J,paper manufacturing (all),2023
+12103,3222//,6,838,65038,J,converted paper products (all),2023
+12105,322///,4,558,46212,J,paper manufacturing (all),2023
+12105,3222//,3,306,31981,J,converted paper products (all),2023
+12105,322211,3,306,31981,J,corrugated and solid fiber box,2023
+12107,322///,3,1035,87823,J,paper manufacturing (all),2023
+12117,322///,3,148,8107,J,paper manufacturing (all),2023
+13021,322///,7,1474,130534,G,paper manufacturing (all),2023
+13021,3222//,5,610,39531,G,converted paper products (all),2023
+13045,322///,5,152,10296,J,paper manufacturing (all),2023
+13045,3222//,4,149,10188,J,converted paper products (all),2023
+13051,322///,4,1349,141578,J,paper manufacturing (all),2023
+13059,322///,4,207,9126,J,paper manufacturing (all),2023
+13059,3222//,4,207,9126,J,converted paper products (all),2023
+13063,322///,5,150,11357,H,paper manufacturing (all),2023
+13063,3222//,5,150,11357,H,converted paper products (all),2023
+13067,322///,8,609,46417,J,paper manufacturing (all),2023
+13067,3222//,6,397,24372,J,converted paper products (all),2023
+13089,322///,4,654,43530,J,paper manufacturing (all),2023
+13089,3222//,4,654,43530,J,converted paper products (all),2023
+13095,322///,5,1144,78871,H,paper manufacturing (all),2023
+13095,3222//,5,1144,78871,H,converted paper products (all),2023
+13095,322211,3,251,18434,H,corrugated and solid fiber box,2023
+13113,322///,3,356,39068,J,paper manufacturing (all),2023
+13113,3222//,3,356,39068,J,converted paper products (all),2023
+13115,322///,3,587,69749,J,paper manufacturing (all),2023
+13121,322///,10,884,66175,G,paper manufacturing (all),2023
+13121,3222//,9,849,62894,G,converted paper products (all),2023
+13121,322211,4,466,36694,H,corrugated and solid fiber box,2023
+13121,322212,3,258,18297,J,folding paperboard box,2023
+13129,322///,4,142,7875,J,paper manufacturing (all),2023
+13129,3222//,4,142,7875,J,converted paper products (all),2023
+13135,322///,13,718,46620,G,paper manufacturing (all),2023
+13135,3222//,13,718,46620,G,converted paper products (all),2023
+13135,322211,3,217,13790,J,corrugated and solid fiber box,2023
+13135,322212,3,215,16287,G,folding paperboard box,2023
+13151,322///,4,220,14285,H,paper manufacturing (all),2023
+13151,3222//,3,154,8819,G,converted paper products (all),2023
+13185,322///,6,477,36986,H,paper manufacturing (all),2023
+13185,3222//,5,151,7163,H,converted paper products (all),2023
+13217,322///,3,282,22187,H,paper manufacturing (all),2023
+13217,3222//,3,282,22187,H,converted paper products (all),2023
+13245,322///,3,733,64337,H,paper manufacturing (all),2023
+13247,322///,9,1236,105361,J,paper manufacturing (all),2023
+13247,3222//,7,1111,93961,J,converted paper products (all),2023
+13247,322211,7,1111,93961,J,corrugated and solid fiber box,2023
+13255,322///,3,220,16264,G,paper manufacturing (all),2023
+13255,3222//,3,220,16264,G,converted paper products (all),2023
+13285,322///,4,286,17692,J,paper manufacturing (all),2023
+13285,3222//,3,286,17628,J,converted paper products (all),2023
+13305,322///,3,979,76698,H,paper manufacturing (all),2023
+13313,322///,6,278,18844,G,paper manufacturing (all),2023
+13313,3222//,6,278,18844,G,converted paper products (all),2023
+16069,322///,3,1083,94091,J,paper manufacturing (all),2023
+17031,322///,82,6078,479510,G,paper manufacturing (all),2023
+17031,3222//,81,5956,463394,G,converted paper products (all),2023
+17031,322211,24,2055,182511,G,corrugated and solid fiber box,2023
+17031,322212,15,1518,141655,G,folding paperboard box,2023
+17043,322///,42,2586,188489,G,paper manufacturing (all),2023
+17043,3222//,41,2551,185849,G,converted paper products (all),2023
+17043,322211,18,1179,95832,G,corrugated and solid fiber box,2023
+17043,322212,4,467,30133,H,folding paperboard box,2023
+17089,322///,19,1193,81752,J,paper manufacturing (all),2023
+17089,3222//,18,1155,78804,H,converted paper products (all),2023
+17089,322211,4,168,12632,G,corrugated and solid fiber box,2023
+17089,322212,4,350,29685,J,folding paperboard box,2023
+17091,322///,3,120,6326,H,paper manufacturing (all),2023
+17091,3222//,3,120,6326,H,converted paper products (all),2023
+17097,322///,8,942,66242,H,paper manufacturing (all),2023
+17097,3222//,8,942,66242,H,converted paper products (all),2023
+17111,322///,5,247,17491,H,paper manufacturing (all),2023
+17111,3222//,5,247,17491,H,converted paper products (all),2023
+17179,322///,5,309,19252,J,paper manufacturing (all),2023
+17179,3222//,4,297,18579,J,converted paper products (all),2023
+17197,322///,15,687,58119,G,paper manufacturing (all),2023
+17197,3222//,15,687,58119,G,converted paper products (all),2023
+17197,322211,3,16,851,J,corrugated and solid fiber box,2023
+17201,322///,6,246,13768,J,paper manufacturing (all),2023
+17201,3222//,5,242,13653,J,converted paper products (all),2023
+17201,322211,3,225,12964,J,corrugated and solid fiber box,2023
+18003,322///,11,543,35425,H,paper manufacturing (all),2023
+18003,3222//,11,543,35425,H,converted paper products (all),2023
+18003,322211,4,307,20248,G,corrugated and solid fiber box,2023
+18005,322///,3,649,39330,G,paper manufacturing (all),2023
+18005,3222//,3,649,39330,G,converted paper products (all),2023
+18009,322///,3,339,33672,H,paper manufacturing (all),2023
+18011,322///,4,237,19710,H,paper manufacturing (all),2023
+18011,3222//,4,237,19710,H,converted paper products (all),2023
+18035,322///,4,150,9530,J,paper manufacturing (all),2023
+18039,322///,8,545,30476,G,paper manufacturing (all),2023
+18039,3222//,8,545,30476,G,converted paper products (all),2023
+18039,322211,3,439,24712,H,corrugated and solid fiber box,2023
+18043,322///,4,425,36537,J,paper manufacturing (all),2023
+18043,3222//,4,425,36537,J,converted paper products (all),2023
+18053,322///,4,354,19323,G,paper manufacturing (all),2023
+18053,3222//,4,354,19323,G,converted paper products (all),2023
+18053,322211,3,178,9463,J,corrugated and solid fiber box,2023
+18069,322///,3,85,4885,H,paper manufacturing (all),2023
+18069,3222//,3,85,4885,H,converted paper products (all),2023
+18089,322///,4,375,24601,J,paper manufacturing (all),2023
+18089,3222//,4,375,24601,J,converted paper products (all),2023
+18097,322///,13,1379,94833,H,paper manufacturing (all),2023
+18097,3222//,13,1379,94833,H,converted paper products (all),2023
+18097,322211,9,899,65898,J,corrugated and solid fiber box,2023
+18099,322///,4,488,31140,J,paper manufacturing (all),2023
+18099,3222//,4,488,31140,J,converted paper products (all),2023
+18099,322211,3,352,22621,J,corrugated and solid fiber box,2023
+18103,322///,3,60,1979,J,paper manufacturing (all),2023
+18103,3222//,3,60,1979,J,converted paper products (all),2023
+18141,322///,6,524,31359,H,paper manufacturing (all),2023
+18141,3222//,6,524,31359,H,converted paper products (all),2023
+18141,322211,4,403,26123,G,corrugated and solid fiber box,2023
+18163,322///,3,123,8383,J,paper manufacturing (all),2023
+18163,3222//,3,123,8383,J,converted paper products (all),2023
+18169,322///,3,279,24184,J,paper manufacturing (all),2023
+18177,322///,4,462,27061,J,paper manufacturing (all),2023
+18177,3222//,4,462,27061,J,converted paper products (all),2023
+18177,322211,3,436,25146,J,corrugated and solid fiber box,2023
+19045,322///,3,417,21502,G,paper manufacturing (all),2023
+19045,3222//,3,417,21502,G,converted paper products (all),2023
+19099,322///,3,210,15566,J,paper manufacturing (all),2023
+19099,3222//,3,210,15566,J,converted paper products (all),2023
+19113,322///,3,530,56231,H,paper manufacturing (all),2023
+19153,322///,5,195,13161,H,paper manufacturing (all),2023
+19153,3222//,5,195,13161,H,converted paper products (all),2023
+20091,322///,7,324,19551,H,paper manufacturing (all),2023
+20091,3222//,7,324,19551,H,converted paper products (all),2023
+20209,322///,3,117,8902,H,paper manufacturing (all),2023
+21015,322///,6,1167,89151,J,paper manufacturing (all),2023
+21015,3222//,6,1167,89151,J,converted paper products (all),2023
+21059,322///,3,495,44890,J,paper manufacturing (all),2023
+21067,322///,4,388,32081,H,paper manufacturing (all),2023
+21067,3222//,4,388,32081,H,converted paper products (all),2023
+21101,322///,3,159,22908,J,paper manufacturing (all),2023
+21111,322///,16,2530,172731,G,paper manufacturing (all),2023
+21111,3222//,16,2530,172731,G,converted paper products (all),2023
+21111,322211,6,479,40988,J,corrugated and solid fiber box,2023
+21117,322///,3,112,7295,J,paper manufacturing (all),2023
+21117,3222//,3,112,7295,J,converted paper products (all),2023
+21211,322///,3,1044,79991,H,paper manufacturing (all),2023
+21211,3222//,3,1044,79991,H,converted paper products (all),2023
+21213,322///,3,728,48295,J,paper manufacturing (all),2023
+21213,3222//,3,728,48295,J,converted paper products (all),2023
+21227,322///,5,1015,78939,H,paper manufacturing (all),2023
+21227,3222//,5,1015,78939,H,converted paper products (all),2023
+22017,322///,4,297,20940,J,paper manufacturing (all),2023
+22017,3222//,3,197,12014,J,converted paper products (all),2023
+22073,322///,12,1723,147548,H,paper manufacturing (all),2023
+22073,3222//,11,1098,83375,H,converted paper products (all),2023
+22073,322211,3,208,15586,H,corrugated and solid fiber box,2023
+22073,322212,3,417,44990,J,folding paperboard box,2023
+22117,322///,3,697,65217,J,paper manufacturing (all),2023
+23001,322///,3,570,45102,J,paper manufacturing (all),2023
+23001,3222//,3,570,45102,J,converted paper products (all),2023
+23031,322///,3,133,8940,H,paper manufacturing (all),2023
+23031,3222//,3,133,8940,H,converted paper products (all),2023
+24005,322///,4,192,13376,H,paper manufacturing (all),2023
+24005,3222//,4,192,13376,H,converted paper products (all),2023
+24043,322///,3,417,23264,J,paper manufacturing (all),2023
+24043,3222//,3,417,23264,J,converted paper products (all),2023
+24510,322///,5,281,19141,H,paper manufacturing (all),2023
+24510,3222//,4,280,19110,H,converted paper products (all),2023
+25003,322///,4,564,52635,H,paper manufacturing (all),2023
+25005,322///,7,475,32905,G,paper manufacturing (all),2023
+25005,3222//,7,475,32905,G,converted paper products (all),2023
+25009,322///,9,403,30441,G,paper manufacturing (all),2023
+25009,3222//,9,403,30441,G,converted paper products (all),2023
+25013,322///,20,1357,92716,G,paper manufacturing (all),2023
+25013,3222//,19,1284,85864,G,converted paper products (all),2023
+25013,322211,3,157,14166,G,corrugated and solid fiber box,2023
+25015,322///,4,330,25692,G,paper manufacturing (all),2023
+25015,3222//,4,330,25692,G,converted paper products (all),2023
+25017,322///,20,957,73462,H,paper manufacturing (all),2023
+25017,3222//,19,954,73230,H,converted paper products (all),2023
+25017,322211,4,271,21209,H,corrugated and solid fiber box,2023
+25017,322212,3,176,18826,J,folding paperboard box,2023
+25021,322///,6,314,24386,G,paper manufacturing (all),2023
+25021,3222//,6,314,24386,G,converted paper products (all),2023
+25027,322///,23,2778,202620,G,paper manufacturing (all),2023
+25027,3222//,21,2554,180472,G,converted paper products (all),2023
+25027,322211,9,1277,83660,H,corrugated and solid fiber box,2023
+26005,322///,4,316,21294,H,paper manufacturing (all),2023
+26005,3222//,3,189,9909,G,converted paper products (all),2023
+26005,322211,3,189,9909,G,corrugated and solid fiber box,2023
+26021,322///,7,168,12453,J,paper manufacturing (all),2023
+26021,3222//,5,91,5960,J,converted paper products (all),2023
+26049,322///,8,355,17343,G,paper manufacturing (all),2023
+26049,3222//,8,355,17343,G,converted paper products (all),2023
+26049,322211,5,292,14312,G,corrugated and solid fiber box,2023
+26077,322///,11,1485,112077,H,paper manufacturing (all),2023
+26077,3222//,10,1060,68156,G,converted paper products (all),2023
+26077,322211,4,446,28093,H,corrugated and solid fiber box,2023
+26081,322///,25,2092,140087,G,paper manufacturing (all),2023
+26081,3222//,25,2092,140087,G,converted paper products (all),2023
+26081,322211,6,872,66082,H,corrugated and solid fiber box,2023
+26081,322212,8,736,43892,G,folding paperboard box,2023
+26099,322///,6,156,8367,G,paper manufacturing (all),2023
+26099,3222//,5,146,7895,G,converted paper products (all),2023
+26099,322211,4,114,6458,G,corrugated and solid fiber box,2023
+26109,322///,4,155,14324,G,paper manufacturing (all),2023
+26109,3222//,3,85,6545,J,converted paper products (all),2023
+26125,322///,9,249,14820,H,paper manufacturing (all),2023
+26125,3222//,9,249,14820,H,converted paper products (all),2023
+26125,322211,3,100,6471,H,corrugated and solid fiber box,2023
+26139,322///,4,238,15889,J,paper manufacturing (all),2023
+26139,3222//,4,238,15889,J,converted paper products (all),2023
+26149,322///,12,866,56784,H,paper manufacturing (all),2023
+26149,322130,4,311,24975,H,paperboard mill,2023
+26149,3222//,8,555,31809,G,converted paper products (all),2023
+26163,322///,21,1828,89463,H,paper manufacturing (all),2023
+26163,3222//,21,1828,89463,H,converted paper products (all),2023
+26163,322211,8,516,36009,H,corrugated and solid fiber box,2023
+27003,322///,8,439,28464,H,paper manufacturing (all),2023
+27003,3222//,8,439,28464,H,converted paper products (all),2023
+27003,322211,4,251,17311,G,corrugated and solid fiber box,2023
+27037,322///,9,913,60114,G,paper manufacturing (all),2023
+27037,3222//,9,913,60114,G,converted paper products (all),2023
+27047,322///,4,307,17469,H,paper manufacturing (all),2023
+27047,3222//,4,307,17469,H,converted paper products (all),2023
+27047,322211,3,302,17245,H,corrugated and solid fiber box,2023
+27053,322///,25,1828,144789,G,paper manufacturing (all),2023
+27053,3222//,25,1828,144789,G,converted paper products (all),2023
+27053,322211,8,714,59223,H,corrugated and solid fiber box,2023
+27053,322212,4,562,44740,H,folding paperboard box,2023
+27085,322///,3,1832,119028,J,paper manufacturing (all),2023
+27085,3222//,3,1832,119028,J,converted paper products (all),2023
+27123,322///,10,1029,76576,G,paper manufacturing (all),2023
+27123,3222//,8,740,51301,G,converted paper products (all),2023
+27123,322211,4,432,29483,H,corrugated and solid fiber box,2023
+27139,322///,4,310,23725,H,paper manufacturing (all),2023
+27139,3222//,3,300,23100,H,converted paper products (all),2023
+27141,322///,5,274,21761,J,paper manufacturing (all),2023
+27141,322130,3,191,18750,J,paperboard mill,2023
+27163,322///,3,117,7911,J,paper manufacturing (all),2023
+27163,3222//,3,117,7911,J,converted paper products (all),2023
+28017,322///,3,250,12033,J,paper manufacturing (all),2023
+28033,322///,3,174,12326,H,paper manufacturing (all),2023
+28033,3222//,3,174,12326,H,converted paper products (all),2023
+28033,322211,3,174,12326,H,corrugated and solid fiber box,2023
+28035,322///,4,345,18283,G,paper manufacturing (all),2023
+28035,3222//,4,345,18283,G,converted paper products (all),2023
+28043,322///,3,284,24565,G,paper manufacturing (all),2023
+28075,322///,3,91,4944,J,paper manufacturing (all),2023
+28075,3222//,3,91,4944,J,converted paper products (all),2023
+28081,322///,6,352,19447,G,paper manufacturing (all),2023
+28081,3222//,6,352,19447,G,converted paper products (all),2023
+28081,322211,5,331,18914,G,corrugated and solid fiber box,2023
+28121,322///,3,418,26751,H,paper manufacturing (all),2023
+28121,3222//,3,418,26751,H,converted paper products (all),2023
+28121,322211,3,418,26751,H,corrugated and solid fiber box,2023
+29031,322///,3,1100,90944,J,paper manufacturing (all),2023
+29047,322///,10,1104,62115,G,paper manufacturing (all),2023
+29047,3222//,8,897,56440,G,converted paper products (all),2023
+29047,322211,5,769,51153,G,corrugated and solid fiber box,2023
+29071,322///,4,425,27252,G,paper manufacturing (all),2023
+29071,3222//,4,425,27252,G,converted paper products (all),2023
+29077,322///,3,542,41498,J,paper manufacturing (all),2023
+29077,3222//,3,542,41498,J,converted paper products (all),2023
+29077,322211,3,542,41498,J,corrugated and solid fiber box,2023
+29095,322///,16,1997,118031,G,paper manufacturing (all),2023
+29095,3222//,16,1997,118031,G,converted paper products (all),2023
+29095,322211,9,534,39427,G,corrugated and solid fiber box,2023
+29097,322///,4,974,54137,H,paper manufacturing (all),2023
+29097,3222//,4,974,54137,H,converted paper products (all),2023
+29183,322///,3,276,15533,J,paper manufacturing (all),2023
+29183,3222//,3,276,15533,J,converted paper products (all),2023
+29189,322///,22,1129,82302,G,paper manufacturing (all),2023
+29189,3222//,22,1129,82302,G,converted paper products (all),2023
+29189,322211,11,645,50949,G,corrugated and solid fiber box,2023
+29510,322///,6,261,17448,G,paper manufacturing (all),2023
+29510,3222//,6,261,17448,G,converted paper products (all),2023
+29510,322211,4,257,17373,G,corrugated and solid fiber box,2023
+31055,322///,6,825,49901,J,paper manufacturing (all),2023
+31055,3222//,6,825,49901,J,converted paper products (all),2023
+31055,322212,3,549,30255,J,folding paperboard box,2023
+31109,322///,3,216,12075,J,paper manufacturing (all),2023
+31109,3222//,3,216,12075,J,converted paper products (all),2023
+32003,322///,9,669,49001,J,paper manufacturing (all),2023
+32003,3222//,8,525,40246,H,converted paper products (all),2023
+32031,322///,6,454,25406,J,paper manufacturing (all),2023
+32031,3222//,6,454,25406,J,converted paper products (all),2023
+33011,322///,5,286,24714,G,paper manufacturing (all),2023
+33011,3222//,4,119,8009,J,converted paper products (all),2023
+33015,322///,4,16,990,J,paper manufacturing (all),2023
+33015,3222//,4,16,990,J,converted paper products (all),2023
+34003,322///,21,777,52863,H,paper manufacturing (all),2023
+34003,3222//,19,684,43747,H,converted paper products (all),2023
+34003,322211,3,133,7482,J,corrugated and solid fiber box,2023
+34003,322212,3,29,2221,J,folding paperboard box,2023
+34005,322///,4,174,13618,J,paper manufacturing (all),2023
+34005,3222//,3,166,13370,J,converted paper products (all),2023
+34007,322///,5,345,28827,J,paper manufacturing (all),2023
+34007,3222//,5,345,28827,J,converted paper products (all),2023
+34007,322211,4,329,27939,J,corrugated and solid fiber box,2023
+34011,322///,5,646,32480,J,paper manufacturing (all),2023
+34011,3222//,5,646,32480,J,converted paper products (all),2023
+34011,322211,3,181,13768,H,corrugated and solid fiber box,2023
+34013,322///,17,849,76418,J,paper manufacturing (all),2023
+34013,3222//,14,826,75462,J,converted paper products (all),2023
+34013,322211,3,410,44304,J,corrugated and solid fiber box,2023
+34017,322///,5,134,8470,J,paper manufacturing (all),2023
+34017,3222//,5,134,8470,J,converted paper products (all),2023
+34023,322///,27,2273,140561,G,paper manufacturing (all),2023
+34023,3222//,26,1894,116517,G,converted paper products (all),2023
+34023,322211,4,426,27720,G,corrugated and solid fiber box,2023
+34023,322212,5,395,25651,G,folding paperboard box,2023
+34027,322///,7,297,20191,H,paper manufacturing (all),2023
+34027,3222//,7,297,20191,H,converted paper products (all),2023
+34029,322///,3,20,1224,J,paper manufacturing (all),2023
+34029,3222//,3,20,1224,J,converted paper products (all),2023
+34031,322///,15,712,47748,H,paper manufacturing (all),2023
+34031,3222//,15,712,47748,H,converted paper products (all),2023
+34031,322211,5,331,25757,J,corrugated and solid fiber box,2023
+34037,322///,4,182,11418,G,paper manufacturing (all),2023
+34037,3222//,4,182,11418,G,converted paper products (all),2023
+34039,322///,3,229,13516,J,paper manufacturing (all),2023
+34039,3222//,3,229,13516,J,converted paper products (all),2023
+35001,322///,7,280,13037,H,paper manufacturing (all),2023
+35001,3222//,7,280,13037,H,converted paper products (all),2023
+35013,322///,3,196,12885,J,paper manufacturing (all),2023
+35013,3222//,3,196,12885,J,converted paper products (all),2023
+35013,322211,3,196,12885,J,corrugated and solid fiber box,2023
+36007,322///,3,190,11932,J,paper manufacturing (all),2023
+36007,3222//,3,190,11932,J,converted paper products (all),2023
+36019,322///,4,300,19747,G,paper manufacturing (all),2023
+36019,3222//,3,201,12483,G,converted paper products (all),2023
+36029,322///,11,828,52671,G,paper manufacturing (all),2023
+36029,3222//,11,828,52671,G,converted paper products (all),2023
+36029,322211,4,218,16633,H,corrugated and solid fiber box,2023
+36045,322///,4,248,16532,H,paper manufacturing (all),2023
+36045,3222//,3,207,14322,G,converted paper products (all),2023
+36047,322///,12,116,4545,H,paper manufacturing (all),2023
+36047,3222//,11,115,4497,H,converted paper products (all),2023
+36049,322///,3,193,12635,H,paper manufacturing (all),2023
+36055,322///,15,965,65597,H,paper manufacturing (all),2023
+36055,3222//,15,965,65597,H,converted paper products (all),2023
+36055,322211,6,294,17556,J,corrugated and solid fiber box,2023
+36059,322///,6,172,12719,J,paper manufacturing (all),2023
+36059,3222//,6,172,12719,J,converted paper products (all),2023
+36061,322///,4,5,276,G,paper manufacturing (all),2023
+36061,3222//,4,5,276,G,converted paper products (all),2023
+36063,322///,8,743,53996,H,paper manufacturing (all),2023
+36063,3222//,6,285,19268,G,converted paper products (all),2023
+36063,322211,3,234,16211,G,corrugated and solid fiber box,2023
+36067,322///,9,1100,87493,G,paper manufacturing (all),2023
+36067,3222//,8,817,63347,G,converted paper products (all),2023
+36067,322211,4,402,31266,H,corrugated and solid fiber box,2023
+36071,322///,10,1103,60021,H,paper manufacturing (all),2023
+36071,3222//,9,1099,59857,H,converted paper products (all),2023
+36071,322211,3,554,35789,J,corrugated and solid fiber box,2023
+36081,322///,5,70,3178,J,paper manufacturing (all),2023
+36081,3222//,5,70,3178,J,converted paper products (all),2023
+36083,322///,3,213,14815,H,paper manufacturing (all),2023
+36085,322///,3,164,18771,J,paper manufacturing (all),2023
+36087,322///,4,1131,103369,J,paper manufacturing (all),2023
+36087,3222//,3,917,79406,J,converted paper products (all),2023
+36089,322///,3,233,16260,G,paper manufacturing (all),2023
+36091,322///,4,471,29488,H,paper manufacturing (all),2023
+36093,322///,3,408,25237,J,paper manufacturing (all),2023
+36093,3222//,3,408,25237,J,converted paper products (all),2023
+36103,322///,20,890,55509,G,paper manufacturing (all),2023
+36103,3222//,17,660,43457,H,converted paper products (all),2023
+36103,322211,4,32,2061,H,corrugated and solid fiber box,2023
+36103,322212,4,292,24080,G,folding paperboard box,2023
+36115,322///,7,996,81529,G,paper manufacturing (all),2023
+36115,3222//,3,239,15598,J,converted paper products (all),2023
+36117,322///,5,155,7718,H,paper manufacturing (all),2023
+36117,3222//,5,155,7718,H,converted paper products (all),2023
+36119,322///,3,48,2013,J,paper manufacturing (all),2023
+36119,3222//,3,48,2013,J,converted paper products (all),2023
+37001,322///,3,233,11942,J,paper manufacturing (all),2023
+37001,3222//,3,233,11942,J,converted paper products (all),2023
+37021,322///,4,182,13630,G,paper manufacturing (all),2023
+37021,3222//,4,182,13630,G,converted paper products (all),2023
+37023,322///,4,239,13365,G,paper manufacturing (all),2023
+37023,3222//,4,239,13365,G,converted paper products (all),2023
+37023,322211,3,222,12541,G,corrugated and solid fiber box,2023
+37025,322///,3,346,27417,J,paper manufacturing (all),2023
+37025,3222//,3,346,27417,J,converted paper products (all),2023
+37027,322///,4,273,18418,J,paper manufacturing (all),2023
+37027,3222//,4,273,18418,J,converted paper products (all),2023
+37035,322///,15,1808,136850,G,paper manufacturing (all),2023
+37035,3222//,14,1804,136637,G,converted paper products (all),2023
+37035,322211,3,391,25503,J,corrugated and solid fiber box,2023
+37057,322///,6,712,38967,G,paper manufacturing (all),2023
+37057,3222//,6,712,38967,G,converted paper products (all),2023
+37067,322///,14,1545,92265,G,paper manufacturing (all),2023
+37067,3222//,14,1545,92265,G,converted paper products (all),2023
+37067,322211,6,849,52141,H,corrugated and solid fiber box,2023
+37071,322///,3,110,5986,J,paper manufacturing (all),2023
+37071,3222//,3,110,5986,J,converted paper products (all),2023
+37081,322///,18,1226,73120,G,paper manufacturing (all),2023
+37081,3222//,18,1226,73120,G,converted paper products (all),2023
+37081,322211,6,602,39305,J,corrugated and solid fiber box,2023
+37087,322///,3,1100,70249,J,paper manufacturing (all),2023
+37097,322///,4,467,40237,H,paper manufacturing (all),2023
+37097,3222//,4,467,40237,H,converted paper products (all),2023
+37097,322211,4,467,40237,H,corrugated and solid fiber box,2023
+37119,322///,15,907,72535,H,paper manufacturing (all),2023
+37119,3222//,14,883,71862,H,converted paper products (all),2023
+37119,322211,4,240,26865,J,corrugated and solid fiber box,2023
+37119,322212,5,350,28389,J,folding paperboard box,2023
+37147,322///,3,425,41191,H,paper manufacturing (all),2023
+37147,3222//,3,425,41191,H,converted paper products (all),2023
+37151,322///,7,362,25749,G,paper manufacturing (all),2023
+37151,3222//,6,357,25598,G,converted paper products (all),2023
+37151,322211,4,288,21749,G,corrugated and solid fiber box,2023
+37153,322///,6,517,34874,H,paper manufacturing (all),2023
+37153,3222//,4,354,23994,H,converted paper products (all),2023
+37155,322///,3,366,39606,H,paper manufacturing (all),2023
+37159,322///,4,466,29112,H,paper manufacturing (all),2023
+37159,3222//,4,466,29112,H,converted paper products (all),2023
+37161,322///,4,160,6814,H,paper manufacturing (all),2023
+37161,3222//,4,160,6814,H,converted paper products (all),2023
+37183,322///,7,239,19386,H,paper manufacturing (all),2023
+37183,3222//,5,177,13522,J,converted paper products (all),2023
+39003,322///,3,53,2232,H,paper manufacturing (all),2023
+39003,3222//,3,53,2232,H,converted paper products (all),2023
+39005,322///,3,201,17012,J,paper manufacturing (all),2023
+39005,3222//,3,201,17012,J,converted paper products (all),2023
+39007,322///,7,510,24093,J,paper manufacturing (all),2023
+39007,3222//,7,510,24093,J,converted paper products (all),2023
+39007,322211,3,121,5201,H,corrugated and solid fiber box,2023
+39011,322///,3,439,30201,J,paper manufacturing (all),2023
+39017,322///,28,1753,131119,G,paper manufacturing (all),2023
+39017,3222//,26,1514,106462,G,converted paper products (all),2023
+39017,322211,13,867,64913,G,corrugated and solid fiber box,2023
+39025,322///,4,630,30372,J,paper manufacturing (all),2023
+39025,3222//,4,630,30372,J,converted paper products (all),2023
+39029,322///,4,201,8991,J,paper manufacturing (all),2023
+39029,3222//,4,201,8991,J,converted paper products (all),2023
+39033,322///,3,41,2453,H,paper manufacturing (all),2023
+39033,3222//,3,41,2453,H,converted paper products (all),2023
+39035,322///,27,1564,95400,G,paper manufacturing (all),2023
+39035,3222//,26,1548,94674,G,converted paper products (all),2023
+39035,322211,8,410,25383,G,corrugated and solid fiber box,2023
+39035,322212,6,585,34104,G,folding paperboard box,2023
+39041,322///,4,502,39282,G,paper manufacturing (all),2023
+39041,3222//,4,502,39282,G,converted paper products (all),2023
+39045,322///,4,261,16390,G,paper manufacturing (all),2023
+39045,3222//,3,193,11283,J,converted paper products (all),2023
+39049,322///,9,568,32903,J,paper manufacturing (all),2023
+39049,3222//,9,568,32903,J,converted paper products (all),2023
+39049,322211,3,228,12852,H,corrugated and solid fiber box,2023
+39049,322212,3,196,12919,J,folding paperboard box,2023
+39061,322///,19,790,56603,G,paper manufacturing (all),2023
+39061,322130,3,118,8202,H,paperboard mill,2023
+39061,3222//,16,672,48401,G,converted paper products (all),2023
+39083,322///,3,235,15806,J,paper manufacturing (all),2023
+39083,3222//,3,235,15806,J,converted paper products (all),2023
+39085,322///,9,1477,125918,J,paper manufacturing (all),2023
+39085,3222//,9,1477,125918,J,converted paper products (all),2023
+39089,322///,3,299,19221,H,paper manufacturing (all),2023
+39089,3222//,3,299,19221,H,converted paper products (all),2023
+39089,322211,3,299,19221,H,corrugated and solid fiber box,2023
+39093,322///,4,79,3736,G,paper manufacturing (all),2023
+39093,3222//,4,79,3736,G,converted paper products (all),2023
+39095,322///,6,331,20053,G,paper manufacturing (all),2023
+39095,3222//,6,331,20053,G,converted paper products (all),2023
+39095,322211,4,308,19013,G,corrugated and solid fiber box,2023
+39101,322///,3,490,27644,J,paper manufacturing (all),2023
+39101,3222//,3,490,27644,J,converted paper products (all),2023
+39103,322///,3,116,7188,H,paper manufacturing (all),2023
+39103,3222//,3,116,7188,H,converted paper products (all),2023
+39109,322///,5,279,19711,J,paper manufacturing (all),2023
+39109,3222//,5,279,19711,J,converted paper products (all),2023
+39113,322///,7,419,30917,J,paper manufacturing (all),2023
+39113,3222//,7,419,30917,J,converted paper products (all),2023
+39113,322211,3,128,6514,H,corrugated and solid fiber box,2023
+39133,322///,4,429,29900,H,paper manufacturing (all),2023
+39133,3222//,4,429,29900,H,converted paper products (all),2023
+39135,322///,3,504,37661,J,paper manufacturing (all),2023
+39135,3222//,3,504,37661,J,converted paper products (all),2023
+39135,322211,3,504,37661,J,corrugated and solid fiber box,2023
+39139,322///,3,339,21225,J,paper manufacturing (all),2023
+39139,3222//,3,339,21225,J,converted paper products (all),2023
+39141,322///,3,802,73419,J,paper manufacturing (all),2023
+39141,3222//,3,802,73419,J,converted paper products (all),2023
+39143,322///,3,244,17023,G,paper manufacturing (all),2023
+39151,322///,9,507,35154,J,paper manufacturing (all),2023
+39151,3222//,8,458,34504,H,converted paper products (all),2023
+39151,322211,3,245,21179,H,corrugated and solid fiber box,2023
+39153,322///,7,492,33861,H,paper manufacturing (all),2023
+39153,3222//,7,492,33861,H,converted paper products (all),2023
+39153,322211,4,395,28455,G,corrugated and solid fiber box,2023
+39159,322///,3,41,1623,J,paper manufacturing (all),2023
+39159,3222//,3,41,1623,J,converted paper products (all),2023
+39165,322///,10,851,53836,G,paper manufacturing (all),2023
+39165,3222//,10,851,53836,G,converted paper products (all),2023
+39165,322211,4,177,15321,H,corrugated and solid fiber box,2023
+39169,322///,3,194,17230,G,paper manufacturing (all),2023
+39169,3222//,3,194,17230,G,converted paper products (all),2023
+39169,322211,3,194,17230,G,corrugated and solid fiber box,2023
+39173,322///,4,551,34809,H,paper manufacturing (all),2023
+39173,3222//,4,551,34809,H,converted paper products (all),2023
+40109,322///,8,618,42364,H,paper manufacturing (all),2023
+40109,3222//,8,618,42364,H,converted paper products (all),2023
+40109,322211,3,337,25162,H,corrugated and solid fiber box,2023
+40143,322///,8,1208,94342,J,paper manufacturing (all),2023
+40143,3222//,7,613,37825,H,converted paper products (all),2023
+40143,322211,3,71,5591,H,corrugated and solid fiber box,2023
+41005,322///,4,553,29760,G,paper manufacturing (all),2023
+41005,3222//,3,223,14743,J,converted paper products (all),2023
+41051,322///,16,617,53318,H,paper manufacturing (all),2023
+41051,3222//,15,616,53316,H,converted paper products (all),2023
+41051,322211,5,293,25290,G,corrugated and solid fiber box,2023
+41067,322///,8,731,44714,G,paper manufacturing (all),2023
+41067,3222//,8,731,44714,G,converted paper products (all),2023
+41067,322211,3,134,10179,G,corrugated and solid fiber box,2023
+41067,322212,3,371,24344,G,folding paperboard box,2023
+42001,322///,9,969,73400,J,paper manufacturing (all),2023
+42001,3222//,8,893,68488,J,converted paper products (all),2023
+42001,322211,4,690,50957,J,corrugated and solid fiber box,2023
+42003,322///,4,219,18639,J,paper manufacturing (all),2023
+42003,3222//,4,219,18639,J,converted paper products (all),2023
+42011,322///,13,736,49724,G,paper manufacturing (all),2023
+42011,3222//,10,623,40968,G,converted paper products (all),2023
+42011,322211,5,346,22885,H,corrugated and solid fiber box,2023
+42013,322///,7,600,35174,J,paper manufacturing (all),2023
+42013,3222//,6,406,24084,J,converted paper products (all),2023
+42017,322///,17,1145,79640,G,paper manufacturing (all),2023
+42017,3222//,17,1145,79640,G,converted paper products (all),2023
+42029,322///,12,628,39781,G,paper manufacturing (all),2023
+42029,3222//,11,580,36318,H,converted paper products (all),2023
+42035,322///,5,1703,128938,J,paper manufacturing (all),2023
+42035,3222//,4,1035,79582,J,converted paper products (all),2023
+42041,322///,6,718,41922,G,paper manufacturing (all),2023
+42041,3222//,6,718,41922,G,converted paper products (all),2023
+42043,322///,3,82,3609,J,paper manufacturing (all),2023
+42043,3222//,3,82,3609,J,converted paper products (all),2023
+42045,322///,3,839,95752,J,paper manufacturing (all),2023
+42049,322///,3,39,1547,J,paper manufacturing (all),2023
+42049,3222//,3,39,1547,J,converted paper products (all),2023
+42069,322///,4,430,24050,H,paper manufacturing (all),2023
+42069,3222//,4,430,24050,H,converted paper products (all),2023
+42071,322///,9,866,61813,H,paper manufacturing (all),2023
+42071,3222//,9,866,61813,H,converted paper products (all),2023
+42071,322211,6,556,47918,G,corrugated and solid fiber box,2023
+42075,322///,4,234,15439,H,paper manufacturing (all),2023
+42075,3222//,3,176,10492,J,converted paper products (all),2023
+42077,322///,7,619,41017,J,paper manufacturing (all),2023
+42077,3222//,6,617,40973,J,converted paper products (all),2023
+42077,322211,4,509,34103,J,corrugated and solid fiber box,2023
+42079,322///,15,817,45465,G,paper manufacturing (all),2023
+42079,3222//,15,817,45465,G,converted paper products (all),2023
+42079,322211,3,306,20046,J,corrugated and solid fiber box,2023
+42079,322212,4,99,5142,J,folding paperboard box,2023
+42087,322///,4,577,33121,G,paper manufacturing (all),2023
+42087,3222//,4,577,33121,G,converted paper products (all),2023
+42091,322///,16,1669,133278,G,paper manufacturing (all),2023
+42091,3222//,15,1652,132421,G,converted paper products (all),2023
+42091,322211,3,509,46974,H,corrugated and solid fiber box,2023
+42095,322///,6,507,31371,J,paper manufacturing (all),2023
+42095,3222//,6,507,31371,J,converted paper products (all),2023
+42097,322///,3,154,10304,J,paper manufacturing (all),2023
+42097,3222//,3,154,10304,J,converted paper products (all),2023
+42101,322///,11,806,63630,H,paper manufacturing (all),2023
+42101,3222//,10,622,46113,G,converted paper products (all),2023
+42101,322211,4,416,33331,G,corrugated and solid fiber box,2023
+42107,322///,3,244,11765,H,paper manufacturing (all),2023
+42107,3222//,3,244,11765,H,converted paper products (all),2023
+42125,322///,8,345,20809,H,paper manufacturing (all),2023
+42125,3222//,7,340,20716,H,converted paper products (all),2023
+42125,322211,3,238,16341,H,corrugated and solid fiber box,2023
+42129,322///,5,618,37693,H,paper manufacturing (all),2023
+42129,3222//,5,618,37693,H,converted paper products (all),2023
+42133,322///,18,2460,199308,G,paper manufacturing (all),2023
+42133,3222//,18,2460,199308,G,converted paper products (all),2023
+42133,322211,9,791,58338,H,corrugated and solid fiber box,2023
+44003,322///,3,113,6693,J,paper manufacturing (all),2023
+44003,3222//,3,113,6693,J,converted paper products (all),2023
+44007,322///,14,620,39004,G,paper manufacturing (all),2023
+44007,3222//,14,620,39004,G,converted paper products (all),2023
+44007,322211,3,237,17653,J,corrugated and solid fiber box,2023
+44007,322212,3,168,11160,J,folding paperboard box,2023
+45007,322///,8,1179,89310,H,paper manufacturing (all),2023
+45007,3222//,7,211,14193,G,converted paper products (all),2023
+45019,322///,3,535,51768,J,paper manufacturing (all),2023
+45031,322///,6,774,65385,J,paper manufacturing (all),2023
+45031,3222//,5,484,33752,J,converted paper products (all),2023
+45041,322///,3,444,41981,J,paper manufacturing (all),2023
+45045,322///,14,813,54792,G,paper manufacturing (all),2023
+45045,3222//,13,717,47412,G,converted paper products (all),2023
+45045,322211,7,266,16362,G,corrugated and solid fiber box,2023
+45063,322///,3,334,24466,J,paper manufacturing (all),2023
+45063,3222//,3,334,24466,J,converted paper products (all),2023
+45063,322211,3,334,24466,J,corrugated and solid fiber box,2023
+45079,322///,3,1122,121326,H,paper manufacturing (all),2023
+45083,322///,10,1078,75195,J,paper manufacturing (all),2023
+45083,3222//,10,1078,75195,J,converted paper products (all),2023
+45083,322211,5,517,34342,J,corrugated and solid fiber box,2023
+45091,322///,5,631,50690,H,paper manufacturing (all),2023
+45091,3222//,4,576,48134,H,converted paper products (all),2023
+46099,322///,5,541,32603,H,paper manufacturing (all),2023
+46099,3222//,5,541,32603,H,converted paper products (all),2023
+46099,322212,3,392,23124,J,folding paperboard box,2023
+47011,322///,5,418,28905,G,paper manufacturing (all),2023
+47011,3222//,5,418,28905,G,converted paper products (all),2023
+47011,322211,4,388,27787,H,corrugated and solid fiber box,2023
+47031,322///,4,320,14258,G,paper manufacturing (all),2023
+47031,3222//,4,320,14258,G,converted paper products (all),2023
+47037,322///,4,50,3524,J,paper manufacturing (all),2023
+47037,3222//,4,50,3524,J,converted paper products (all),2023
+47053,322///,4,216,15950,G,paper manufacturing (all),2023
+47053,3222//,4,216,15950,G,converted paper products (all),2023
+47053,322211,3,207,15692,G,corrugated and solid fiber box,2023
+47059,322///,4,719,34397,H,paper manufacturing (all),2023
+47059,3222//,4,719,34397,H,converted paper products (all),2023
+47063,322///,6,857,50229,H,paper manufacturing (all),2023
+47063,3222//,6,857,50229,H,converted paper products (all),2023
+47065,322///,12,1235,100499,G,paper manufacturing (all),2023
+47065,3222//,10,955,80071,G,converted paper products (all),2023
+47065,322212,4,681,60882,H,folding paperboard box,2023
+47093,322///,10,613,31179,G,paper manufacturing (all),2023
+47093,3222//,9,584,28808,G,converted paper products (all),2023
+47093,322212,4,284,17087,H,folding paperboard box,2023
+47113,322///,6,893,51142,G,paper manufacturing (all),2023
+47113,3222//,6,893,51142,G,converted paper products (all),2023
+47117,322///,3,209,15495,J,paper manufacturing (all),2023
+47125,322///,3,241,14920,H,paper manufacturing (all),2023
+47125,3222//,3,241,14920,H,converted paper products (all),2023
+47141,322///,3,131,5703,J,paper manufacturing (all),2023
+47141,3222//,3,131,5703,J,converted paper products (all),2023
+47149,322///,4,440,32978,G,paper manufacturing (all),2023
+47149,3222//,4,440,32978,G,converted paper products (all),2023
+47149,322211,3,319,25031,G,corrugated and solid fiber box,2023
+47157,322///,8,943,66345,H,paper manufacturing (all),2023
+47157,3222//,6,314,18757,G,converted paper products (all),2023
+47163,322///,3,399,31861,G,paper manufacturing (all),2023
+47163,3222//,3,399,31861,G,converted paper products (all),2023
+47165,322///,5,218,16232,G,paper manufacturing (all),2023
+47165,3222//,5,218,16232,G,converted paper products (all),2023
+47165,322211,3,200,15675,H,corrugated and solid fiber box,2023
+47189,322///,5,557,36214,G,paper manufacturing (all),2023
+47189,3222//,5,557,36214,G,converted paper products (all),2023
+48027,322///,4,303,21419,G,paper manufacturing (all),2023
+48027,3222//,4,303,21419,G,converted paper products (all),2023
+48027,322211,4,303,21419,G,corrugated and solid fiber box,2023
+48029,322///,13,597,39520,G,paper manufacturing (all),2023
+48029,3222//,13,597,39520,G,converted paper products (all),2023
+48029,322211,7,500,35734,G,corrugated and solid fiber box,2023
+48037,322///,3,93,2814,J,paper manufacturing (all),2023
+48037,3222//,3,93,2814,J,converted paper products (all),2023
+48085,322///,3,180,18200,J,paper manufacturing (all),2023
+48113,322///,54,3094,212929,G,paper manufacturing (all),2023
+48113,3222//,50,2960,200763,G,converted paper products (all),2023
+48113,322211,13,795,59789,G,corrugated and solid fiber box,2023
+48113,322212,5,473,30298,J,folding paperboard box,2023
+48121,322///,8,410,34828,J,paper manufacturing (all),2023
+48121,3222//,8,410,34828,J,converted paper products (all),2023
+48139,322///,3,186,14488,G,paper manufacturing (all),2023
+48139,3222//,3,186,14488,G,converted paper products (all),2023
+48141,322///,15,858,45864,G,paper manufacturing (all),2023
+48141,3222//,15,858,45864,G,converted paper products (all),2023
+48141,322211,8,472,31305,G,corrugated and solid fiber box,2023
+48141,322212,3,307,11207,H,folding paperboard box,2023
+48201,322///,25,925,71493,G,paper manufacturing (all),2023
+48201,3222//,25,925,71493,G,converted paper products (all),2023
+48201,322211,11,595,50930,G,corrugated and solid fiber box,2023
+48201,322212,3,89,4552,J,folding paperboard box,2023
+48215,322///,5,300,21243,J,paper manufacturing (all),2023
+48215,3222//,5,300,21243,J,converted paper products (all),2023
+48215,322211,4,300,21226,J,corrugated and solid fiber box,2023
+48251,322///,3,176,11329,J,paper manufacturing (all),2023
+48251,3222//,3,176,11329,J,converted paper products (all),2023
+48257,322///,4,353,38740,J,paper manufacturing (all),2023
+48257,3222//,3,73,4422,J,converted paper products (all),2023
+48309,322///,7,671,50443,J,paper manufacturing (all),2023
+48309,3222//,7,671,50443,J,converted paper products (all),2023
+48309,322211,3,348,30038,J,corrugated and solid fiber box,2023
+48423,322///,5,135,6940,G,paper manufacturing (all),2023
+48423,3222//,5,135,6940,G,converted paper products (all),2023
+48423,322211,3,87,5106,J,corrugated and solid fiber box,2023
+48439,322///,32,2316,175111,G,paper manufacturing (all),2023
+48439,3222//,31,2315,174896,G,converted paper products (all),2023
+48439,322211,17,1569,121911,G,corrugated and solid fiber box,2023
+48439,322212,4,180,13356,J,folding paperboard box,2023
+48453,322///,5,152,9303,H,paper manufacturing (all),2023
+48453,3222//,5,152,9303,H,converted paper products (all),2023
+49011,322///,4,242,15358,J,paper manufacturing (all),2023
+49011,3222//,4,242,15358,J,converted paper products (all),2023
+49035,322///,16,1070,68849,H,paper manufacturing (all),2023
+49035,3222//,16,1070,68849,H,converted paper products (all),2023
+49035,322211,4,436,33382,J,corrugated and solid fiber box,2023
+49035,322212,3,258,14724,J,folding paperboard box,2023
+49049,322///,4,252,17929,J,paper manufacturing (all),2023
+49049,3222//,3,248,17714,J,converted paper products (all),2023
+51023,322///,3,321,18336,H,paper manufacturing (all),2023
+51023,3222//,3,321,18336,H,converted paper products (all),2023
+51041,322///,5,595,39125,G,paper manufacturing (all),2023
+51041,3222//,5,595,39125,G,converted paper products (all),2023
+51041,322212,3,447,26555,H,folding paperboard box,2023
+51085,322///,6,392,27188,J,paper manufacturing (all),2023
+51085,3222//,5,242,16442,J,converted paper products (all),2023
+51087,322///,5,398,27676,G,paper manufacturing (all),2023
+51087,3222//,4,378,26656,H,converted paper products (all),2023
+51089,322///,4,232,14211,H,paper manufacturing (all),2023
+51089,3222//,4,232,14211,H,converted paper products (all),2023
+51089,322211,4,232,14211,H,corrugated and solid fiber box,2023
+51161,322///,5,307,19420,H,paper manufacturing (all),2023
+51161,3222//,5,307,19420,H,converted paper products (all),2023
+51550,322///,3,182,12813,H,paper manufacturing (all),2023
+51760,322///,11,725,49013,G,paper manufacturing (all),2023
+51760,322130,3,119,9924,H,paperboard mill,2023
+51760,3222//,8,606,39089,G,converted paper products (all),2023
+51760,322211,4,232,19240,J,corrugated and solid fiber box,2023
+51810,322///,5,331,19114,J,paper manufacturing (all),2023
+51810,3222//,5,331,19114,J,converted paper products (all),2023
+53011,322///,6,563,43959,G,paper manufacturing (all),2023
+53011,3222//,5,416,29597,G,converted paper products (all),2023
+53015,322///,11,2305,230421,J,paper manufacturing (all),2023
+53015,3222//,7,369,23977,H,converted paper products (all),2023
+53033,322///,20,1291,97712,G,paper manufacturing (all),2023
+53033,3222//,20,1291,97712,G,converted paper products (all),2023
+53033,322211,7,507,37057,G,corrugated and solid fiber box,2023
+53033,322212,3,403,35780,G,folding paperboard box,2023
+53053,322///,14,1141,92918,H,paper manufacturing (all),2023
+53053,322130,3,520,50736,H,paperboard mill,2023
+53053,3222//,11,621,42182,G,converted paper products (all),2023
+53063,322///,6,481,34365,G,paper manufacturing (all),2023
+53063,3222//,5,327,21469,G,converted paper products (all),2023
+53077,322///,6,368,26954,G,paper manufacturing (all),2023
+53077,3222//,5,362,26673,G,converted paper products (all),2023
+55009,322///,30,5667,450918,H,paper manufacturing (all),2023
+55009,3222//,22,2867,198394,H,converted paper products (all),2023
+55017,322///,5,559,41230,G,paper manufacturing (all),2023
+55017,3222//,3,558,37289,G,converted paper products (all),2023
+55027,322///,3,170,15096,G,paper manufacturing (all),2023
+55027,3222//,3,170,15096,G,converted paper products (all),2023
+55055,322///,3,183,12278,J,paper manufacturing (all),2023
+55055,3222//,3,183,12278,J,converted paper products (all),2023
+55059,322///,4,240,18406,H,paper manufacturing (all),2023
+55059,3222//,4,240,18406,H,converted paper products (all),2023
+55073,322///,8,1686,120577,G,paper manufacturing (all),2023
+55073,3222//,6,990,65669,G,converted paper products (all),2023
+55079,322///,18,1576,125627,H,paper manufacturing (all),2023
+55079,3222//,18,1576,125627,H,converted paper products (all),2023
+55079,322211,6,457,33754,H,corrugated and solid fiber box,2023
+55087,322///,18,2448,173030,H,paper manufacturing (all),2023
+55087,3222//,15,1465,98364,H,converted paper products (all),2023
+55097,322///,4,709,49618,H,paper manufacturing (all),2023
+55101,322///,7,809,64566,G,paper manufacturing (all),2023
+55101,3222//,7,809,64566,G,converted paper products (all),2023
+55101,322211,3,480,41759,G,corrugated and solid fiber box,2023
+55105,322///,5,349,21665,G,paper manufacturing (all),2023
+55105,3222//,5,349,21665,G,converted paper products (all),2023
+55109,322///,3,254,17740,H,paper manufacturing (all),2023
+55109,3222//,3,254,17740,H,converted paper products (all),2023
+55117,322///,4,1192,74692,J,paper manufacturing (all),2023
+55117,3222//,4,1192,74692,J,converted paper products (all),2023
+55131,322///,9,814,57254,J,paper manufacturing (all),2023
+55131,3222//,9,814,57254,J,converted paper products (all),2023
+55131,322211,7,773,53848,H,corrugated and solid fiber box,2023
+55133,322///,11,1217,90060,H,paper manufacturing (all),2023
+55133,3222//,11,1217,90060,H,converted paper products (all),2023
+55139,322///,28,4226,339959,H,paper manufacturing (all),2023
+55139,3222//,25,3632,307667,H,converted paper products (all),2023
+55139,322211,5,564,49669,J,corrugated and solid fiber box,2023
+55141,322///,9,1398,125319,H,paper manufacturing (all),2023
+55141,3222//,5,680,58839,G,converted paper products (all),2023
