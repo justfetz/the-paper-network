@@ -256,8 +256,8 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--rule);font-fa
   </div>
   <div class="detail" id="detail-thru" hidden>
     <section class="card wide"><h2>One day of board, end to end (short tons; hover a band)</h2><div id="chain"></div><p class="note" id="chain-note"></p></section>
-    <section class="card wide2"><h2>Loads on the move, per day</h2><div class="tblwrap"><table class="rec" id="loads-table"></table></div></section>
-    <section class="card"><h2>Conversions used</h2><div class="tblwrap"><table class="rec" id="conv-table"></table></div></section>
+    <section class="card wide"><h2>Loads on the move, per day</h2><div class="tblwrap"><table class="rec" id="loads-table"></table></div></section>
+    <section class="card wide"><h2>Conversions used</h2><div class="tblwrap"><table class="rec" id="conv-table"></table></div></section>
   </div>
   <div class="detail" id="detail-prospects" hidden>
     <section class="card wide"><h2>What a unilateral $70/t increase does to open-market volume</h2><div class="tblwrap"><table class="rec" id="shock-table"></table></div><p class="note">Integrated tonnage does not move: a company's own box plants keep buying from its own mills. The open-market tons are the ones that can walk, and in a market where the next mill is $5/t away, they all do. Real increases hold because the producers announce them together and the index follows.</p></section>
@@ -733,8 +733,8 @@ window.PN_BASEMAP={"states":[{"id":"01","name":"Alabama","d":"M648,492.4L651.8,4
       { name: "sold as", nodes: [["To own box plants", totInt], ["Open market", totMkt], ["Export", totExp]] },
       { name: "moved by", nodes: [["Truck", totTruck], ["Rail", totRail], ["To the docks", totExp]] },
       { name: "converted", nodes: [["Corrugator plants' own boxes", dom - sheets], ["Sheets to sheet plants", sheets], ["Exported", totExp]] },
-      { name: "boxes used for", nodes: eu.map(function (e) { return [e.name, boxes * e.share]; }).concat([["Other", boxes * other], ["Plant waste (back to OCC)", waste], ["Exported board", totExp]]) },
-      { name: "after use", nodes: [["OCC back to recycled mills", occMill], ["OCC exported", occExp], ["Recovered, no taker", occNone], ["Not recovered", notRec], ["Exported board", totExp]] }];
+      { name: "boxes used for", nodes: eu.map(function (e) { return [e.name.split(/[,:&]/)[0].replace("Retail", "Retail & e-com").replace("Durables", "Durables"), boxes * e.share]; }).concat([["Other uses", boxes * other], ["Plant waste", waste], ["Exported board", totExp]]) },
+      { name: "after use", nodes: [["OCC to recycled mills", occMill], ["OCC exported", occExp], ["Recovered, no taker", occNone], ["Not recovered", notRec], ["Exported board", totExp]] }];
     // links: each column feeds the next proportionally (a flow accounting, not a traced path)
     var links = [];
     function connect(a, b) { var ta = d3.sum(a.nodes, function (n) { return n[1]; }), tb = d3.sum(b.nodes, function (n) { return n[1]; }); a.nodes.forEach(function (x, i) { b.nodes.forEach(function (y, j) { var v = x[1] * (y[1] / tb); if (v > 0) links.push({ a: a, i: i, b: b, j: j, v: v }); }); }); }
@@ -746,10 +746,10 @@ window.PN_BASEMAP={"states":[{"id":"01","name":"Alabama","d":"M648,492.4L651.8,4
         var tb = d3.sum(B2.nodes, function (n) { return n[1]; }); A.nodes.forEach(function (x, i) { if (i === aE) return; B.nodes.forEach(function (y, j) { if (j === bE) return; var v = x[1] * (y[1] / tb); if (v > 0) links.push({ a: A, i: i, b: B, j: j, v: v }); }); }); }
       else connect(A, B);
     }
-    var w = 1100, h = 470, m = { l: 10, r: 10, t: 28, b: 10 }, iw = w - m.l - m.r, ih = h - m.t - m.b, nodeW = 10, gap = 6;
+    var w = 1200, h = 520, m = { l: 10, r: 170, t: 28, b: 10 }, iw = w - m.l - m.r, ih = h - m.t - m.b, nodeW = 10, gap = 11;
     var host = d3.select("#chain"); host.selectAll("svg").remove(); host.selectAll(".legend").remove();
     var svg = host.append("svg").attr("viewBox", "0 0 " + w + " " + h); var g = svg.append("g").attr("transform", "translate(" + m.l + "," + m.t + ")");
-    var maxTot = d3.max(cols, function (c) { return d3.sum(c.nodes, function (n) { return n[1]; }); }), scale = (ih - gap * 8) / maxTot;
+    var maxTot = d3.max(cols, function (c) { return d3.sum(c.nodes, function (n) { return n[1]; }); }), scale = (ih - gap * 9) / maxTot;
     var x = d3.scalePoint().domain(cols.map(function (c, i) { return i; })).range([0, iw - nodeW]);
     cols.forEach(function (c, ci) { var y0 = 0; c.nodes.forEach(function (n) { n.y0 = y0; n.y1 = y0 + n[1] * scale; y0 = n.y1 + gap; }); c.x = x(ci); });
     var out = {}, inn = {};
@@ -761,12 +761,12 @@ window.PN_BASEMAP={"states":[{"id":"01","name":"Alabama","d":"M648,492.4L651.8,4
       .on("mousemove", function (ev, l) { S.showTipAt("#chain", ev, "<b>" + l.a.nodes[l.i][0] + " → " + l.b.nodes[l.j][0] + "</b><br>" + tons(l.v) + unit() + (/sheet|boxes|corrugator/i.test(l.b.nodes[l.j][0]) ? " ≈ " + msf(l.v) + unit() : "")); }).on("mouseleave", function () { S.hideTipAt("#chain"); });
     cols.forEach(function (c, ci) {
       var gc = g.append("g").attr("transform", "translate(" + c.x + ",0)");
-      gc.append("text").attr("class", "axlab").attr("x", ci === cols.length - 1 ? nodeW : 0).attr("y", -12).attr("text-anchor", ci === cols.length - 1 ? "end" : "start").style("text-transform", "uppercase").style("letter-spacing", ".08em").text(c.name);
+      gc.append("text").attr("class", "axlab").attr("x", 0).attr("y", -12).attr("text-anchor", "start").style("text-transform", "uppercase").style("letter-spacing", ".08em").text(c.name);
       var nodes = gc.selectAll("g.n").data(c.nodes).enter().append("g").attr("class", "n");
       nodes.append("rect").attr("x", 0).attr("y", function (n) { return n.y0; }).attr("width", nodeW).attr("height", function (n) { return Math.max(1, n.y1 - n.y0); }).attr("rx", 2).style("fill", function (n) { return color(n[0]); })
         .on("mousemove", function (ev, n) { S.showTipAt("#chain", ev, "<b>" + n[0] + "</b><br>" + tons(n[1]) + unit() + (/box|sheet|corrugator|waste|used/i.test(n[0]) || c.name === "boxes used for" ? " ≈ " + msf(n[1]) + unit() : "") + (/truck/i.test(n[0]) ? " = " + loads(n[1], TRUCK_T) + " loads" : /rail/i.test(n[0]) ? " = " + loads(n[1], RAIL_T) + " railcars" : "")); }).on("mouseleave", function () { S.hideTipAt("#chain"); });
-      nodes.append("text").attr("class", "lab").attr("x", ci === cols.length - 1 ? -6 : nodeW + 6).attr("y", function (n) { return (n.y0 + n.y1) / 2 + 3.5; }).attr("text-anchor", ci === cols.length - 1 ? "end" : "start").style("font-size", "10px")
-        .text(function (n) { return (n.y1 - n.y0 >= 9 ? n[0] + " " + tons(n[1]) : ""); });
+      nodes.append("text").attr("class", "lab").attr("x", nodeW + 6).attr("y", function (n) { return (n.y0 + n.y1) / 2 + 3.5; }).attr("text-anchor", "start").style("font-size", "10px")
+        .text(function (n) { return (n.y1 - n.y0 >= 8 ? n[0] + " " + tons(n[1]) : ""); });
     });
     d3.select("#chain-note").html("Reading left to right: fiber into the mills, board out by fiber type, who it is sold to, how it moves, what the corrugators do with it, what the boxes carry, and what comes back. Bands between columns are a flow accounting (each column's split applied to the previous one), not traced paths; the export lane is kept separate. Per " + (S.basis === "day" ? "calendar day (annual tons ÷ 365)" : "year") + ". Mills: " + tons(K.tons_shipped_domestic + K.tons_exported) + unit() + "; corrugators: " + msf(dom / (1 - WASTE)) + unit() + " of board for " + msf(dom) + unit() + " of boxes; recovered: " + tons(occSup) + unit() + ".");
     var lt = d3.select("#loads-table"); lt.html("<tr><th>What moves</th><th class='n'>Tons" + unit() + "</th><th class='n'>Unit</th><th class='n'>Loads" + unit() + "</th><th>Note</th></tr>");
