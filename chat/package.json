@@ -1,0 +1,8 @@
+{
+  "name": "paper-network-chat",
+  "private": true,
+  "type": "module",
+  "scripts": { "deploy": "wrangler deploy", "dev": "wrangler dev", "test": "node test.mjs" },
+  "dependencies": { "@anthropic-ai/sdk": ">=0.110.0 <1" },
+  "devDependencies": { "wrangler": "^4" }
+}

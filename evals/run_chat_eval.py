@@ -41,12 +41,24 @@ def tools_over(d):
         if not k: raise ValueError("no shock for " + producer); s = d["price_shocks"][k]
         return dict(producer=k, open_market_tons_before=s["base_market_tons"], open_market_tons_after=s["market_tons_after"], extra_network_cost_usd_per_year=s["d_cost"], markets_that_switch=len(s["calls"]))
     def scenarios(): return [dict(id=k, label=s["label"], kind=s["kind"], demand_tons=s["demand_tons"], export_tons=s["export_tons"], kpi=s["kpi"]) for k, s in d["scenarios"].items()]
+    import csv, os
+    plants = list(csv.DictReader(open(os.path.join(os.path.dirname(os.path.abspath(sys.argv[2])), "plants_frs_box.csv")))) if os.path.exists(os.path.join(os.path.dirname(os.path.abspath(sys.argv[2])), "plants_frs_box.csv")) else []
+    def find_plants(query, state=""):
+        q = norm(query); q = "" if q in ("all", "any", "*") else q; st = str(state or "").strip().upper()[:2]
+        hits = [p for p in plants if (not st or p["state"] == st) and (not q or q in norm(" ".join([p["name"], p["owner_guess"], p["city"], p["state"]])))]
+        if not hits: raise ValueError(f"no EPA site matches {query}")
+        return dict(matches=len(hits), shown=[dict(name=re.sub(r"^\d+ - ", "", p["name"]), owner_guess=p["owner_guess"], city=p["city"].title(), state=p["state"], market=nn(int(float(p["node"])))) for p in hits[:25]])
+    def plant_owners():
+        from collections import Counter; c = Counter(p["owner_guess"] for p in plants)
+        return dict(total_sites=len(plants), by_owner=[dict(owner=o, sites=n) for o, n in c.most_common(30)])
     defs = [dict(name="find_mill", description="Find containerboard mills by name, owner, city or state. Returns capacity, status, utilization, scarcity value, top markets and the knockout cost.", input_schema={"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}),
             dict(name="find_market", description="Find a demand market by city or state. Returns demand, delivered marginal cost, suppliers and the cheapest alternatives.", input_schema={"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}),
             dict(name="knockouts", description="The 20 costliest single-mill outages per year.", input_schema={"type": "object", "properties": {}}),
             dict(name="price_shock", description="What happens when one producer raises its open-market price by $70/t.", input_schema={"type": "object", "properties": {"producer": {"type": "string"}}, "required": ["producer"]}),
-            dict(name="scenarios", description="KPIs of every solved scenario: freight bill, haul, rail share, unmet tons.", input_schema={"type": "object", "properties": {}})]
-    return defs, dict(find_mill=find_mill, find_market=find_market, knockouts=knockouts, price_shock=price_shock, scenarios=scenarios)
+            dict(name="scenarios", description="KPIs of every solved scenario: freight bill, haul, rail share, unmet tons.", input_schema={"type": "object", "properties": {}}),
+            dict(name="find_plants", description="Search the EPA box-plant list by company, city or state ('all' with a state lists it); up to 25 plants with owner guess, city, state, market.", input_schema={"type": "object", "properties": {"query": {"type": "string"}, "state": {"type": "string"}}, "required": ["query"]}),
+            dict(name="plant_owners", description="Companies in the EPA box-plant list with site counts.", input_schema={"type": "object", "properties": {}})]
+    return defs, dict(find_mill=find_mill, find_market=find_market, knockouts=knockouts, price_shock=price_shock, scenarios=scenarios, find_plants=find_plants, plant_owners=plant_owners)
 
 RULES = ("You are the analyst built into The Paper Network, a public model of the US containerboard network solved as a minimum-cost flow from public data. "
          "Use the tools for any number about a specific mill, market, producer or scenario and say which scenario it comes from; never invent a mill, plant, price or flow the tools did not return; "

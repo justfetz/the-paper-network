@@ -1,0 +1,22 @@
+name = "paper-network-chat"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+ALLOWED_ORIGINS = "https://justfetz.github.io,http://localhost:8000,http://127.0.0.1:8000"
+CHAT_MODEL = "claude-opus-5-5"     # claude-sonnet-5-5 is about a tenth of the cost per round, claude-haiku-5-5 a hundredth
+DAILY_CAP = "400"                  # chat rounds a day, all visitors together; the Anthropic console spend limit is the hard stop
+MAX_TURNS = "14"
+
+# the daily counter; create with: npx wrangler kv namespace create CHAT_KV  (the chat workflow does this for you)
+[[kv_namespaces]]
+binding = "CHAT_KV"
+id = "REPLACE_WITH_KV_ID"
+
+# per-visitor limit: 20 rounds a minute
+[[unsafe.bindings]]
+name = "CHAT_RL"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 20, period = 60 }

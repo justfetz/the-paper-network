@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
 site/test.html
+chat/node_modules/
+chat/deploy.log
+chat/.wrangler/

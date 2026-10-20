@@ -1,0 +1,44 @@
+# Deploys the chat proxy (chat/worker.js) to Cloudflare Workers and records its endpoint for the page.
+# Needs CLOUDFLARE_API_TOKEN (template "Edit Cloudflare Workers"), CLOUDFLARE_ACCOUNT_ID and ANTHROPIC_API_KEY as repository secrets.
+name: chat
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Deploy the Worker
+        working-directory: chat
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          [ -z "$CLOUDFLARE_API_TOKEN" ] && { echo "no CLOUDFLARE_API_TOKEN secret; nothing to do"; exit 0; }
+          [ -z "$ANTHROPIC_API_KEY" ] && { echo "no ANTHROPIC_API_KEY secret; the chat needs it"; exit 1; }
+          npm install --no-audit --no-fund
+          npm test
+          ID=$(npx wrangler kv namespace list 2>/dev/null | python3 -c "import sys,json; ns=json.load(sys.stdin); print(next((n['id'] for n in ns if n['title'].endswith('CHAT_KV')), ''))" || true)
+          if [ -z "$ID" ]; then ID=$(npx wrangler kv namespace create CHAT_KV | grep -o 'id = "[^"]*"' | head -1 | cut -d'"' -f2); fi
+          echo "KV namespace: $ID"; sed -i "s/REPLACE_WITH_KV_ID/$ID/" wrangler.toml
+          printf '%s' "$ANTHROPIC_API_KEY" | npx wrangler secret put ANTHROPIC_API_KEY
+          npx wrangler deploy 2>&1 | tee deploy.log
+          URL=$(grep -o 'https://[^ ]*workers\.dev' deploy.log | head -1)
+          [ -z "$URL" ] && { echo "could not read the Worker URL from the deploy output"; exit 1; }
+          echo "$URL/v1/chat" > ../site/chat_endpoint.txt; echo "endpoint: $URL/v1/chat"
+      - name: Record the endpoint and rebuild the page
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          [ -f site/chat_endpoint.txt ] || exit 0
+          git config user.name "paper-network-bot" && git config user.email "bot@users.noreply.github.com"
+          git add site/chat_endpoint.txt; git diff --cached --quiet && echo "endpoint unchanged" || { git commit -m "chat: Worker endpoint $(cat site/chat_endpoint.txt)"; for i in 1 2 3 4; do git pull --rebase -q origin main && git push && break || sleep 15; done; }
+          curl -s -o /dev/null -w "refresh dispatched: %{http_code}\n" -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/refresh.yml/dispatches" -d '{"ref":"main"}'

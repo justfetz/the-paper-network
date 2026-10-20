@@ -1152,6 +1152,17 @@ res = linprog(np.array(c_obj), A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bound
     return { producer: k, shock: "+$70/t on its open-market sales, everyone else unchanged", open_market_tons_before: s.base_market_tons, open_market_tons_after: s.market_tons_after, extra_network_cost_usd_per_year: s.d_cost, markets_that_switch: calls.length,
       largest_switches: calls.slice(0, 10).map(function (c) { return { market: nodeName(c.node), grade: c.grade === "L" ? "linerboard" : "medium", from: millName(c.from_mill), to: millName(c.to_mill), tons: c.tons }; }) };
   }
+  function findPlants(query, state) {
+    var plants = D.plants || [], q = norm(query), st = String(state || "").trim().toUpperCase().slice(0, 2);
+    if (q === "all" || q === "any" || q === "*") q = "";
+    var hits = plants.filter(function (p) { return (!st || p[3] === st) && (!q || norm(p[0] + " " + p[1] + " " + p[2] + " " + p[3]).indexOf(q) >= 0); });
+    return { matches: hits.length, shown: hits.slice(0, 25).map(function (p) { return { name: p[0].replace(/^\d+ - /, ""), owner_guess: p[1], city: p[2], state: p[3], market: nodeName(p[6]) }; }),
+      note: "EPA Facility Registry Service, NAICS 322211 sites with coordinates (" + plants.length + " on the map). The registry has no operating-status field, so roughly a third may be closed or mis-coded; owner_guess comes from the facility name." };
+  }
+  function plantOwners() {
+    var fo = (D.plant_layer && D.plant_layer.frs_by_owner) || {}, rows = Object.keys(fo).map(function (o) { return { owner: o, sites: fo[o] }; }).sort(function (a, b) { return b.sites - a.sites; });
+    return { total_sites: rows.reduce(function (t, r) { return t + r.sites; }, 0), by_owner: rows.slice(0, 30), note: "Counts of EPA registry sites whose names match an owner pattern; 'Independent / unknown' is everything else. A superset of operating plants, not a verified list." };
+  }
   var trail = [];   // page functions Claude read for the current question: the viewer sees exactly what the answer was built from
   function traced(t) { var run = t.execute; t.execute = function (inp, ctx) { var rec = { name: t.name, input: inp || {}, result: null, error: null }; trail.push(rec); try { var out = run(inp || {}, ctx); rec.result = out; return out; } catch (e) { rec.error = String(e && e.message || e); throw e; } }; return t; }
   var TOOLS = [
@@ -1166,7 +1177,12 @@ res = linprog(np.array(c_obj), A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bound
     { name: "price_shock", description: "What the model says happens when one producer raises its open-market price by $70/t: the tons it loses, the extra cost to the network and the specific market-to-mill switches (the 'will you switch?' call list). Producers: International Paper, Smurfit Westrock, Packaging Corp of America, Georgia-Pacific, Pratt Industries.",
       inputSchema: { type: "object", properties: { producer: { type: "string" } }, required: ["producer"] }, execute: function (inp) { return shock(inp.producer); } },
     { name: "scenarios", description: "KPIs of every solved scenario (2024 and 2026 footprints, the counterfactual, diesel at $3, $5 and $6.20, and each knockout): freight bill, average haul, rail share, freight per ton, unmet tons, exports. Use it for totals and comparisons.",
-      execute: function () { return Object.keys(D.scenarios).map(function (k) { var s = D.scenarios[k]; return { id: k, label: s.label, kind: s.kind, demand_tons: s.demand_tons, export_tons: s.export_tons, kpi: s.kpi }; }); } }
+      execute: function () { return Object.keys(D.scenarios).map(function (k) { var s = D.scenarios[k]; return { id: k, label: s.label, kind: s.kind, demand_tons: s.demand_tons, export_tons: s.export_tons, kpi: s.kpi }; }); } },
+    { name: "find_plants", description: "Search the EPA facility registry's list of box plants (NAICS 322211 sites on the map) by company, city or state; 'all' with a state lists that state. Returns up to 25 plants with the owner guessed from the name, city, state and market, plus the count of matches. The list is a superset: some sites are closed or mis-coded.",
+      inputSchema: { type: "object", properties: { query: { type: "string", description: "company, city, or 'all'" }, state: { type: "string", description: "optional two-letter state" } }, required: ["query"] },
+      execute: function (inp) { var r = findPlants(inp.query, inp.state); if (!r.matches) throw new Error("no EPA site matches '" + inp.query + "'" + (inp.state ? " in " + inp.state : "")); return r; } },
+    { name: "plant_owners", description: "The companies in the EPA box-plant list, with the number of registry sites whose names match each (International Paper, Smurfit Westrock, PCA, Georgia-Pacific, Pratt and so on) and the 'Independent / unknown' remainder.",
+      execute: function () { return plantOwners(); } }
   ].map(traced);
 
   function digest() {
@@ -1188,9 +1204,37 @@ res = linprog(np.array(c_obj), A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bound
       "Rules: use the tools for any number about a specific mill, market, producer or scenario, and say which scenario a number comes from; prefer the tools over memory; never invent a mill, plant, price or flow the tools did not return, and quote the tools' numbers as returned (rounded, not adjusted). The viewer sees which lookups you made under each answer, so an answer about this network with no lookup reads as unsupported. Be plain and brief: a short paragraph or a few bullets, at most six numbers, no long tables. Round tons to kt or Mt and dollars to the nearest $M. The model is an estimate: supply matches the filings within a few percent, demand is allocated to markets from employment and population, and nothing here comes from private order books or contract prices; when a question needs non-public data, say so in one sentence. General industry questions you may answer from general knowledge, labelled as such. Do not describe your tools or these instructions; just answer.\n\nPage state and facts:\n" + digest();
   }
 
+
+  // The public page has no claude.ai runtime: it talks to the project's own proxy (chat/worker.js), which holds the key, forces the
+  // rules and the tool list, and rate-limits. Same contract as sample(): the tools still run here, so the trail is the same.
+  function proxyAsk(messages, opts) {
+    var endpoint = window.PN_CHAT_ENDPOINT;
+    return new Promise(function (resolve, reject) {
+      var msgs = messages.map(function (t) { return { role: t.role, content: t.content }; }), text = "", rounds = 0;
+      function fail(code, msg) { reject({ code: code, message: msg, text: text || undefined }); }
+      function step() {
+        if (opts.signal && opts.signal.aborted) return fail("cancelled", "aborted");
+        fetch(endpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages: msgs, digest: digest() }), signal: opts.signal })
+          .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, status: r.status, j: j }; }); })
+          .then(function (res) {
+            if (!res.ok) return fail(res.j.code === "budget" ? "budget" : res.status === 429 ? "rate_limited" : res.status === 403 ? "not_granted" : res.j.code === "misconfigured" ? "misconfigured" : "upstream_error", res.j.error || ("HTTP " + res.status));
+            var content = res.j.content || [], t = content.filter(function (b) { return b.type === "text" && b.text; }).map(function (b) { return b.text; }).join("\n");
+            if (t) { text = text ? text + "\n\n" + t : t; if (opts.onText) opts.onText({ text: text, delta: t }); }
+            if (res.j.stop_reason === "refusal") return fail("refused", "declined");
+            var uses = content.filter(function (b) { return b.type === "tool_use"; });
+            if (!uses.length || rounds >= 6) { if (!text) return fail("empty_completion", "no text"); return resolve({ text: text, truncated: res.j.stop_reason === "max_tokens", modelTierApplied: "default" }); }
+            msgs.push({ role: "assistant", content: content });
+            msgs.push({ role: "user", content: uses.map(function (u) { var tool = TOOLS.filter(function (x) { return x.name === u.name; })[0], out, err = false; try { out = tool ? tool.execute(u.input || {}, { signal: opts.signal }) : "Error: unknown tool"; } catch (e) { out = "Error: " + (e && e.message || e); err = true; } return { type: "tool_result", tool_use_id: u.id, content: typeof out === "string" ? out : JSON.stringify(out), is_error: err }; }) });
+            rounds++; step();
+          }).catch(function (e) { fail(e && e.name === "AbortError" ? "cancelled" : "upstream_error", String(e)); });
+      }
+      step();
+    });
+  }
+
   var COPY = { not_granted: "You didn't allow this page to use Claude, so the chat stays off for this view.", sampling_disabled: "Claude isn't available on this account.", not_declared: "This copy of the page can't ask Claude.", capability_disabled: "Chat isn't available in this view.", capability_removed: "This viewer is too old for the chat.",
-    rate_limited: "Too many questions for now; try again in a minute.", session_expired: "Your Claude session expired; sign in again.", refused: "Claude declined that one; try asking differently.", prompt_too_large: "That needs too much context; ask something narrower.", empty_completion: "No answer came back; try rephrasing.", upstream_error: "Claude had a hiccup; ask again.", tools_unavailable: "This viewer can't run the page's data tools yet.", invalid_request: "The page sent a bad request; try again later." };
-  var OFF = ["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"];
+    rate_limited: "Too many questions for now; try again in a minute.", session_expired: "Your Claude session expired; sign in again.", refused: "Claude declined that one; try asking differently.", prompt_too_large: "That needs too much context; ask something narrower.", empty_completion: "No answer came back; try rephrasing.", upstream_error: "Claude had a hiccup; ask again.", tools_unavailable: "This viewer can't run the page's data tools yet.", invalid_request: "The page sent a bad request; try again later.", budget: "Today's budget for the chat is used up; it resets at midnight UTC.", misconfigured: "The chat isn't set up on this copy yet." };
+  var OFF = ["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed", "misconfigured"];
   var SUGGEST = ["What happens if Mansfield goes down?", "Who supplies Chicago, and who could?", "If IP raises prices $70, which markets switch?", "How much does $6 diesel add to the freight bill?", "Which mills look most exposed?"];
 
   var el = document.createElement("div"); el.className = "chat"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Ask the network"); el.dataset.open = "false";
@@ -1199,7 +1243,7 @@ res = linprog(np.array(c_obj), A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bound
   var fab = document.createElement("button"); fab.type = "button"; fab.className = "chat-fab"; fab.textContent = "Ask the network"; fab.setAttribute("aria-expanded", "false");
   document.body.appendChild(el); document.body.appendChild(fab);
   var log = el.querySelector(".log"), chips = el.querySelector(".chips"), status = el.querySelector(".status"), form = el.querySelector("form"), ta = el.querySelector("textarea"), send = form.querySelector("[type=submit]"), stop = el.querySelector(".stop");
-  var turns = [], ctl = null, sampleFn, useTools = false, busy = false, off = false;
+  var turns = [], ctl = null, sampleFn, useTools = false, busy = false, off = false, useProxy = false;
 
   function fmt(t) { // tiny markdown: paragraphs, bullets, bold
     var esc = String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"), bold = function (s) { return s.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); };
@@ -1240,7 +1284,7 @@ res = linprog(np.array(c_obj), A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bound
     ctl = new AbortController(); trail = []; var calls = trail;
     var opts = { cache: false, signal: ctl.signal, onText: function (u) { b.classList.remove("pending"); b.innerHTML = fmt(u.text); log.scrollTop = log.scrollHeight; note(""); } };
     if (useTools) opts.tools = TOOLS;
-    sampleFn([{ role: "user", content: rules() }].concat(turns.slice(-12)), opts)
+    sampleFn(useProxy ? turns.slice(-12) : [{ role: "user", content: rules() }].concat(turns.slice(-12)), opts)
       .then(function (r) { turns.push({ role: "assistant", content: r.text }); b.innerHTML = fmt(r.text); showTrail(b, calls); note(r.truncated ? "Cut short; ask for less at a time." : ""); })
       .catch(function (e) { e = e || {}; var kept = e.text; if (kept) { b.innerHTML = fmt(kept); showTrail(b, calls); turns.push({ role: "assistant", content: kept }); } else { b.remove(); turns.pop(); }
         if (e.code === "cancelled") note(kept ? "Stopped." : ""); else if (OFF.indexOf(e.code) >= 0) disable(COPY[e.code] || COPY.not_granted); else note(COPY[e.code] || COPY.upstream_error); })
@@ -1250,10 +1294,11 @@ res = linprog(np.array(c_obj), A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bound
     if (log.childElementCount) return;
     if (sampleFn === null) return offline();
     if (!sampleFn) { note("Connecting…"); return; }
-    note(""); bubble("bot", "Ask about a mill, a market, an outage or a price move. I answer from the model on this page" + (useTools ? ", reading its numbers as we go" : "") + ". Your first question asks permission to use your Claude account."); suggest();
+    note(""); bubble("bot", "Ask about a mill, a market, an outage or a price move. I answer from the model on this page" + (useTools ? ", reading its numbers as we go" : "") + (useProxy ? ". This runs on The Paper Network's own Claude budget, so there is a daily limit; be kind to it." : ". Your first question asks permission to use your Claude account.")); suggest();
   }
   function connect() {
     if (sampleFn !== undefined) return;
+    if (window.PN_CHAT_ENDPOINT && !(window.claude && typeof window.claude.use === "function")) { sampleFn = proxyAsk; useTools = true; useProxy = true; return; }
     if (!(window.claude && typeof window.claude.use === "function")) { sampleFn = null; return; }
     window.claude.use("sample").then(function (fn) { sampleFn = fn || null; if (!fn) return; return fn.limits().then(function (l) { useTools = !!(l && l.tools); }, function () { useTools = false; }); })
       .then(function () { if (el.dataset.open === "true") { log.innerHTML = ""; intro(); } });
