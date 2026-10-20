@@ -7,12 +7,18 @@ Live site: `site/index.html` (enable GitHub Pages with source "GitHub Actions", 
 https://justfetz.github.io/the-paper-network/). A hosted copy of the same page is at
 https://claude.ai/artifact/UCaPyJMWgrDAg94xakwn9w. Everything on it is reproducible from this repo.
 
-**Ask the network.** The hosted copy on claude.ai has a chat drawer (bottom right) that answers questions about mills,
-markets, outages, switching and prices from the page's own numbers: it reads the solved scenarios through page
-functions and names the scenario each figure comes from. It runs on the viewer's own Claude account through the
-artifact runtime, so there is no API key in the page and nothing is sent anywhere else; the first question asks
-permission. The GitHub Pages copy shows the same drawer with a link to the live version, because a static page
-cannot hold a key.
+**Ask the network.** The page has a chat drawer (bottom right) that answers questions about mills, markets, outages,
+switching and prices from the page's own numbers: it reads the solved scenarios and the EPA plant list through page
+functions, names the scenario each figure comes from, and lists the lookups under every answer. On claude.ai it runs on
+the viewer's own account through the artifact runtime. On the public page it runs through `chat/worker.js`, a Cloudflare
+Worker that holds the key, fixes the prompt and the tools, allows only this site's origin, limits each visitor to 20
+rounds a minute and everyone to 400 rounds a day, and forwards to the Messages API; `chat/README.md` has the deploy
+steps and the `chat` workflow does them from repository secrets. No key is ever in the page.
+
+**The tape.** The strip along the bottom scrolls the live inputs (EIA diesel by region, the index points, FRED series)
+and the model's results (freight bill, costliest outages, switching gaps, price shocks, capacity values, the 2025
+closures); every item jumps to its tab and scenario. Links carry the scenario: `#flows/ko31` opens Flows with
+Mansfield knocked out.
 
 ## The idea
 
@@ -43,7 +49,9 @@ sales manager, a mill scheduler or a box buyer can read in a minute.
 | `data/` | `mills_final.csv` (90 mills, sourced), `counties.csv` (3,142 counties with population and centroids), `basemap.json`, the research files behind the mill table, and the scenario JSON the site reads. |
 | `notes/` | Calibration numbers with sources (`industry_calibration.md`, `market_anchors.md`), plant-footprint notes by company, methodology. |
 | `ingest/` | Scripts for the next data layer (EPA FRS plant list, Census CBP, Places, EIA diesel, EDGAR, Overpass, job-posting signals, and `claude_verify.py`, which checks each EPA site with Claude and web search). See `NEEDS.md` for the keys. |
-| `.github/workflows/` | `refresh.yml` (scheduled: EIA diesel, FRED, BLS QCEW, plant layer, model, site, Pages deploy); on demand: `plants.yml` (EPA FRS national file), `cbp.yml` (Census bulk files), `places.yml` (Google Places text search, free Pro tier), `verify.yml` (Claude web check of the plant list, budget-capped). |
+| `chat/` | The chat proxy for the public page: `worker.js` (Cloudflare Worker), `wrangler.toml`, gate tests (`npm test`), README with the deploy steps. |
+| `evals/` | How the AI parts are checked: a generated golden set for the chat and its runner, a second-model audit for the plant verification, and the README that explains the guardrails. |
+| `.github/workflows/` | `refresh.yml` (scheduled: EIA diesel, FRED, BLS QCEW, plant layer, model, site, publish to the `gh-pages` branch); on demand: `plants.yml` (EPA FRS national file), `cbp.yml` (Census bulk files), `places.yml` (Google Places text search, resumable inside the free tier), `verify.yml` (Claude web check of the plant list, budget-capped), `chat.yml` (deploys the Worker and records its endpoint). |
 | `NEEDS.md` | What the project needs from outside: API keys, downloads, memberships, and why. |
 | `ROADMAP.md` | What changes the picture most per hour of work, in order. |
 

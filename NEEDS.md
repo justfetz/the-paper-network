@@ -6,8 +6,8 @@ the JHU county table, and an offline zip-code database. The next layer of accura
 things below. None of them are expensive; most are free.
 
 Keys in place as repository secrets (October 2026): `EIA_API_KEY`, `FRED_API_KEY`, `BLS_API_KEY`, `EDGAR_UA`
-(the EDGAR User-Agent: a name and an email address), `GOOGLE_MAPS_API_KEY`. Wanted next: `ANTHROPIC_API_KEY`, which
-turns on `verify.yml`. Keys never go in the code or the site; each workflow step is skipped when its secret is absent.
+(the EDGAR User-Agent: a name and an email address), `GOOGLE_MAPS_API_KEY`. `ANTHROPIC_API_KEY` is in place too (it runs `verify.yml` and the public page's chat). Wanted next: `CLOUDFLARE_API_TOKEN` and
+`CLOUDFLARE_ACCOUNT_ID` (a free Cloudflare account), which let `chat.yml` deploy the chat proxy. Keys never go in the code or the site; each workflow step is skipped when its secret is absent.
 
 | Need | Why | How to get it | Cost |
 |---|---|---|---|

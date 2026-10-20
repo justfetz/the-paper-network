@@ -28,6 +28,7 @@ Run from the Actions tab when a source moves; each is skipped when its secret is
 | `cbp.yml` | Census County Business Patterns bulk county and state files for NAICS 322211 | nothing | free |
 | `places.yml` | Google Places (New) text search around every demand point: names and addresses of box plants | `GOOGLE_MAPS_API_KEY` | 1,764 calls, inside the free 5,000-call Pro tier |
 | `verify.yml` | Claude reads the web for each EPA site: operating, corrugator or sheet plant, owner, shift hiring; resumable, stops at the budget input | `ANTHROPIC_API_KEY` | about $0.10 a site on Opus 5.5 (see `NEEDS.md`) |
+| `chat.yml` | Deploys the chat proxy (Cloudflare Worker) and records its endpoint for the page | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `ANTHROPIC_API_KEY` | free tier; the chat itself is a few cents a round, capped per day |
 
 ## The Claude scheduled tasks
 
