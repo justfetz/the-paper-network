@@ -14,7 +14,7 @@ and drawn on a map. With the dual prices, the scenarios, a chat that shows its l
 
 | | |
 |---|---|
-| **The app** | https://justfetz.github.io/the-paper-network/ (static page, no account; "Ask the network" runs on the project's budget once the proxy is deployed) |
+| **The app** | https://justfetz.github.io/the-paper-network/ (static page, no account; "Ask the network" runs on the project's budget once the proxy is deployed; the **Guide** button gives a tour, a How-to card per view and an index of which view answers what) |
 | **The write-up** | https://justfetz.github.io/posts/the-paper-network.html (the algorithm, the sources, the cleaning, a page-by-page tour, how it is built, evaluated and refreshed) |
 | **The claude.ai copy** | https://claude.ai/artifact/UCaPyJMWgrDAg94xakwn9w (same page; the chat runs on the viewer's own Claude account) |
 
@@ -122,6 +122,16 @@ regional detail, the real corrugator list.
 | `places.yml` | daily until complete, and on demand | Google Places text search around every market, resumable inside the daily quota |
 | `verify.yml` | on demand | Claude checks EPA sites with web search; inputs: sites per run, model, budget, state |
 | `chat.yml` | on demand | Deploys the Worker, records its endpoint, rebuilds the page |
+
+## Finding your way: the guide
+
+Every tab carries a "How to use this view" card at the top of the side panel: what the view shows, how to read
+the encodings (what a circle, a square, a colored or gray or dashed line, a dark or pale fill means on that tab), what
+each control and layer does, Try buttons that set the view up (knock out the costliest mill, color mills by scarcity
+value, shock a producer, show the named plants), and questions to click straight into the chat. Every control has hover
+help. The Guide button in the header opens an index of which view answers which question, with a glossary, and a
+nine-stop tour that walks the tabs and highlights the control it is talking about. The card remembers whether you hid
+it. All of it lives in `site/src/ui_guide.js` and only drives controls that already exist.
 
 ## Ask the network, and the tape
 

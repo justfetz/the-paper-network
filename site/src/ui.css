@@ -169,3 +169,39 @@ body.has-ticker .chat{bottom:calc(110px + env(safe-area-inset-bottom,0px))}
 /* first-load draw-in */
 @keyframes pn-in{from{opacity:0}}
 #map .arc.intro{animation:pn-in .9s ease-out both;animation-delay:calc(var(--i,0) * .35ms)}
+/* The guide: a "How to use this view" card per tab, the question index, and the tour */
+.guide{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,var(--card))}
+.guide .ghead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.guide .ghead h2{margin:0;color:var(--accent);flex:1;min-width:0}
+.guide .gbtns{display:flex;gap:6px;flex-wrap:wrap}
+.guide .gbtns button,.guide .gtry button,.guide .gask button,.guide .gindex button{font-family:var(--mono);font-size:11px;min-height:30px;padding:0 10px;border:1px solid var(--rule);border-radius:999px;background:var(--card);color:var(--ink-2);cursor:pointer;text-align:left}
+.guide .gbtns button:hover,.guide .gtry button:hover,.guide .gask button:hover,.guide .gindex button:hover{border-color:var(--accent);color:var(--accent)}
+.guide .gbtns button[data-g=tour]{border-color:var(--accent);color:var(--accent)}
+.guide.slim .ghead{margin:0}
+.guide .gbody{margin-top:10px}
+.guide .gwhat{color:var(--ink);font-size:14px}
+.guide h3{font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:12px 0 6px}
+.guide ul{margin:0;padding-left:18px;color:var(--ink-2);font-size:13.5px}
+.guide ul li{margin:0 0 5px}
+.guide .gdl{margin:0;font-size:13.5px;display:grid;grid-template-columns:minmax(96px,auto) 1fr;gap:4px 10px}
+.guide .gdl dt{color:var(--ink);font-weight:600}
+.guide .gdl dd{margin:0;color:var(--ink-2)}
+.guide .gtry,.guide .gask{display:flex;flex-wrap:wrap;gap:6px}
+.guide .gask button{background:var(--code-bg)}
+.guide .gask button::before{content:"?";display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:9px;line-height:14px;text-align:center;margin-right:6px}
+.guide .gindex{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.guide .gindex li{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.guide .gindex li span{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.guide .note{margin-top:12px}
+@media (max-width:560px){.guide .gdl{grid-template-columns:1fr}.guide .gdl dt{margin-top:4px}}
+.tour-ring{position:absolute;z-index:22;pointer-events:none;border:2px solid var(--accent);border-radius:14px;box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent),0 0 0 9999px rgba(0,0,0,.08);transition:left .3s,top .3s,width .3s,height .3s}
+.tour-card{position:fixed;z-index:23;left:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:min(400px,calc(100vw - 36px));background:var(--card);color:var(--ink);border:1px solid var(--accent);border-radius:14px;padding:14px 16px;box-shadow:0 18px 60px rgba(0,0,0,.22)}
+body.has-ticker .tour-card{bottom:calc(58px + env(safe-area-inset-bottom,0px))}
+.tour-card .tstep{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.tour-card b{font-size:15px;font-weight:600}
+.tour-card p{margin:6px 0 10px;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+.tour-card .tbtns{display:flex;gap:6px;flex-wrap:wrap}
+.tour-card .tbtns button{font-family:var(--mono);font-size:11.5px;min-height:34px;padding:0 12px;border:1px solid var(--rule);border-radius:8px;background:var(--card);color:var(--ink-2);cursor:pointer}
+.tour-card .tbtns button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tour-card .tbtns button:hover{border-color:var(--accent)}
+@media (max-width:640px){.tour-card{left:8px;width:calc(100vw - 16px)}body.has-ticker .tour-card{bottom:calc(106px + env(safe-area-inset-bottom,0px))}}   /* phones: the card sits above the chat launcher */

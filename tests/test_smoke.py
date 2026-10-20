@@ -70,6 +70,8 @@ r = subprocess.run([sys.executable, os.path.join(ROOT, "site", "build_site.py"),
 idx = open(os.path.join(ROOT, "site", "index.html")).read() if r.returncode == 0 else ""
 check("site builds", r.returncode == 0, r.stderr[-300:])
 check("site has its data, the chat, the tape and no unfilled placeholders", "PN_DATA" in open(os.path.join(ROOT, "site", "data.js")).read()[:40] and "chat-fab" in open(os.path.join(ROOT, "site", "ui.js")).read() and "ticker" in open(os.path.join(ROOT, "site", "ui.js")).read() and "{{n_plants}}" not in idx and "{{generated}}" not in idx)
+ui_js = open(os.path.join(ROOT, "site", "ui.js")).read(); tpl = open(os.path.join(ROOT, "site", "src", "index.template.html")).read()
+check("guide is bundled: a How-to card per tab, the question index, the tour and the header button", "How to use · " in ui_js and "Which view answers what" in ui_js and "tour-card" in ui_js and 'id="guide-btn"' in tpl and all(k in ui_js for k in ["flows: {", "corr: {", "thru: {", "prospects: {", "prices: {", "fiber: {", "demand: {", "backtest: {", "method: {"]))
 check("model-run badge written", os.path.exists(os.path.join(ROOT, "site", "badge.json")))
 if shutil.which("node"):
     for js in sorted(glob.glob(os.path.join(ROOT, "site", "src", "*.js"))) + [os.path.join(ROOT, "chat", "worker.js")]:

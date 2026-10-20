@@ -18,6 +18,7 @@
     d3.select("#ko").property("value", isKo ? key : ""); d3.select("#month").property("value", isMonth ? key : "");
     d3.selectAll("#scen button").attr("aria-pressed", function () { return !isKo && !isMonth && this.dataset.scen === key ? "true" : "false"; });
   }
+  S.setScenario = setScenario;
   var render0 = S.render;
   S.render = function () { render0(); try { history.replaceState(null, "", "#" + S.tab + (S.scen && S.scen !== "fp2026" ? "/" + S.scen : "")); } catch (e) {} };
   (function readHash() { var parts = decodeURIComponent(location.hash || "").replace("#", "").split("/"); if (parts[1] && D.scenarios[parts[1]]) { setScenario(parts[1]); S.render(); } })();
