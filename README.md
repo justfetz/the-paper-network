@@ -4,7 +4,8 @@
 solved as a network-flow problem, and drawn on a map.**
 
 Live site: `site/index.html` (enable GitHub Pages on `main`, folder `/site`, and it serves at
-https://justfetz.github.io/the-paper-network/). Everything on it is reproducible from this repo.
+https://justfetz.github.io/the-paper-network/). A hosted copy of the same page is at
+https://claude.ai/artifact/UCaPyJMWgrDAg94xakwn9w. Everything on it is reproducible from this repo.
 
 ## The idea
 
