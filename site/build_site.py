@@ -141,6 +141,16 @@ page = f"""<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Paper Network</title>
 <meta name="description" content="{html.escape(DESC)}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The Paper Network">
+<meta property="og:description" content="{html.escape(DESC)}">
+<meta property="og:image" content="https://justfetz.github.io/the-paper-network/og.png">
+<meta property="og:url" content="https://justfetz.github.io/the-paper-network/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Paper Network">
+<meta name="twitter:description" content="{html.escape(DESC)}">
+<meta name="twitter:image" content="https://justfetz.github.io/the-paper-network/og.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231f5f4e'/%3E%3Cpath d='M7 12l9-5 9 5v8l-9 5-9-5z' fill='none' stroke='%23fff' stroke-width='2'/%3E%3Cpath d='M7 12l9 5 9-5M16 17v8' fill='none' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E">
 {FONTS}
 <style>
 {css}</style>

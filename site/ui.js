@@ -250,7 +250,7 @@
       .on("mousemove", function (ev, n) { var c = N[n.i], inn = (inflow[n.i] || []).slice().sort(function (a, b) { return b[2] - a[2]; }), out = (outflow[n.i] || []).slice().sort(function (a, b) { return b[2] - a[2]; });
         S.showTip(ev, "<b>" + n.name + "</b><br>" + (c.has_corrugator ? c.corrugators.toFixed(1) + " corrugator plants expected" + (c.feeders > 0.05 ? " + " + c.feeders.toFixed(1) + " sheet feeders" : "") + " · " + c.sheet_plants.toFixed(0) + " sheet plants<br>capacity " + mm(c.corr_capacity + c.feeder_capacity) + ", " + fmtP(c.utilization) + " loaded<br>converts " + mm(c.own_conversion) + " itself, sells " + mm(c.sheets_sold) + " of sheets" + (c.hours_value > 0.5 ? "<br>one more MMSF of corrugator capacity is worth $" + Math.round(c.hours_value * tpm).toLocaleString() + " a year here" : "") : "no corrugator pencils out at " + kt(base.node_demand[n.i]) + " of local board; " + c.sheet_plants.toFixed(1) + " sheet plants buy in") +
           "<br>sheet demand " + mm(c.sheet_demand) + " · marginal sheet costs $" + (c.sheet_value / tpm).toFixed(2) + "/MSF of freight" + (inn.length ? "<br>sheets from: " + inn.slice(0, 3).map(function (f) { return D.nodes[f[0]].name + " " + mm(f[2]); }).join(", ") : "") + (out.length ? "<br>sheets to: " + out.slice(0, 3).map(function (f) { return D.nodes[f[1]].name + " " + mm(f[2]); }).join(", ") : "")); }).on("mouseleave", S.hideTip);
-    S.drawMills({ dim: function () { return true; } });
+    S.drawMills({ dim: function () { return true; } }); if (S.drawNamed) S.drawNamed();
     S.setRamp(S.cl.value ? "markets: freight in the marginal sheet, $0 → $" + (valScale.domain()[1] / tpm).toFixed(1) + "/MSF" : S.cl.util ? "markets with corrugators: load on corrugator capacity, 50% → 100% (hollow squares: no corrugator)" : null);
     var k = C.kpi, items = [["corrugator plants · sheet feeders · sheet plants", C.params.corrugator_plants + " · " + C.params.sheet_feeders + " · " + C.params.sheet_plants], ["fleet capacity at " + Math.round(C.params.oee * 100) + "% OEE", bsf(k.corrugator_capacity + k.feeder_capacity) + " (" + C.avg_corrugator_mmsf.toLocaleString() + " MMSF avg)"],
       ["board to run through them", bsf(k.board_total) + " for " + k.shipped_bsf.toFixed(0) + " BSF of boxes (FBA 2024: 381)"], ["fleet load", fmtP(k.national_utilization)], ["sheet trade", bsf(k.sheets_shipped) + " · avg haul " + Math.round(k.avg_sheet_haul) + " mi"], ["markets with no corrugator", k.markets_without_corrugator + " of " + D.nodes.length], ["sheet freight bill", musd(k.sheet_freight_usd) + "/yr"]];
@@ -547,6 +547,34 @@
     d3.select("#fiber-note").html(F.note);
   }
 
+  /* ---------- named plants (EPA FRS) ---------- */
+  var PL = D.plants || null, PLN = D.plant_layer || null; S.named = false; S.namedQ = "";
+  if (PL) { document.getElementById("named-toggle").hidden = false; document.getElementById("named-search-bar").hidden = false; document.getElementById("named-card").hidden = false;
+    PL.forEach(function (p) { var q = S.D && window.d3 ? d3.geoConicEqualArea().parallels([29.5, 45.5]).rotate([96, 0]).center([-0.6, 38.7]).scale(1300).translate([487.5, 305])([p[5], p[4]]) : null; p.x = q ? q[0] : null; p.y = q ? q[1] : null; }); }
+  function drawNamed() {
+    var sel = L.ports.selectAll("circle.plant").data(S.named && PL ? PL.filter(function (p) { return p.x !== null && (!S.namedQ || (p[0] + " " + p[1] + " " + p[2] + " " + p[3]).toLowerCase().indexOf(S.namedQ) >= 0); }) : [], function (p) { return p[0] + p[2] + p[3]; });
+    sel.exit().remove();
+    sel.enter().append("circle").attr("class", "plant").attr("r", 1.9).style("stroke", "var(--bg)").style("stroke-width", 0.3).style("opacity", 0.9).style("cursor", "pointer").merge(sel)
+      .attr("cx", function (p) { return p.x; }).attr("cy", function (p) { return p.y; }).style("fill", function (p) { return p[1] === "Independent / unknown" ? "var(--ink-2)" : ownerVar(p[1]); })
+      .on("mousemove", function (ev, p) { S.showTip(ev, "<b>" + p[0] + "</b><br>" + p[2] + ", " + p[3] + " · " + p[1] + "<br><i>EPA FRS, NAICS 322211; in market " + D.nodes[p[6]].name + "</i>"); }).on("mouseleave", S.hideTip);
+  }
+  function drawNamedList() {
+    if (!PL) return;
+    var q = S.namedQ, rows = PL.filter(function (p) { return !q || (p[0] + " " + p[1] + " " + p[2] + " " + p[3]).toLowerCase().indexOf(q) >= 0; });
+    var byOwner = {}; PL.forEach(function (p) { byOwner[p[1]] = (byOwner[p[1]] || 0) + 1; });
+    d3.select("#named-h").text("Named plants from the EPA Facility Registry: " + rows.length.toLocaleString() + (q ? " matching \"" + q + "\"" : "") + " of " + PL.length.toLocaleString());
+    d3.select("#named-list").html("<table><tr><th>Plant</th><th>Owner (from the name)</th><th>City</th><th>St</th><th>Market</th></tr>" + rows.slice(0, 400).sort(function (a, b) { return a[3] === b[3] ? a[2].localeCompare(b[2]) : a[3].localeCompare(b[3]); }).map(function (p) { return "<tr data-node='" + p[6] + "'><td>" + p[0] + "</td><td>" + p[1] + "</td><td>" + p[2] + "</td><td>" + p[3] + "</td><td>" + D.nodes[p[6]].name + "</td></tr>"; }).join("") + "</table>");
+    d3.select("#named-note").html("Sites with NAICS 322211 (corrugated and solid fiber boxes) in the EPA Facility Registry Service, with coordinates. Owner is inferred from the registered name, so a plant registered under a former owner or a local name shows as independent or unknown; corrugator versus sheet plant is not in the record. By owner: " + Object.keys(byOwner).sort(function (a, b) { return byOwner[b] - byOwner[a]; }).slice(0, 10).map(function (o) { return o + " " + byOwner[o]; }).join(" · ") + ".");
+    if (PLN && PLN.state_comparison) { document.getElementById("proxy-card").hidden = false; var t = d3.select("#proxy-table"), sc = PLN.state_comparison, cols = Object.keys(sc[Object.keys(sc)[0]] || {});
+      t.html("<tr><th>State</th>" + cols.map(function (c) { return "<th class='n'>" + c.replace("model_share", "proxy (model)").replace("frs_share", "EPA plants").replace("cbp_emp_share", "CBP employment") + "</th>"; }).join("") + "</tr>");
+      Object.keys(sc).slice(0, 20).forEach(function (s) { t.append("tr").html("<td>" + s + "</td>" + cols.map(function (c) { return "<td class='n'>" + fmtP(sc[s][c]) + "</td>"; }).join("")); });
+      var le = Object.keys(PLN).filter(function (k) { return k.indexOf("log_error") === 0; }).map(function (k) { return k.replace("log_error_vs_", "") + ": rms log error " + PLN[k].rms + " (weighted " + PLN[k].weighted_rms + ", " + PLN[k].n_states + " states)"; }).join("; ");
+      d3.select("#proxy-note").text("How far the population proxy is from the measured distribution, by state. " + le + ". A log error of 0.3 means a typical state is off by about 35%; 0.1 means about 10%. " + (D.params.demand_weighting ? "This run's demand weighting: " + D.params.demand_weighting + "." : "")); }
+  }
+  d3.select("#named-toggle").on("click", function () { S.named = !S.named; d3.select(this).attr("aria-pressed", S.named ? "true" : "false"); S.render(); });
+  d3.select("#named-search").on("input", function () { S.namedQ = this.value.trim().toLowerCase(); drawNamed(); drawNamedList(); });
+  S.drawNamed = drawNamed;
+
   /* ---------- demand ---------- */
   var plantsTotal = D.facts.plants_total, corrTons = 53500;
   function renderDemand() {
@@ -557,7 +585,7 @@
     ns.enter().append("rect").attr("class", "node ramp").merge(ns).attr("width", function (n) { return S.sNode(dem[n.i]) * 1.2; }).attr("height", function (n) { return S.sNode(dem[n.i]) * 1.2; }).attr("x", function (n) { return n.x - S.sNode(dem[n.i]) * 0.6; }).attr("y", function (n) { return n.y - S.sNode(dem[n.i]) * 0.6; })
       .style("fill", function (n) { return S.dlayer === "plants" ? "var(--s7)" : sc(dem[n.i]); }).style("opacity", 0.9)
       .on("mousemove", function (ev, n) { var eu = D.enduse.map(function (e) { return e.name + " " + kt(dem[n.i] * e.share); }).slice(0, 4).join("<br>"); S.showTip(ev, "<b>" + n.name + "</b> · " + DIV[n.st] + "<br>" + kt(dem[n.i]) + " of board a year ≈ " + (dem[n.i] / corrTons).toFixed(1) + " corrugator-equivalents<br>≈ " + plants[n.i].toFixed(1) + " of the nation's " + plantsTotal.toLocaleString() + " corrugated facilities, if they follow demand<br><i>end use at national shares:</i><br>" + eu); }).on("mouseleave", S.hideTip);
-    S.drawMills({ dim: function () { return true; } });
+    S.drawMills({ dim: function () { return true; } }); drawNamed();
     S.setRamp(S.dlayer === "plants" ? null : "markets: board demand, 0 → " + kt(sc.domain()[1]) + " a year");
     var items = [["US box-plant demand, 2026", kt(tot)], ["corrugator-equivalents at 1,000 MMSF each", Math.round(tot / corrTons)], ["FBA count: corrugator plants / facilities", D.facts.corrugator_plants + " / " + plantsTotal.toLocaleString()], ["food & beverage share", D.facts.fnb_share], ["e-commerce share", D.facts.ecom_share]];
     var kk = d3.select("#kpis-demand").selectAll("div.k").data(items); kk.exit().remove(); kk.enter().append("div").attr("class", "k").merge(kk).html(function (d) { return "<span>" + d[0] + "</span><b>" + d[1] + "</b>"; });
@@ -626,6 +654,6 @@
   new MutationObserver(function () { S.render(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   if (window.matchMedia) window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { S.render(); });
   /* boot */
-  S.renderLegend(); S.drawFlowsDetail(); drawProspectsDetail(); drawPricesDetail(); drawFiberDetail(); drawDemandDetail(); drawBacktestDetail();
+  S.renderLegend(); S.drawFlowsDetail(); drawProspectsDetail(); drawPricesDetail(); drawFiberDetail(); drawDemandDetail(); drawNamedList(); drawBacktestDetail();
   var h = (location.hash || "").replace("#", ""); setTab(TITLES[h] ? h : "flows");
 })();
