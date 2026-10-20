@@ -245,7 +245,7 @@
     document.getElementById("legend").hidden = tab === "prices" || tab === "demand" || tab === "corr" || tab === "thru";
     if (tab !== "backtest" && S.scen === "fp2024" && S._autoScen) { S.scen = "fp2026"; S._autoScen = false; }
     if (tab === "backtest") { S._autoScen = S.scen !== "fp2024"; }
-    S.render(); try { location.hash = tab; } catch (e) {}
+    S.render();
   }
   S.render = function () { if (S.tab === "flows") S.renderFlows(); else if (S.tab === "corr" && S.renderCorr) S.renderCorr(); else if (S.tab === "thru" && S.renderThru) S.renderThru(); else if (S.tab === "prospects") renderProspects(); else if (S.tab === "prices") renderPrices(); else if (S.tab === "fiber") renderFiber(); else if (S.tab === "demand") renderDemand(); else if (S.tab === "backtest") renderBacktest(); else renderMethod(); };
   d3.selectAll("nav.tabs button").on("click", function () { setTab(this.dataset.tab); });
@@ -256,5 +256,5 @@
   if (window.matchMedia) window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { S.render(); });
   /* boot */
   S.renderLegend(); S.drawFlowsDetail(); drawProspectsDetail(); drawPricesDetail(); drawFiberDetail(); drawDemandDetail(); drawNamedList(); drawBacktestDetail();
-  var h = (location.hash || "").replace("#", ""); setTab(TITLES[h] ? h : "flows");
+  S.setTab = setTab; var h = (location.hash || "").replace("#", "").split("/")[0]; setTab(TITLES[h] ? h : "flows");
 })();

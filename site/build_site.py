@@ -154,7 +154,7 @@ def render(extra):
     miss = re.findall(r"{{(\w+)}}", out)
     if miss: raise SystemExit("unfilled: " + ", ".join(miss))
     return out
-css = open(os.path.join(SRC, "ui.css")).read(); js = open(os.path.join(SRC, "ui_core.js")).read() + "\n" + open(os.path.join(SRC, "ui_corr.js")).read() + "\n" + open(os.path.join(SRC, "ui_thru.js")).read() + "\n" + open(os.path.join(SRC, "ui_tabs.js")).read() + "\n" + open(os.path.join(SRC, "ui_chat.js")).read()
+css = open(os.path.join(SRC, "ui.css")).read(); js = open(os.path.join(SRC, "ui_core.js")).read() + "\n" + open(os.path.join(SRC, "ui_corr.js")).read() + "\n" + open(os.path.join(SRC, "ui_thru.js")).read() + "\n" + open(os.path.join(SRC, "ui_tabs.js")).read() + "\n" + open(os.path.join(SRC, "ui_chat.js")).read() + "\n" + open(os.path.join(SRC, "ui_ticker.js")).read()
 data_js = "window.PN_DATA=" + json.dumps(D, separators=(",", ":")) + ";\nwindow.PN_BASEMAP=" + json.dumps(BM, separators=(",", ":")) + ";\n" + "window.PN_ARTIFACT_URL=" + json.dumps(ARTIFACT_URL) + ";\n"
 
 D3 = '<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>'

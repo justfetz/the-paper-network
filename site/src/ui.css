@@ -147,3 +147,25 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--rule);font-fa
 .chat .trail summary{cursor:pointer;line-height:1.45}.chat .trail summary:hover{color:var(--accent)}
 .chat .trail pre{margin:6px 0 0;max-height:220px;overflow:auto;white-space:pre-wrap;word-break:break-word;font-size:10.5px;color:var(--ink-2);background:var(--bg);border:1px solid var(--rule);border-radius:6px;padding:6px 8px}
 .chat .trail.warn summary{color:var(--s8)}
+
+/* the tape: live inputs, model results and events along the bottom; every item jumps to its tab */
+body.has-ticker{padding-bottom:44px}
+.ticker{position:fixed;left:0;right:0;bottom:0;z-index:19;height:40px;display:flex;align-items:center;gap:0;background:var(--card);border-top:1px solid var(--rule);font-family:var(--mono);font-size:12px;color:var(--ink-2);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:content-box}
+.ticker .tag{flex:none;padding:0 12px;height:100%;display:flex;align-items:center;font-size:10.5px;letter-spacing:.14em;color:var(--accent-ink);background:var(--accent);font-weight:500}
+.ticker .view{flex:1;min-width:0;overflow:hidden;height:100%;position:relative;mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 24px),transparent)}
+.ticker .view.static{overflow-x:auto;mask-image:none}
+.ticker .track{display:inline-flex;align-items:center;height:100%;white-space:nowrap;will-change:transform}
+.ticker .track.roll{animation:pn-roll linear infinite}
+.ticker:hover .track.roll,.ticker:focus-within .track.roll{animation-play-state:paused}
+@keyframes pn-roll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ticker .it{font:inherit;color:inherit;background:none;border:0;padding:0 10px;height:100%;cursor:pointer;white-space:nowrap}
+.ticker .it:hover,.ticker .it:focus-visible{color:var(--accent);outline:none}
+.ticker .it.live::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--good);margin-right:7px;vertical-align:1px}
+.ticker .it.ev{color:var(--s8)}
+.ticker .sep{color:var(--ink-3);font-size:7px;padding:0 2px;opacity:.7}
+body.has-ticker .chat-fab{bottom:calc(58px + env(safe-area-inset-bottom,0px))}
+body.has-ticker .chat{bottom:calc(110px + env(safe-area-inset-bottom,0px))}
+@media (max-width:640px){body.has-ticker .chat{bottom:0;height:min(82vh,640px)}.chat[data-open="true"]~.ticker{display:none}}
+/* first-load draw-in */
+@keyframes pn-in{from{opacity:0}}
+#map .arc.intro{animation:pn-in .9s ease-out both;animation-delay:calc(var(--i,0) * .35ms)}
