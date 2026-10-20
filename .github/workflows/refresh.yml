@@ -1,0 +1,60 @@
+# The Paper Network: scheduled data refresh, model re-run and site rebuild.
+# Machine-readable sources run here (they need network access and, for some, a free key stored as a repo secret).
+# Judgment work (mill closures, conversions, price moves read from press) is a separate Claude scheduled task that edits
+# data/mills_final.csv and site/build_site.py price points and commits; this workflow then re-runs on the push.
+name: refresh
+on:
+  schedule:
+    - cron: "17 14 * * 1"     # Mondays 14:17 UTC: EIA diesel lands Monday afternoon ET
+    - cron: "23 13 9 * *"     # 9th of each month: price-point month closed, rebuild
+    - cron: "31 13 28 1,4,7,10 *"  # quarter-end + 4 weeks: AF&PA quarterly report and earnings season are in
+  workflow_dispatch:
+  push:
+    paths: ["data/mills_final.csv", "data/counties.csv", "model/**", "site/src/**", "site/build_site.py"]
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency: { group: refresh, cancel-in-progress: false }
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - run: pip install numpy pandas scipy zipcodes geonamescache
+      - name: Ingest what has keys (each step is skipped when its secret is absent)
+        env:
+          EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
+          CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
+          EDGAR_UA: ${{ secrets.EDGAR_UA }}
+        run: |
+          set -e
+          [ -n "$EIA_API_KEY" ] && python ingest/eia_diesel.py data/diesel_weekly.csv || echo "EIA: no key, skipped"
+          [ -n "$CENSUS_API_KEY" ] && python ingest/census_cbp.py 2022 data/cbp_322211_county.csv || echo "Census: no key, skipped"
+          [ -n "$EDGAR_UA" ] && [ "$(date +%m)" = "03" ] && python ingest/edgar_10k.py data/10k || echo "EDGAR: skipped (runs in March with EDGAR_UA set)"
+      - name: Re-run the model (about 5 minutes)
+        run: |
+          cd model
+          python export_json.py ../data/mills_final.csv ../data/paper_network.json
+          python corrugators.py ../data/paper_network.json ../data/corrugators.json
+      - name: Rebuild the site
+        run: cd site && python build_site.py ../data/paper_network.json ../data/basemap.json
+      - name: Commit if anything changed
+        run: |
+          git config user.name "paper-network-bot" && git config user.email "bot@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && echo "no changes" || (git commit -m "refresh: $(date -u +%Y-%m-%d) scheduled data and model re-run" && git push)
+      - name: Upload site for Pages
+        uses: actions/upload-pages-artifact@v3
+        with: { path: site }
+  deploy:
+    needs: refresh
+    runs-on: ubuntu-latest
+    environment: { name: github-pages, url: ${{ steps.deployment.outputs.page_url }} }
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
