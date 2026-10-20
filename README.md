@@ -126,8 +126,8 @@ regional detail, the real corrugator list.
 ## Ask the network, and the tape
 
 The chat drawer (bottom right) answers questions about mills, markets, outages, switching and prices from the page's own
-numbers through seven page functions (find a mill, find a market, the knockouts, a price shock, the scenario KPIs, the EPA
-plant list, its owners), names the scenario each figure comes from, and lists the lookups under every answer with the raw
+numbers through six page functions (find a mill, find a market, the knockouts, a price shock, the scenario KPIs, the EPA
+plant list as registered, with status and owner only where verified), names the scenario each figure comes from, and lists the lookups under every answer with the raw
 results one click away. An answer that quotes network numbers with no lookup behind it is flagged as unsupported. On
 claude.ai it runs on the viewer's own account; on the public page it runs through the Worker in `chat/`, which holds the
 key, allows only this site's origin, limits each visitor to 20 rounds a minute and everyone to 400 rounds a day. No key is

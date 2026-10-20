@@ -14,7 +14,14 @@ D["plants"] = None; D["plant_layer"] = None
 if os.path.exists(PL_PATH):
     import csv
     rows = list(csv.DictReader(open(PL_PATH, encoding="utf-8", errors="ignore")))
-    D["plants"] = [[r["name"][:48], r["owner_guess"], r["city"].title() if r["city"] else "", r["state"], round(float(r["lat"]), 3), round(float(r["lon"]), 3), int(float(r["node"]))] for r in rows if r.get("lat") and r.get("lon")]
+    VER_PATH = os.path.join(os.path.dirname(JSON_PATH), "plants_verified.csv"); ver = {}
+    if os.path.exists(VER_PATH):
+        for v in csv.DictReader(open(VER_PATH, encoding="utf-8", errors="ignore")): ver[v["registry_id"]] = v
+    def vrow(r):   # the EPA row as registered, then what the verification pass established (empty until it has run for that site)
+        v = ver.get(r["registry_id"], {})
+        return [r["name"], r["city"], r["state"], round(float(r["lat"]), 3), round(float(r["lon"]), 3), int(float(r["node"])),
+                v.get("operating", ""), v.get("plant_type", ""), v.get("owner", ""), v.get("confidence", ""), v.get("evidence_url", ""), r.get("address", ""), r.get("zip", "")]   # name and location exactly as registered
+    D["plants"] = [vrow(r) for r in rows if r.get("lat") and r.get("lon")]
 if os.path.exists(PLN_PATH):
     D["plant_layer"] = json.load(open(PLN_PATH))
     if D["plant_layer"].get("weighting_note") and D.get("params", {}).get("demand_weighting", "").startswith("85%"):

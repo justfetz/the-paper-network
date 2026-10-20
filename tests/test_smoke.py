@@ -54,8 +54,8 @@ try:
     check("chat lookup: Houston, TX and Cook both resolve", impl["find_market"]("Houston, TX")[0]["market"] == "Harris, TX" and impl["find_market"]("Cook")[0]["market"] == "Cook, IL")
     mans = impl["find_mill"]("Mansfield")[0]
     check("chat lookup: Mansfield has a knockout cost and named top markets", mans["if_this_mill_goes_down"]["network_cost_usd_per_year"] > 1e8 and mans["top_markets_served"] and ", TX, TX" not in mans["top_markets_served"][0])
-    check("chat lookup: owners and plant search", impl["plant_owners"]()["total_sites"] > 1000 and impl["find_plants"]("International Paper", "TX")["matches"] > 0)
-    check("chat lookup: price shock and scenarios", impl["price_shock"]("IP")["open_market_tons_before"] > 0 and len(impl["scenarios"]()) > 20 and len(defs) == 7)
+    fp_ = impl["find_plants"]("International Paper", "TX"); check("chat lookup: plant search returns rows as registered, no guessed owner", fp_["matches"] > 0 and "registered_name" in fp_["shown"][0] and "owner_guess" not in json.dumps(fp_))
+    check("chat lookup: price shock and scenarios", impl["price_shock"]("IP")["open_market_tons_before"] > 0 and len(impl["scenarios"]()) > 20 and len(defs) == 6)
 except Exception as e: check("chat lookups import and run", False, repr(e))
 tmp = tempfile.mkdtemp()
 r = subprocess.run([sys.executable, os.path.join(ROOT, "evals", "chat_golden.py"), os.path.join(ROOT, "data", "paper_network.json"), os.path.join(tmp, "g.json")], capture_output=True, text=True)

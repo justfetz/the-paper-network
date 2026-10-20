@@ -53,13 +53,10 @@
   function findPlants(query, state) {
     var plants = D.plants || [], q = norm(expand(query)), st = String(state || "").trim().toUpperCase().slice(0, 2);
     if (q === "all" || q === "any" || q === "*") q = "";
-    var hits = plants.filter(function (p) { return (!st || p[3] === st) && (!q || norm(p[0] + " " + p[1] + " " + p[2] + " " + p[3]).indexOf(q) >= 0); });
-    return { matches: hits.length, shown: hits.slice(0, 25).map(function (p) { return { name: p[0].replace(/^\d+ - /, ""), owner_guess: p[1], city: p[2], state: p[3], market: nodeName(p[6]) }; }),
-      note: "EPA Facility Registry Service, NAICS 322211 sites with coordinates (" + plants.length + " on the map). The registry has no operating-status field, so roughly a third may be closed or mis-coded; owner_guess comes from the facility name." };
-  }
-  function plantOwners() {
-    var fo = (D.plant_layer && D.plant_layer.frs_by_owner) || {}, rows = Object.keys(fo).map(function (o) { return { owner: o, sites: fo[o] }; }).sort(function (a, b) { return b.sites - a.sites; });
-    return { total_sites: rows.reduce(function (t, r) { return t + r.sites; }, 0), by_owner: rows.slice(0, 30), note: "Counts of EPA registry sites whose names match an owner pattern; 'Independent / unknown' is everything else. A superset of operating plants, not a verified list." };
+    var hits = plants.filter(function (p) { return (!st || p[2] === st) && (!q || norm(p[0] + " " + p[1] + " " + p[2] + " " + p[8] + " " + p[7]).indexOf(q) >= 0); });
+    var nv = plants.filter(function (p) { return p[6]; }).length;
+    return { matches: hits.length, shown: hits.slice(0, 25).map(function (p) { var r = { registered_name: p[0], registered_address: p[11] || "", city: p[1], state: p[2], zip: p[12] || "", market: nodeName(p[5]) }; if (p[6]) { r.verified = { operating: p[6], plant_type: p[7], owner: p[8], confidence: p[9], source: p[10] }; } else r.verified = "not yet checked"; return r; }),
+      note: "EPA Facility Registry Service, NAICS 322211 sites with coordinates (" + plants.length + " on the map), shown exactly as registered; the registry carries no owner, status or date. Owner, plant type and status come only from the verification pass (" + nv + " sites checked so far, each with a source URL). A name match is not ownership: a site named for a company may have changed hands." };
   }
   var trail = [];   // page functions Claude read for the current question: the viewer sees exactly what the answer was built from
   function traced(t) { var run = t.execute; t.execute = function (inp, ctx) { var rec = { name: t.name, input: inp || {}, result: null, error: null }; trail.push(rec); try { var out = run(inp || {}, ctx); rec.result = out; return out; } catch (e) { rec.error = String(e && e.message || e); throw e; } }; return t; }
@@ -76,11 +73,9 @@
       inputSchema: { type: "object", properties: { producer: { type: "string" } }, required: ["producer"] }, execute: function (inp) { return shock(inp.producer); } },
     { name: "scenarios", description: "KPIs of every solved scenario (2024 and 2026 footprints, the counterfactual, diesel at $3, $5 and $6.20, and each knockout): freight bill, average haul, rail share, freight per ton, unmet tons, exports. Use it for totals and comparisons.",
       execute: function () { return Object.keys(D.scenarios).map(function (k) { var s = D.scenarios[k]; return { id: k, label: s.label, kind: s.kind, demand_tons: s.demand_tons, export_tons: s.export_tons, kpi: s.kpi }; }); } },
-    { name: "find_plants", description: "Search the EPA facility registry's list of box plants (NAICS 322211 sites on the map) by company, city or state; 'all' with a state lists that state. Returns up to 25 plants with the owner guessed from the name, city, state and market, plus the count of matches. The list is a superset: some sites are closed or mis-coded.",
-      inputSchema: { type: "object", properties: { query: { type: "string", description: "company, city, or 'all'" }, state: { type: "string", description: "optional two-letter state" } }, required: ["query"] },
-      execute: function (inp) { var r = findPlants(inp.query, inp.state); if (!r.matches) throw new Error("no EPA site matches '" + inp.query + "'" + (inp.state ? " in " + inp.state : "")); return r; } },
-    { name: "plant_owners", description: "The companies in the EPA box-plant list, with the number of registry sites whose names match each (International Paper, Smurfit Westrock, PCA, Georgia-Pacific, Pratt and so on) and the 'Independent / unknown' remainder.",
-      execute: function () { return plantOwners(); } }
+    { name: "find_plants", description: "Search the EPA facility registry's list of box plants (NAICS 322211 sites on the map) by a word in the registered name, a city or a state; 'all' with a state lists that state. Returns up to 25 rows exactly as registered (name, city, state, market) plus, only where the verification pass has checked the site, its status, plant type, owner and source. The registry itself carries no owner or status, and a name match is not ownership.",
+      inputSchema: { type: "object", properties: { query: { type: "string", description: "word in the registered name, a city, or 'all'" }, state: { type: "string", description: "optional two-letter state" } }, required: ["query"] },
+      execute: function (inp) { var r = findPlants(inp.query, inp.state); if (!r.matches) throw new Error("no EPA site matches '" + inp.query + "'" + (inp.state ? " in " + inp.state : "")); return r; } }
   ].map(traced);
 
   function digest() {
