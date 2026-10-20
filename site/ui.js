@@ -1,0 +1,453 @@
+/* The Paper Network dashboard, part 1: data access, shared map, flows tab. Needs d3 v7 and window.PN_DATA / window.PN_BASEMAP. */
+(function () {
+  var D = window.PN_DATA, BM = window.PN_BASEMAP;
+  var fmtT = d3.format(",.0f"), fmtP = d3.format(".0%"), fmt1 = d3.format(".1f");
+  var kt = function (v) { return v >= 950000 ? (v / 1e6).toFixed(2) + " Mt" : Math.round(v / 1e3) + " kt"; };
+  var musd = function (v) { return "$" + (Math.abs(v) / 1e6).toFixed(Math.abs(v) < 1e7 ? 1 : 0) + "M"; };
+  var css = function (n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); };
+  var proj = d3.geoConicEqualArea().parallels([29.5, 45.5]).rotate([96, 0]).center([-0.6, 38.7]).scale(1300).translate([487.5, 305]);
+  D.mills.forEach(function (m) { var p = proj([m.lon, m.lat]); m.x = p[0]; m.y = p[1]; });
+  D.nodes.forEach(function (n, i) { var p = proj([n.lon, n.lat]); n.x = p[0]; n.y = p[1]; n.i = i; });
+  D.ports.forEach(function (p) { var q = proj([p.lon, p.lat]); p.x = q[0]; p.y = q[1]; });
+  D.occ.ports.forEach(function (p) { var q = proj([p.lon, p.lat]); p.x = q[0]; p.y = q[1]; });
+  var OWNERS = D.owner_order, byId = {}; D.mills.forEach(function (m) { byId[m.id] = m; });
+  function ownerVar(o) { var i = OWNERS.indexOf(o); return i >= 0 && i < 8 ? "var(--s" + (i + 1) + ")" : "var(--other)"; }
+  var GRADE = { kraft_linerboard: "kraft liner", recycled_linerboard: "recycled liner", white_top_linerboard: "white-top liner", semichem_medium: "semichem medium", recycled_medium: "recycled medium" };
+  function grades(g) { return String(g || "").split(/[;|]/).filter(Boolean).map(function (x) { return GRADE[x] || x; }).join(", "); }
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  /* ---------- state ---------- */
+  var S = window.PN = { tab: "flows", scen: "fp2026", flows: true, market: true, exports: false, demand: true, millColor: "owner", nodeColor: "none", isolate: null, minflow: 2000,
+    grade: "L", shock: "", spec: "ect32", pLiner: +document.getElementById("p-liner").value, pMedium: +document.getElementById("p-medium").value, diesel: "3.75", hike: 70,
+    fiberFlows: true, fiberValue: true, dlayer: "demand", cal: "m" };
+  S.D = D; S.byId = byId; S.ownerVar = ownerVar; S.kt = kt; S.musd = musd; S.css = css; S.grades = grades; S.MONTHS = MONTHS; S.fmtT = fmtT; S.fmtP = fmtP; S.fmt1 = fmt1;
+  function scen() { return D.scenarios[S.scen]; }
+  function arcsOf(key) {
+    var s = D.scenarios[key]; if (!s.delta_of) return s.arcs;
+    var map = new Map(D.scenarios[s.delta_of].arcs.map(function (a) { return [a[0] + "|" + a[1] + "|" + a[3], a]; }));
+    s.arcs.forEach(function (a) { var k = a[0] + "|" + a[1] + "|" + a[3]; if (a[2] === 0) map.delete(k); else map.set(k, a); });
+    return Array.from(map.values());
+  }
+  function ownerIn(m) { return S.scen === "fp2024" ? m.owner_2024 : m.owner; }
+  function capIn(m) { return S.scen === "fp2024" ? m.cap_2024 : m.cap; }
+  var cache = {};
+  function derived(key) {
+    if (cache[key]) return cache[key];
+    var s = D.scenarios[key], arcs = arcsOf(key), byMill = {}, byNode = {};
+    arcs.forEach(function (a) { (byMill[a[0]] = byMill[a[0]] || []).push(a); (byNode[a[1]] = byNode[a[1]] || []).push(a); });
+    var byPort = {}; s.exports.forEach(function (e) { (byPort[e[1]] = byPort[e[1]] || []).push(e); });
+    var active = {}; s.active.forEach(function (g) { active[g] = true; });
+    return (cache[key] = { arcs: arcs, byMill: byMill, byNode: byNode, byPort: byPort, active: active });
+  }
+  S.scen_ = scen; S.derived = derived; S.ownerIn = ownerIn; S.capIn = capIn;
+
+  /* ---------- map scaffold ---------- */
+  var W = 975, H = 610, root = d3.select("#map");
+  var svg = root.append("svg").attr("viewBox", "0 0 " + W + " " + H).attr("role", "img").attr("aria-label", "Map of US containerboard mills, demand and modeled flows");
+  var gBase = svg.append("g"), gArcs = svg.append("g"), gExp = svg.append("g"), gNodes = svg.append("g"), gPorts = svg.append("g"), gMills = svg.append("g"), gLab = svg.append("g");
+  gBase.append("path").attr("d", BM.nation).attr("class", "nation"); gBase.append("path").attr("d", BM.mesh).attr("class", "mesh");
+  var tip = d3.select("#mapcard").append("div").attr("class", "tip").style("display", "none");
+  function showTip(ev, html) {
+    var box = document.getElementById("mapcard").getBoundingClientRect(), x = ev.clientX - box.left, y = ev.clientY - box.top;
+    tip.html(html).style("display", "block"); var tw = tip.node().offsetWidth, th = tip.node().offsetHeight;
+    tip.style("left", Math.max(4, Math.min(box.width - tw - 4, x + 14)) + "px").style("top", (y - th - 12 < 4 ? y + 16 : y - th - 12) + "px");
+  }
+  function hideTip() { tip.style("display", "none"); }
+  S.showTip = showTip; S.hideTip = hideTip; S.layers = { arcs: gArcs, exp: gExp, nodes: gNodes, ports: gPorts, mills: gMills, lab: gLab };
+  function arcPath(a, b) { var dx = b.x - a.x, dy = b.y - a.y, k = 0.16; return "M" + a.x + "," + a.y + "Q" + ((a.x + b.x) / 2 - dy * k) + "," + ((a.y + b.y) / 2 + dx * k) + " " + b.x + "," + b.y; }
+  var rMill = function (cap) { return Math.max(2.4, Math.sqrt(cap / 1e6) * 9); }, sNode = function (t) { return Math.max(1.6, Math.sqrt(t / 1e6) * 7); }, wArc = function (t) { return Math.max(0.35, Math.sqrt(t / 1e6) * 6); };
+  S.arcPath = arcPath; S.rMill = rMill; S.sNode = sNode; S.wArc = wArc;
+  function seq(domain) { return d3.scaleSequential(d3.interpolateLab(css("--seq-lo"), css("--seq-hi"))).domain(domain); }
+  S.seq = seq;
+  function setRamp(text) { var r = d3.select("#ramp"); if (!text) { r.attr("hidden", ""); return; } r.attr("hidden", null); d3.select("#ramp-text").text(text); }
+  S.setRamp = setRamp;
+
+  /* ---------- generic mill layer (used by every tab) ---------- */
+  function drawMills(opts) {
+    var s = scen(), dv = derived(S.scen), iso = S.isolate;
+    var mills = D.mills.filter(function (m) { return m.country !== "MX" && (dv.active[m.id] || m.status === "closed" || (s.kind === "knockout" && s.mill === m.id)); });
+    var off = function (m) { return !dv.active[m.id] || (s.kind === "knockout" && s.mill === m.id); };
+    var sel = gMills.selectAll("circle").data(mills, function (m) { return m.id; });
+    sel.exit().remove();
+    sel.enter().append("circle").attr("class", "mill").merge(sel)
+      .attr("cx", function (m) { return m.x; }).attr("cy", function (m) { return m.y; })
+      .attr("r", function (m) { return opts && opts.radius ? opts.radius(m) : rMill(capIn(m)); })
+      .classed("off", off).classed("dim", function (m) { return (iso && ownerIn(m) !== iso) || (opts && opts.dim && opts.dim(m)); })
+      .style("fill", function (m) { if (off(m)) return "none"; return opts && opts.fill ? opts.fill(m) : ownerVar(ownerIn(m)); })
+      .style("stroke", function (m) { return off(m) ? "var(--ink-3)" : (opts && opts.stroke ? opts.stroke(m) : ownerVar(ownerIn(m))); })
+      .on("mousemove", function (ev, m) { showTip(ev, (opts && opts.tip ? opts.tip(m) : millTip(m, s, dv))); gArcs.selectAll("path").classed("hl", function (a) { return a[0] === m.id; }).classed("fade", function (a) { return a[0] !== m.id; }); })
+      .on("mouseleave", function () { hideTip(); gArcs.selectAll("path").classed("hl", false).classed("fade", false); });
+    var labs = mills.filter(function (m) { return capIn(m) >= 850000 && dv.active[m.id]; });
+    var ls = gLab.selectAll("text").data(labs, function (m) { return m.id; }); ls.exit().remove();
+    ls.enter().append("text").merge(ls).attr("x", function (m) { return m.x + rMill(capIn(m)) + 2; }).attr("y", function (m) { return m.y + 3; }).text(function (m) { return m.name; });
+  }
+  function millTip(m, s, dv) {
+    var dests = (dv.byMill[m.id] || []).slice().sort(function (a, b) { return b[2] - a[2]; });
+    var exp = s.exports.filter(function (e) { return e[0] === m.id; }).reduce(function (a, e) { return a + e[2]; }, 0);
+    var off = !dv.active[m.id] || (s.kind === "knockout" && s.mill === m.id);
+    var line = off ? (m.status === "closed" ? "closed " + (m.closed_year || "") : "knocked out in this scenario") : "shipping " + kt(s.shipped[m.id]) + " of " + kt(capIn(m)) + " (" + fmtP(s.util[m.id]) + " loaded) · " + Math.round(capIn(m) / 355) + " t/day";
+    return "<b>" + m.name + ", " + m.st + "</b> · " + ownerIn(m) + "<br>" + grades(m.grades) + " · " + kt(capIn(m)) + "/yr<br>" + line +
+      (off ? "" : "<br>one more ton of capacity is worth $" + Math.round(s.shadow[m.id]) + "/t to the network" + (exp ? "<br>exports " + kt(exp) : "")) +
+      (dests.length ? "<br>" + dests.slice(0, 3).map(function (a) { return "→ " + D.nodes[a[1]].name + " " + kt(a[2]); }).join("<br>") : "") + (m.note ? "<br><i>" + m.note + "</i>" : "");
+  }
+  S.drawMills = drawMills; S.millTip = millTip;
+  function clearLayers() { gArcs.selectAll("*").remove(); gExp.selectAll("*").remove(); gNodes.selectAll("*").remove(); gPorts.selectAll("*").remove(); }
+  S.clearLayers = clearLayers;
+
+  /* ---------- flows tab ---------- */
+  function renderFlows() {
+    var s = scen(), dv = derived(S.scen), iso = S.isolate;
+    var shadowScale = seq([0, d3.quantile(s.shadow.filter(function (v) { return v > 0; }).sort(d3.ascending), 0.95) || 1]);
+    var mcScale = seq([d3.min(s.node_mc), d3.quantile(s.node_mc.slice().sort(d3.ascending), 0.95)]);
+    var arcs = (S.flows || S.market ? dv.arcs : []).filter(function (a) { return a[2] >= S.minflow && ((a[3] === 1 && S.flows) || (a[3] === 0 && S.market)) && (!iso || ownerIn(byId[a[0]]) === iso); }).sort(function (a, b) { return b[2] - a[2]; });
+    var as = gArcs.selectAll("path").data(arcs, function (a) { return a[0] + "|" + a[1] + "|" + a[3]; }); as.exit().remove();
+    as.enter().append("path").merge(as).attr("d", function (a) { return arcPath(byId[a[0]], D.nodes[a[1]]); }).attr("class", function (a) { return a[3] ? "arc own" : "arc mkt"; })
+      .style("stroke", function (a) { return a[3] ? ownerVar(ownerIn(byId[a[0]])) : null; }).style("stroke-width", function (a) { return wArc(a[2]); });
+    var ex = S.exports ? s.exports.filter(function (e) { return !iso || ownerIn(byId[e[0]]) === iso; }) : [];
+    var es = gExp.selectAll("path").data(ex, function (e) { return e[0] + "|" + e[1]; }); es.exit().remove();
+    es.enter().append("path").merge(es).attr("class", "arc exp").attr("d", function (e) { return arcPath(byId[e[0]], D.ports[e[1]]); }).style("stroke", function (e) { return ownerVar(ownerIn(byId[e[0]])); }).style("stroke-width", function (e) { return wArc(e[2]); });
+    var ps = gPorts.selectAll("path").data(S.exports ? D.ports : [], function (p) { return p.name; }); ps.exit().remove();
+    ps.enter().append("path").attr("class", "port").merge(ps)
+      .attr("d", function (p) { var t = (dv.byPort[D.ports.indexOf(p)] || []).reduce(function (a, e) { return a + e[2]; }, 0), r = Math.max(3, Math.sqrt(t / 1e6) * 9); return "M" + p.x + "," + (p.y - r) + "L" + (p.x + r) + "," + (p.y + r) + "L" + (p.x - r) + "," + (p.y + r) + "Z"; })
+      .on("mousemove", function (ev, p) { var i = D.ports.indexOf(p), list = (dv.byPort[i] || []).slice().sort(function (a, b) { return b[2] - a[2]; }), t = list.reduce(function (a, e) { return a + e[2]; }, 0); showTip(ev, "<b>" + p.name + "</b><br>export gateway · " + fmtP(p.share) + " of US export tons<br>" + kt(t) + " through here<br>" + list.slice(0, 3).map(function (e) { return byId[e[0]].name + " " + kt(e[2]); }).join("<br>")); })
+      .on("mouseleave", hideTip);
+    var ns = gNodes.selectAll("rect").data(S.demand ? D.nodes : [], function (n) { return n.id; }); ns.exit().remove();
+    ns.enter().append("rect").attr("class", "node").merge(ns)
+      .attr("x", function (n) { return n.x - sNode(s.node_demand[n.i]) / 2; }).attr("y", function (n) { return n.y - sNode(s.node_demand[n.i]) / 2; }).attr("width", function (n) { return sNode(s.node_demand[n.i]); }).attr("height", function (n) { return sNode(s.node_demand[n.i]); })
+      .classed("ramp", S.nodeColor === "mc").style("fill", function (n) { return S.nodeColor === "mc" ? mcScale(s.node_mc[n.i]) : null; })
+      .on("mousemove", function (ev, n) { var list = (dv.byNode[n.i] || []).slice().sort(function (a, b) { return b[2] - a[2]; }); showTip(ev, "<b>" + n.name + "</b><br>" + fmtT(n.pop) + " people in the catchment<br>" + kt(s.node_demand[n.i]) + " of board a year ≈ " + (s.node_demand[n.i] / 53500).toFixed(1) + " corrugator-equivalents<br>delivered marginal cost $" + Math.round(s.node_mc[n.i]) + "/t<br>" + list.slice(0, 4).map(function (a) { var m = byId[a[0]]; return m.name + ", " + m.st + " (" + ownerIn(m) + (a[3] ? ", own" : ", market") + ") " + kt(a[2]); }).join("<br>")); })
+      .on("mouseleave", hideTip);
+    drawMills({ fill: S.millColor === "shadow" ? function (m) { return shadowScale(s.shadow[m.id]); } : null, stroke: S.millColor === "shadow" ? function () { return "var(--bg)"; } : null });
+    setRamp(S.millColor === "shadow" ? "mills: value of one more ton, $0 → $" + Math.round(shadowScale.domain()[1]) + "/t" : S.nodeColor === "mc" ? "demand: delivered marginal cost, $" + Math.round(mcScale.domain()[0]) + " → $" + Math.round(mcScale.domain()[1]) + "/t" : null);
+    renderKpis();
+  }
+  function renderKpis() {
+    var s = scen(), k = s.kpi, b = D.scenarios.fp2026.kpi, isBase = S.scen === "fp2026" || S.scen === "fp2024";
+    var delta = function (v, bv, f, unit) { if (isBase) return ""; var d = v - bv; return "<span class='d'> " + (d >= 0 ? "+" : "−") + f(Math.abs(d)) + unit + " vs Oct 2026</span>"; };
+    var items = [["scenario", s.label], ["board shipped", kt(k.tons_shipped_domestic) + delta(k.tons_shipped_domestic, b.tons_shipped_domestic, kt, "")], ["exported", kt(k.tons_exported)],
+      ["average haul", Math.round(k.avg_haul_miles) + " mi" + delta(k.avg_haul_miles, b.avg_haul_miles, function (v) { return Math.round(v); }, " mi")], ["by rail", fmtP(k.rail_share)],
+      ["freight", "$" + fmt1(k.avg_freight_per_ton) + "/t · " + musd(k.freight_usd) + delta(k.freight_usd, b.freight_usd, musd, "")],
+      ["bought outside own system", kt(k.owner_purchased_from_market_tons)], ["unmet demand", k.unmet_tons > 0 ? kt(k.unmet_tons) : "none"]];
+    if (s.kind === "month") items.push(["outage cost this month", musd(s.outage_penalty_usd) + " · " + s.mills_down.length + " mills down, " + kt(s.tons_offline) + " offline"]);
+    var sel = d3.select("#kpis").selectAll("div.k").data(items); sel.exit().remove();
+    sel.enter().append("div").attr("class", "k").merge(sel).classed("warn", function (d) { return d[0] === "unmet demand" && d[1] !== "none"; }).html(function (d) { return "<span>" + d[0] + "</span><b>" + d[1] + "</b>"; });
+  }
+  S.renderFlows = renderFlows;
+  function renderLegend() {
+    var caps = {}; D.mills.forEach(function (m) { if (m.country !== "MX" && m.status === "open") caps[m.owner] = (caps[m.owner] || 0) + m.cap; });
+    var rows = OWNERS.slice(0, 8).map(function (o) { return { o: o, cap: caps[o] || 0 }; }); rows.push({ o: "Other", cap: OWNERS.slice(8).reduce(function (a, o) { return a + (caps[o] || 0); }, 0) });
+    var sel = d3.select("#legend").selectAll("button").data(rows);
+    sel.enter().append("button").attr("type", "button").merge(sel).attr("aria-pressed", function (d) { return S.isolate === d.o ? "true" : "false"; })
+      .html(function (d) { return "<i style='background:" + (d.o === "Other" ? "var(--other)" : ownerVar(d.o)) + "'></i>" + d.o + " <span>" + kt(d.cap) + "</span>"; })
+      .on("click", function (ev, d) { S.isolate = S.isolate === d.o ? null : (d.o === "Other" ? null : d.o); renderLegend(); S.render(); });
+  }
+  S.renderLegend = renderLegend;
+
+  /* ---------- flows controls ---------- */
+  function setScen(key) { S.scen = key; d3.selectAll("#scen button").attr("aria-pressed", function () { return this.dataset.scen === key ? "true" : "false"; }); S.render(); }
+  S.setScen = setScen;
+  d3.selectAll("#scen button").on("click", function () { d3.select("#month").property("value", ""); d3.select("#ko").property("value", ""); setScen(this.dataset.scen); });
+  var monthSel = d3.select("#month");
+  ["m", "o"].forEach(function (pfx) {
+    var og = monthSel.append("optgroup").attr("label", pfx === "m" ? "Staggered calendar (as drawn)" : "Dual-priced assignment");
+    og.selectAll("option").data(d3.range(1, 13)).enter().append("option").attr("value", function (m) { return pfx + (m < 10 ? "0" + m : m); })
+      .text(function (m) { var s = D.scenarios[pfx + (m < 10 ? "0" + m : m)]; return MONTHS[m - 1] + " · " + s.mills_down.length + " mills down · " + kt(s.tons_offline) + " offline · " + musd(s.outage_penalty_usd); });
+  });
+  monthSel.on("change", function () { if (this.value) { d3.select("#ko").property("value", ""); d3.selectAll("#scen button").attr("aria-pressed", "false"); S.scen = this.value; S.render(); } });
+  var koSel = d3.select("#ko");
+  koSel.selectAll("option.k").data(D.knockouts.slice().sort(function (a, b) { return b.d_total - a.d_total; })).enter().append("option").attr("class", "k").attr("value", function (k) { return "ko" + k.mill; })
+    .text(function (k) { return k.name + ", " + k.st + " (" + k.owner + ") · +" + musd(k.d_total) + "/yr" + (k.unmet > 0 ? " · " + kt(k.unmet) + " unmet" : ""); });
+  koSel.on("change", function () { if (this.value) { d3.select("#month").property("value", ""); d3.selectAll("#scen button").attr("aria-pressed", "false"); S.scen = this.value; S.render(); } });
+  d3.selectAll("#layers button").on("click", function () {
+    var k = this.dataset.layer;
+    if (k === "flows" || k === "market" || k === "exports" || k === "demand") S[k] = !S[k];
+    if (k === "shadow") S.millColor = S.millColor === "shadow" ? "owner" : "shadow";
+    if (k === "mc") S.nodeColor = S.nodeColor === "mc" ? "none" : "mc";
+    d3.selectAll("#layers button").attr("aria-pressed", function () { var q = this.dataset.layer; return (q === "shadow" ? S.millColor === "shadow" : q === "mc" ? S.nodeColor === "mc" : S[q]) ? "true" : "false"; });
+    S.render();
+  });
+  d3.select("#minflow").on("input", function () { S.minflow = +this.value; d3.select("#minflow-v").text(kt(S.minflow)); S.render(); });
+
+  /* ---------- flows detail charts ---------- */
+  function chartFrame(id, w, h, m) { var host = d3.select(id); host.selectAll("svg").remove(); var s = host.append("svg").attr("viewBox", "0 0 " + w + " " + h); return s.append("g").attr("transform", "translate(" + m.l + "," + m.t + ")"); }
+  function showTipAt(id, ev, html) { var box = d3.select(id); var t = box.select(".tip"); if (t.empty()) t = box.append("div").attr("class", "tip"); var r = box.node().getBoundingClientRect(); t.html(html).style("display", "block").style("left", Math.max(0, Math.min(r.width - 200, ev.clientX - r.left + 12)) + "px").style("top", (ev.clientY - r.top - 44) + "px"); }
+  function hideTipAt(id) { d3.select(id).select(".tip").style("display", "none"); }
+  S.chartFrame = chartFrame; S.showTipAt = showTipAt; S.hideTipAt = hideTipAt;
+  function drawHaul() {
+    var rows = D.scenarios.fp2026.haul, w = 640, h = 220, m = { l: 44, r: 12, t: 12, b: 34 }, iw = w - m.l - m.r, ih = h - m.t - m.b, g = chartFrame("#haul", w, h, m);
+    var x = d3.scaleBand().domain(rows.map(function (r) { return r[0]; })).range([0, iw]).padding(0.28), y = d3.scaleLinear().domain([0, d3.max(rows, function (r) { return r[1] + r[2]; }) * 1.08]).nice().range([ih, 0]);
+    g.append("g").attr("class", "grid-ax").call(d3.axisLeft(y).ticks(4).tickSize(-iw).tickFormat(function (v) { return (v / 1e6).toFixed(0) + " Mt"; }));
+    g.append("g").attr("class", "axis").attr("transform", "translate(0," + ih + ")").call(d3.axisBottom(x).tickSize(0));
+    g.append("text").attr("class", "axlab").attr("x", iw / 2).attr("y", ih + 30).attr("text-anchor", "middle").text("road miles, mill to box plant");
+    var b = g.selectAll("g.b").data(rows).enter().append("g").attr("class", "b");
+    b.append("rect").attr("class", "truck").attr("x", function (r) { return x(r[0]); }).attr("width", x.bandwidth()).attr("y", function (r) { return y(r[1]); }).attr("height", function (r) { return Math.max(0, ih - y(r[1])); }).attr("rx", 2);
+    b.append("rect").attr("class", "rail").attr("x", function (r) { return x(r[0]); }).attr("width", x.bandwidth()).attr("y", function (r) { return y(r[1] + r[2]); }).attr("height", function (r) { return Math.max(0, y(r[1]) - y(r[1] + r[2]) - (r[2] > 0 ? 2 : 0)); }).attr("rx", 2);
+    b.append("text").attr("class", "val").attr("x", function (r) { return x(r[0]) + x.bandwidth() / 2; }).attr("y", function (r) { return y(r[1] + r[2]) - 5; }).attr("text-anchor", "middle").text(function (r) { return ((r[1] + r[2]) / 1e6).toFixed(1); });
+    b.on("mousemove", function (ev, r) { showTipAt("#haul", ev, "<b>" + r[0] + " miles</b><br>truck " + kt(r[1]) + "<br>rail " + kt(r[2])); }).on("mouseleave", function () { hideTipAt("#haul"); });
+  }
+  function drawIntegration() {
+    var integ = D.scenarios.fp2026.integration, rep = D.reported_integration || {};
+    var rows = Object.keys(integ).map(function (o) { var v = integ[o], tot = v.total + v.exports; return { o: o, tot: tot, own: tot ? v.internal / tot : 0, mkt: v.market, exp: v.exports, buy: v.bought_from_market }; }).filter(function (r) { return r.tot > 0; }).sort(function (a, b) { return b.tot - a.tot; });
+    var t = d3.select("#integ"); t.html("<tr><th>Owner</th><th class='n'>Shipped</th><th class='n'>To own plants</th><th class='n'>Sold</th><th class='n'>Exported</th><th class='n'>Bought outside</th><th>Disclosed</th></tr>");
+    rows.forEach(function (r) { t.append("tr").html("<td>" + r.o + "</td><td class='n'>" + kt(r.tot) + "</td><td class='n'>" + fmtP(r.own) + "</td><td class='n'>" + kt(r.mkt) + "</td><td class='n'>" + kt(r.exp) + "</td><td class='n'>" + kt(r.buy) + "</td><td>" + (rep[r.o] || "not disclosed") + "</td>"); });
+  }
+  function drawMonths() {
+    var pfx = S.cal, months = d3.range(1, 13).map(function (m) { var s = D.scenarios[pfx + (m < 10 ? "0" + m : m)]; return { m: m, off: s.tons_offline, down: s.mills_down.length, pen: s.outage_penalty_usd, unmet: s.kpi.unmet_tons - (s.noout ? s.noout.unmet_tons : 0) }; });
+    var w = 640, h = 190, m = { l: 48, r: 12, t: 14, b: 26 }, iw = w - m.l - m.r, ih = h - m.t - m.b;
+    var x = d3.scaleBand().domain(months.map(function (d) { return d.m; })).range([0, iw]).padding(0.3);
+    var g1 = chartFrame("#months-off", w, h, m), y1 = d3.scaleLinear().domain([0, Math.max(1, d3.max(months, function (d) { return d.off; })) * 1.15]).nice().range([ih, 0]);
+    g1.append("g").attr("class", "grid-ax").call(d3.axisLeft(y1).ticks(4).tickSize(-iw).tickFormat(function (v) { return (v / 1e3).toFixed(0) + " kt"; }));
+    g1.append("g").attr("class", "axis").attr("transform", "translate(0," + ih + ")").call(d3.axisBottom(x).tickSize(0).tickFormat(function (d) { return MONTHS[d - 1][0]; }));
+    g1.selectAll("rect").data(months).enter().append("rect").attr("class", "off").attr("x", function (d) { return x(d.m); }).attr("width", x.bandwidth()).attr("y", function (d) { return y1(d.off); }).attr("height", function (d) { return Math.max(0, ih - y1(d.off)); }).attr("rx", 2)
+      .on("mousemove", function (ev, d) { showTipAt("#months-off", ev, "<b>" + MONTHS[d.m - 1] + "</b><br>" + d.down + " mills in planned outage<br>" + kt(d.off) + " of capacity offline"); }).on("mouseleave", function () { hideTipAt("#months-off"); });
+    g1.selectAll("text.val").data(months).enter().append("text").attr("class", "val").attr("x", function (d) { return x(d.m) + x.bandwidth() / 2; }).attr("y", function (d) { return y1(d.off) - 4; }).attr("text-anchor", "middle").text(function (d) { return d.down || ""; });
+    var g2 = chartFrame("#months-cost", w, h, m), y2 = d3.scaleLinear().domain([0, Math.max(1e6, d3.max(months, function (d) { return d.pen; })) * 1.15]).nice().range([ih, 0]);
+    g2.append("g").attr("class", "grid-ax").call(d3.axisLeft(y2).ticks(4).tickSize(-iw).tickFormat(function (v) { return "$" + (v / 1e6).toFixed(0) + "M"; }));
+    g2.append("g").attr("class", "axis").attr("transform", "translate(0," + ih + ")").call(d3.axisBottom(x).tickSize(0).tickFormat(function (d) { return MONTHS[d - 1][0]; }));
+    g2.selectAll("rect").data(months).enter().append("rect").attr("class", pfx === "o" ? "cost opt" : "cost").attr("x", function (d) { return x(d.m); }).attr("width", x.bandwidth()).attr("y", function (d) { return y2(Math.max(0, d.pen)); }).attr("height", function (d) { return Math.max(0, ih - y2(Math.max(0, d.pen))); }).attr("rx", 2)
+      .on("mousemove", function (ev, d) { showTipAt("#months-cost", ev, "<b>" + MONTHS[d.m - 1] + "</b><br>outage cost " + musd(d.pen) + " (monthly rate)<br>freight + outside purchases at $150/t + unmet at $400/t" + (d.unmet > 1000 ? "<br>unmet demand " + kt(d.unmet) : "")); }).on("mouseleave", function () { hideTipAt("#months-cost"); })
+      .on("click", function (ev, d) { d3.select("#month").property("value", pfx + (d.m < 10 ? "0" + d.m : d.m)); d3.selectAll("#scen button").attr("aria-pressed", "false"); S.scen = pfx + (d.m < 10 ? "0" + d.m : d.m); S.render(); });
+    var co = D.calendar_opt; d3.select("#cal-note").text((pfx === "m" ? "Staggered calendar as drawn: " : "Calendar from the assignment problem: ") + musd(pfx === "m" ? co.random_actual_annual_penalty : co.opt_actual_annual_penalty) + " a year of outage cost across the twelve months, against a dual-price estimate of " + musd(pfx === "m" ? co.random_est : co.opt_est) + ". Same " + co.assignments.length + " outages, same durations; only the months moved.");
+  }
+  d3.selectAll("button[data-cal]").on("click", function () { S.cal = this.dataset.cal; d3.selectAll("button[data-cal]").attr("aria-pressed", function () { return this.dataset.cal === S.cal ? "true" : "false"; }); drawMonths(); });
+  function drawKnockouts() {
+    var rows = D.knockouts.slice().sort(function (a, b) { return b.d_total - a.d_total; }), w = 900, rowH = 22, m = { l: 200, r: 90, t: 8, b: 26 }, h = m.t + m.b + rows.length * rowH, iw = w - m.l - m.r, g = chartFrame("#ko-chart", w, h, m);
+    var x = d3.scaleLinear().domain([0, d3.max(rows, function (r) { return Math.max(0, r.d_total); }) * 1.05]).nice().range([0, iw]), y = d3.scaleBand().domain(rows.map(function (r) { return r.mill; })).range([0, rows.length * rowH]).padding(0.25);
+    g.append("g").attr("class", "grid-ax").attr("transform", "translate(0," + rows.length * rowH + ")").call(d3.axisBottom(x).ticks(5).tickSize(-rows.length * rowH).tickFormat(function (v) { return "+$" + (v / 1e6).toFixed(0) + "M"; }));
+    var r = g.selectAll("g.r").data(rows).enter().append("g").attr("class", "r").attr("transform", function (d) { return "translate(0," + y(d.mill) + ")"; });
+    r.append("rect").attr("x", 0).attr("width", function (d) { return Math.max(0, x(Math.max(0, d.d_total))); }).attr("height", y.bandwidth()).attr("rx", 2).style("fill", function (d) { return ownerVar(d.owner); });
+    r.append("text").attr("class", "lab").attr("x", -8).attr("y", y.bandwidth() / 2 + 4).attr("text-anchor", "end").text(function (d) { return d.name + ", " + d.st; });
+    r.append("text").attr("class", "val").attr("x", function (d) { return Math.max(0, x(Math.max(0, d.d_total))) + 5; }).attr("y", y.bandwidth() / 2 + 4).text(function (d) { return kt(d.cap) + (d.unmet > 0 ? " · " + kt(d.unmet) + " unmet" : ""); });
+    r.on("mousemove", function (ev, d) { showTipAt("#ko-chart", ev, "<b>" + d.name + ", " + d.st + "</b> (" + d.owner + ", " + kt(d.cap) + ")<br>network cost if it vanished: +" + musd(d.d_total) + "/yr<br>freight " + (d.d_freight >= 0 ? "+" : "−") + musd(d.d_freight) + "; owner buys " + kt(d.owner_buys) + " outside<br>average haul " + (d.d_haul >= 0 ? "+" : "") + d.d_haul + " mi" + (d.unmet > 0 ? "<br>" + kt(d.unmet) + " cannot be served" : "")); })
+     .on("mouseleave", function () { hideTipAt("#ko-chart"); })
+     .on("click", function (ev, d) { d3.select("#ko").property("value", "ko" + d.mill); d3.select("#month").property("value", ""); d3.selectAll("#scen button").attr("aria-pressed", "false"); S.scen = "ko" + d.mill; S.render(); document.getElementById("mapcard").scrollIntoView({ behavior: "smooth", block: "center" }); });
+  }
+  S.drawFlowsDetail = function () { drawHaul(); drawIntegration(); drawMonths(); drawKnockouts(); };
+})();
+
+/* The Paper Network dashboard, part 2: prospects, prices, fiber loop, demand, backtest, method; tab switching; boot. */
+(function () {
+  var S = window.PN, D = S.D, byId = S.byId, kt = S.kt, musd = S.musd, fmtP = S.fmtP, fmtT = S.fmtT, fmt1 = S.fmt1, ownerVar = S.ownerVar, L = S.layers;
+  var DIV = { CT: "New England", ME: "New England", MA: "New England", NH: "New England", RI: "New England", VT: "New England", NJ: "Middle Atlantic", NY: "Middle Atlantic", PA: "Middle Atlantic",
+    IL: "East North Central", IN: "East North Central", MI: "East North Central", OH: "East North Central", WI: "East North Central", IA: "West North Central", KS: "West North Central", MN: "West North Central", MO: "West North Central", NE: "West North Central", ND: "West North Central", SD: "West North Central",
+    DE: "South Atlantic", DC: "South Atlantic", FL: "South Atlantic", GA: "South Atlantic", MD: "South Atlantic", NC: "South Atlantic", SC: "South Atlantic", VA: "South Atlantic", WV: "South Atlantic", AL: "East South Central", KY: "East South Central", MS: "East South Central", TN: "East South Central",
+    AR: "West South Central", LA: "West South Central", OK: "West South Central", TX: "West South Central", AZ: "Mountain", CO: "Mountain", ID: "Mountain", MT: "Mountain", NV: "Mountain", NM: "Mountain", UT: "Mountain", WY: "Mountain", AK: "Pacific", CA: "Pacific", HI: "Pacific", OR: "Pacific", WA: "Pacific" };
+  var base = D.scenarios.fp2026, dvb = S.derived("fp2026");
+  var marketTons = D.nodes.map(function (n) { return (dvb.byNode[n.i] || []).filter(function (a) { return a[3] === 0; }).reduce(function (a, b) { return a + b[2]; }, 0); });
+
+  /* ---------- prospects ---------- */
+  function renderProspects() {
+    S.clearLayers();
+    var P = D.prospects[S.grade], gapScale = S.seq([0, 25]);
+    var shock = S.shock ? D.price_shocks[S.shock] : null, swNodes = {}, swArcs = [];
+    if (shock) shock.calls.forEach(function (c) { swNodes[c.node] = (swNodes[c.node] || 0) + c.tons; if (c.to_mill !== null) swArcs.push(c); });
+    var as = L.arcs.selectAll("path").data(swArcs, function (c) { return c.node + "|" + c.grade + "|" + c.to_mill; }); as.exit().remove();
+    as.enter().append("path").merge(as).attr("class", "arc sw").attr("d", function (c) { return S.arcPath(byId[c.to_mill], D.nodes[c.node]); }).style("stroke", function (c) { return ownerVar(byId[c.to_mill].owner); }).style("stroke-width", function (c) { return Math.max(0.8, S.wArc(c.tons) * 1.5); });
+    var ns = L.nodes.selectAll("rect").data(D.nodes, function (n) { return n.id; }); ns.exit().remove();
+    ns.enter().append("rect").attr("class", "node ramp").merge(ns)
+      .attr("width", function (n) { return Math.max(2.2, S.sNode(marketTons[n.i] * 3)); }).attr("height", function (n) { return Math.max(2.2, S.sNode(marketTons[n.i] * 3)); })
+      .attr("x", function (n) { return n.x - Math.max(2.2, S.sNode(marketTons[n.i] * 3)) / 2; }).attr("y", function (n) { return n.y - Math.max(2.2, S.sNode(marketTons[n.i] * 3)) / 2; })
+      .style("fill", function (n) { return shock ? (swNodes[n.i] ? "var(--s8)" : "var(--ink-3)") : gapScale(Math.max(0, 25 - P[n.i].gap)); }).style("opacity", function (n) { return shock && !swNodes[n.i] ? 0.35 : 0.95; })
+      .on("mousemove", function (ev, n) { var p = P[n.i], b = byId[p.best], s2 = byId[p.second], t = byId[p.third], cur = (dvb.byNode[n.i] || []).filter(function (a) { return a[3] === 0; }).sort(function (a, c) { return c[2] - a[2]; });
+        S.showTip(ev, "<b>" + n.name + "</b> · open-market board " + kt(marketTons[n.i]) + "<br>cheapest " + (S.grade === "L" ? "liner" : "medium") + ": " + b.name + ", " + b.st + " (" + b.owner + ") $" + p.best_cost + "/t freight<br>next: " + s2.name + ", " + s2.st + " (" + s2.owner + ") +$" + p.gap + "/t · then " + t.name + " +$" + (p.third_cost - p.best_cost).toFixed(1) +
+          (cur.length ? "<br>solver's market supplier: " + cur.slice(0, 2).map(function (a) { return byId[a[0]].name + " " + kt(a[2]); }).join(", ") : "") + (swNodes[n.i] ? "<br><b>switches " + kt(swNodes[n.i]) + " after the increase</b>" : "")); })
+      .on("mouseleave", S.hideTip);
+    S.drawMills({ dim: function (m) { return shock && m.owner === S.shock; } });
+    S.setRamp(shock ? null : "markets: gap to the second-cheapest mill, $25+ (sticky) → $0 (a phone call)");
+    var gaps = P.map(function (p) { return p.gap; }).sort(d3.ascending), w5 = gaps.filter(function (g) { return g <= 5; }).length / gaps.length, w10 = gaps.filter(function (g) { return g <= 10; }).length / gaps.length;
+    var items = [["markets with a 2nd mill within $5/t", fmtP(w5)], ["within $10/t", fmtP(w10)], ["median gap", "$" + d3.median(gaps).toFixed(1) + "/t"], ["open-market board, all owners", kt(d3.sum(marketTons))]];
+    if (shock) items = items.concat([["after +$70/t by " + S.shock, kt(shock.market_tons_after) + " of " + kt(shock.base_market_tons) + " kept"], ["accounts that move", shock.calls.length + " market-grades"], ["cost to the rest of the network", "+" + musd(shock.d_cost) + "/yr"]]);
+    var k = d3.select("#kpis-pro").selectAll("div.k").data(items); k.exit().remove(); k.enter().append("div").attr("class", "k").merge(k).html(function (d) { return "<span>" + d[0] + "</span><b>" + d[1] + "</b>"; });
+    var rows, head;
+    if (shock) { rows = shock.calls.slice(0, 120).map(function (c) { var f = byId[c.from_mill], t = c.to_mill !== null ? byId[c.to_mill] : null, n = D.nodes[c.node]; return "<tr data-node='" + c.node + "'><td>" + n.name + "</td><td class='n'>" + kt(c.tons) + "</td><td>" + f.name + "</td><td>" + (t ? t.name + " (" + t.owner + ")" : "unserved") + "</td><td class='n'>$" + D.prospects[c.grade][c.node].gap + "</td></tr>"; });
+      head = "<tr><th>Market</th><th class='n'>Tons</th><th>From</th><th>To</th><th class='n'>Gap</th></tr>"; d3.select("#calls-h").text("Call sheet: who " + S.shock + " loses, and to whom"); }
+    else { var idx = d3.range(D.nodes.length).filter(function (i) { return marketTons[i] > 0; }).sort(function (a, b) { return P[a].gap - P[b].gap || marketTons[b] - marketTons[a]; }).slice(0, 120);
+      rows = idx.map(function (i) { var p = P[i], b = byId[p.best], s2 = byId[p.second]; return "<tr data-node='" + i + "' class='" + (p.gap <= 5 ? "hot" : "") + "'><td>" + D.nodes[i].name + "</td><td class='n'>" + kt(marketTons[i]) + "</td><td>" + b.name + " (" + b.owner + ")</td><td>" + s2.name + " (" + s2.owner + ")</td><td class='n'>$" + p.gap + "</td></tr>"; });
+      head = "<tr><th>Market</th><th class='n'>Open mkt</th><th>Cheapest</th><th>Next</th><th class='n'>Gap</th></tr>"; d3.select("#calls-h").text("Call sheet: most contestable open-market board"); }
+    d3.select("#calls").html("<table>" + head + rows.join("") + "</table>");
+  }
+  d3.selectAll("button[data-grade]").on("click", function () { S.grade = this.dataset.grade; d3.selectAll("button[data-grade]").attr("aria-pressed", function () { return this.dataset.grade === S.grade ? "true" : "false"; }); S.render(); });
+  var shockSel = d3.select("#shock"); shockSel.selectAll("option.s").data(Object.keys(D.price_shocks)).enter().append("option").attr("class", "s").attr("value", function (o) { return o; }).text(function (o) { return o + " raises open-market price $70/t"; });
+  shockSel.on("change", function () { S.shock = this.value; S.render(); });
+  function drawProspectsDetail() {
+    var t = d3.select("#shock-table"); t.html("<tr><th>Owner</th><th class='n'>Open-market tons today</th><th class='n'>Kept after +$70</th><th class='n'>Accounts that move</th><th class='n'>Extra cost to network</th></tr>");
+    Object.keys(D.price_shocks).forEach(function (o) { var v = D.price_shocks[o]; t.append("tr").html("<td>" + o + "</td><td class='n'>" + kt(v.base_market_tons) + "</td><td class='n'>" + kt(v.market_tons_after) + "</td><td class='n'>" + v.calls.length + "</td><td class='n'>+" + musd(v.d_cost) + "/yr</td>"); });
+    var gaps = D.prospects.L.map(function (p) { return p.gap; }), w = 640, h = 200, m = { l: 40, r: 12, t: 12, b: 34 }, iw = w - m.l - m.r, ih = h - m.t - m.b, g = S.chartFrame("#gap-hist", w, h, m);
+    var bins = d3.bin().domain([0, 40]).thresholds(d3.range(0, 42, 2.5))(gaps.map(function (v) { return Math.min(v, 39.9); }));
+    var x = d3.scaleLinear().domain([0, 40]).range([0, iw]), y = d3.scaleLinear().domain([0, d3.max(bins, function (b) { return b.length; }) * 1.1]).nice().range([ih, 0]);
+    g.append("g").attr("class", "grid-ax").call(d3.axisLeft(y).ticks(4).tickSize(-iw)); g.append("g").attr("class", "axis").attr("transform", "translate(0," + ih + ")").call(d3.axisBottom(x).ticks(8).tickFormat(function (v) { return "$" + v; }));
+    g.append("text").attr("class", "axlab").attr("x", iw / 2).attr("y", ih + 30).attr("text-anchor", "middle").text("freight gap, cheapest to second-cheapest liner mill ($/t); 441 markets");
+    g.selectAll("rect").data(bins).enter().append("rect").attr("x", function (b) { return x(b.x0) + 1; }).attr("width", function (b) { return Math.max(0, x(b.x1) - x(b.x0) - 2); }).attr("y", function (b) { return y(b.length); }).attr("height", function (b) { return Math.max(0, ih - y(b.length)); }).attr("rx", 2).style("fill", "var(--s3)");
+    var mo = {}; D.nodes.forEach(function (n) { (dvb.byNode[n.i] || []).forEach(function (a) { if (a[3] === 0) { var o = byId[a[0]].owner; mo[o] = (mo[o] || 0) + a[2]; } }); });
+    var rows = Object.keys(mo).map(function (o) { return { o: o, t: mo[o] }; }).sort(function (a, b) { return b.t - a.t; }).slice(0, 12), rowH = 20, m2 = { l: 170, r: 70, t: 6, b: 6 }, h2 = m2.t + m2.b + rows.length * rowH, iw2 = w - m2.l - m2.r, g2 = S.chartFrame("#market-by-owner", w, h2, m2);
+    var x2 = d3.scaleLinear().domain([0, d3.max(rows, function (r) { return r.t; }) * 1.05]).range([0, iw2]), y2 = d3.scaleBand().domain(rows.map(function (r) { return r.o; })).range([0, rows.length * rowH]).padding(0.25);
+    var r = g2.selectAll("g").data(rows).enter().append("g").attr("transform", function (d) { return "translate(0," + y2(d.o) + ")"; });
+    r.append("rect").attr("width", function (d) { return x2(d.t); }).attr("height", y2.bandwidth()).attr("rx", 2).style("fill", function (d) { return ownerVar(d.o); });
+    r.append("text").attr("class", "lab").attr("x", -8).attr("y", y2.bandwidth() / 2 + 4).attr("text-anchor", "end").text(function (d) { return d.o; });
+    r.append("text").attr("class", "val").attr("x", function (d) { return x2(d.t) + 5; }).attr("y", y2.bandwidth() / 2 + 4).text(function (d) { return kt(d.t); });
+  }
+
+  /* ---------- prices and delivered cost ---------- */
+  var SPECS = { ect32: { name: "32 ECT single wall, 35-26-35 C-flute", liner: 70, medium: 26 * 1.43, extra: 3 }, mullen200: { name: "200# Mullen single wall, 42-26-42 C-flute", liner: 84, medium: 26 * 1.43, extra: 3 } };
+  function dieselScen() { return S.diesel === "3.75" ? base : (D.scenarios["dz" + parseInt(S.diesel, 10)] || base); }
+  function deliveredPerMSF(i, spec) { var sp = SPECS[spec], lb = sp.liner + sp.medium + sp.extra, paper = (sp.liner * S.pLiner + sp.medium * S.pMedium) / 2000, frt = dieselScen().node_mc[i] * lb / 2000; return { paper: paper, freight: frt, total: paper + frt, lb: lb }; }
+  function renderPrices() {
+    S.clearLayers();
+    var vals = D.nodes.map(function (n) { return deliveredPerMSF(n.i, S.spec); }), ext = d3.extent(vals, function (v) { return v.total; }), sc = S.seq(ext), sp = SPECS[S.spec];
+    var ns = L.nodes.selectAll("rect").data(D.nodes, function (n) { return n.id; }); ns.exit().remove();
+    ns.enter().append("rect").attr("class", "node ramp").merge(ns).attr("width", function (n) { return S.sNode(base.node_demand[n.i]); }).attr("height", function (n) { return S.sNode(base.node_demand[n.i]); })
+      .attr("x", function (n) { return n.x - S.sNode(base.node_demand[n.i]) / 2; }).attr("y", function (n) { return n.y - S.sNode(base.node_demand[n.i]) / 2; }).style("fill", function (n) { return sc(vals[n.i].total); })
+      .on("mousemove", function (ev, n) { var v = vals[n.i], hike = S.hike * v.lb / 2000; S.showTip(ev, "<b>" + n.name + "</b><br>" + sp.name + " · " + v.lb.toFixed(0) + " lb/MSF<br>paper at the mill $" + v.paper.toFixed(2) + "/MSF + freight $" + v.freight.toFixed(2) + " = <b>$" + v.total.toFixed(2) + "/MSF delivered</b><br>freight is " + fmtP(v.freight / v.total) + " of delivered paper cost<br>a $" + S.hike + "/t increase adds $" + hike.toFixed(2) + "/MSF (" + fmtP(hike / v.total) + ")"); }).on("mouseleave", S.hideTip);
+    S.drawMills({ dim: function () { return false; } });
+    S.setRamp("delivered paper cost, " + sp.name.split(",")[0] + ": $" + ext[0].toFixed(0) + " → $" + ext[1].toFixed(0) + "/MSF");
+    var hikeMSF = S.hike * sp.liner / 2000 + S.hike * sp.medium / 2000 * (S.spec === "ect32" ? 1 : 1), fr = vals.map(function (v) { return v.freight / v.total; });
+    var items = [["paper at the mill", "$" + vals[0].paper.toFixed(2) + "/MSF"], ["delivered, cheapest → dearest", "$" + ext[0].toFixed(2) + " → $" + ext[1].toFixed(2)], ["freight share of delivered cost", fmtP(d3.min(fr)) + " → " + fmtP(d3.max(fr))], ["a $" + S.hike + "/t mill increase", "+$" + hikeMSF.toFixed(2) + "/MSF, " + fmtP(hikeMSF / ext[1]) + "–" + fmtP(hikeMSF / ext[0]) + " of delivered"], ["diesel " + S.diesel + " $/gal: network freight", musd(dieselScen().kpi.freight_usd) + " · " + fmtP(dieselScen().kpi.rail_share) + " by rail"]];
+    var k = d3.select("#kpis-price").selectAll("div.k").data(items); k.exit().remove(); k.enter().append("div").attr("class", "k").merge(k).html(function (d) { return "<span>" + d[0] + "</span><b>" + d[1] + "</b>"; });
+    var order = d3.range(D.nodes.length).sort(function (a, b) { return vals[a].total - vals[b].total; }), rows = order.slice(0, 8).concat([-1], order.slice(-8));
+    d3.select("#price-rank").html("<table><tr><th>Market</th><th class='n'>Delivered $/MSF</th><th class='n'>Freight</th></tr>" + rows.map(function (i) { return i < 0 ? "<tr><td colspan='3' style='text-align:center;color:var(--ink-3)'>…</td></tr>" : "<tr data-node='" + i + "'><td>" + D.nodes[i].name + "</td><td class='n'>$" + vals[i].total.toFixed(2) + "</td><td class='n'>" + fmtP(vals[i].freight / vals[i].total) + "</td></tr>"; }).join("") + "</table>");
+  }
+  d3.selectAll("button[data-spec]").on("click", function () { S.spec = this.dataset.spec; d3.selectAll("button[data-spec]").attr("aria-pressed", function () { return this.dataset.spec === S.spec ? "true" : "false"; }); S.render(); });
+  d3.select("#p-liner").on("input", function () { S.pLiner = +this.value || 0; S.render(); }); d3.select("#p-medium").on("input", function () { S.pMedium = +this.value || 0; S.render(); }); d3.select("#p-hike").on("input", function () { S.hike = +this.value || 0; S.render(); });
+  d3.select("#diesel").on("change", function () { S.diesel = this.value; S.render(); });
+  function lineChart(host, title, series, unit, note) {
+    var card = d3.select(host).append("section").attr("class", "card"); card.append("h2").text(title);
+    var w = 420, h = 170, m = { l: 44, r: 14, t: 10, b: 24 }, iw = w - m.l - m.r, ih = h - m.t - m.b, id = "pc" + Math.random().toString(36).slice(2, 7); card.append("div").attr("id", id).attr("class", "line");
+    var g = S.chartFrame("#" + id, w, h, m), pts = series.map(function (p) { return { d: new Date(p[0] + (p[0].length === 7 ? "-15" : p[0].length === 4 ? "-07-01" : "")), v: p[1] }; }).sort(function (a, b) { return a.d - b.d; });
+    var x = d3.scaleTime().domain(d3.extent(pts, function (p) { return p.d; })).range([0, iw]), y = d3.scaleLinear().domain([Math.min(0, d3.min(pts, function (p) { return p.v; })) , d3.max(pts, function (p) { return p.v; }) * 1.1]).nice().range([ih, 0]);
+    g.append("g").attr("class", "grid-ax").call(d3.axisLeft(y).ticks(4).tickSize(-iw).tickFormat(function (v) { return unit === "$" ? "$" + v : v; })); g.append("g").attr("class", "axis").attr("transform", "translate(0," + ih + ")").call(d3.axisBottom(x).ticks(5).tickFormat(d3.timeFormat("%b %y")));
+    g.append("path").attr("class", "area").attr("d", d3.area().x(function (p) { return x(p.d); }).y0(ih).y1(function (p) { return y(p.v); })(pts));
+    g.append("path").attr("class", "ser").attr("d", d3.line().x(function (p) { return x(p.d); }).y(function (p) { return y(p.v); })(pts));
+    g.selectAll("circle").data(pts).enter().append("circle").attr("class", "pt").attr("r", 3.2).attr("cx", function (p) { return x(p.d); }).attr("cy", function (p) { return y(p.v); })
+      .on("mousemove", function (ev, p) { S.showTipAt("#" + id, ev, "<b>" + d3.timeFormat("%b %Y")(p.d) + "</b><br>" + (unit === "$" ? "$" : "") + p.v + (unit === "$" ? "" : " " + unit)); }).on("mouseleave", function () { S.hideTipAt("#" + id); });
+    var last = pts[pts.length - 1]; g.append("text").attr("class", "val").attr("x", x(last.d) - 4).attr("y", y(last.v) - 8).attr("text-anchor", "end").text((unit === "$" ? "$" : "") + last.v);
+    if (note) card.append("p").attr("class", "note").text(note);
+  }
+  function drawPricesDetail() {
+    var P = D.prices, host = "#price-charts"; d3.select(host).html("");
+    lineChart(host, "42-lb kraft linerboard, US East ($/short ton)", P.liner_east, "$", P.notes.liner_east);
+    lineChart(host, "OCC, national average ($/ton, FOB seller's dock)", P.occ_national, "$", P.notes.occ);
+    lineChart(host, "On-highway diesel, US average ($/gal)", P.diesel, "$", P.notes.diesel);
+    lineChart(host, "Recycled linerboard 30/31-lb East and medium index ($/t)", P.recycled_liner, "$", P.notes.recycled);
+    d3.select("#price-note").html(P.notes.general);
+    var t = d3.select("#ect-table"); t.html("<tr><th>Spec</th><th>Furnish</th><th class='n'>lb / MSF</th><th class='n'>Paper $/MSF at current prices</th><th class='n'>Tons per 1,000 MSF</th></tr>");
+    [["200# Mullen (burst)", "42-26-42, C-flute", 42 + 42 + 26 * 1.43 + 3], ["32 ECT (edge crush)", "35-26-35, C-flute", 35 + 35 + 26 * 1.43 + 3], ["32 ECT with 23-lb medium", "35-23-35, C-flute", 35 + 35 + 23 * 1.43 + 3], ["29 ECT lightweight", "31-23-31, C-flute", 31 + 31 + 23 * 1.43 + 3]].forEach(function (r) {
+      var liner = r[2] - 3 - (r[1].indexOf("23") > 0 ? 23 * 1.43 : 26 * 1.43), med = r[2] - 3 - liner, cost = (liner * S.pLiner + med * S.pMedium) / 2000;
+      t.append("tr").html("<td>" + r[0] + "</td><td>" + r[1] + "</td><td class='n'>" + r[2].toFixed(0) + "</td><td class='n'>$" + cost.toFixed(2) + "</td><td class='n'>" + (r[2] / 2).toFixed(1) + "</td>"); });
+    var dt = d3.select("#diesel-table"); dt.html("<tr><th>Diesel</th><th class='n'>Network freight</th><th class='n'>$/ton</th><th class='n'>By rail</th><th>Context</th></tr>");
+    [["3.0", "$3.00", "2023–25 Gulf Coast range"], ["3.75", "$3.75", "2024 US average (EIA $3.76)"], ["5.0", "$5.00", "2022 average (EIA $4.99); 2026 YTD $5.07"], ["6.2", "$6.20", "week of Oct 12, 2026: US $6.18, West Coast $7.24"]].forEach(function (r) {
+      var k = (r[0] === "3.75" ? base : D.scenarios["dz" + parseInt(r[0], 10)]); if (!k) return;
+      dt.append("tr").html("<td>" + r[1] + "/gal</td><td class='n'>" + musd(k.kpi.freight_usd) + "</td><td class='n'>$" + fmt1(k.kpi.avg_freight_per_ton) + "</td><td class='n'>" + fmtP(k.kpi.rail_share) + "</td><td>" + r[2] + "</td>"); });
+  }
+
+  /* ---------- fiber loop ---------- */
+  var O = D.occ, sinkPos = O.sinks.map(function (s) { return s[0] === "mill" ? byId[s[1]] : O.ports[s[1]]; }), intake = {}, intakeMiles = {};
+  O.flows.forEach(function (f) { var s = O.sinks[f[1]], key = s[0] + s[1]; intake[key] = (intake[key] || 0) + f[2]; var n = D.nodes[f[0]], p = sinkPos[f[1]], mi = Math.hypot(n.x - p.x, n.y - p.y) * 2.6; intakeMiles[key] = (intakeMiles[key] || 0) + f[2] * mi; });
+  function renderFiber() {
+    S.clearLayers();
+    var valScale = S.seq([0, d3.quantile(O.county_value.slice().sort(d3.ascending), 0.95) || 1]);
+    var fl = S.fiberFlows ? O.flows.filter(function (f) { return f[2] >= 5000; }) : [];
+    var as = L.arcs.selectAll("path").data(fl, function (f) { return f[0] + "|" + f[1]; }); as.exit().remove();
+    as.enter().append("path").merge(as).attr("class", "arc occ").attr("d", function (f) { return S.arcPath(D.nodes[f[0]], sinkPos[f[1]]); }).style("stroke-width", function (f) { return S.wArc(f[2]); });
+    var ns = L.nodes.selectAll("rect").data(D.nodes, function (n) { return n.id; }); ns.exit().remove();
+    ns.enter().append("rect").attr("class", "node").merge(ns).classed("ramp", S.fiberValue).attr("width", function (n) { return S.sNode(O.supply[n.i]); }).attr("height", function (n) { return S.sNode(O.supply[n.i]); })
+      .attr("x", function (n) { return n.x - S.sNode(O.supply[n.i]) / 2; }).attr("y", function (n) { return n.y - S.sNode(O.supply[n.i]) / 2; }).style("fill", function (n) { return S.fiberValue ? valScale(O.county_value[n.i]) : null; })
+      .on("mousemove", function (ev, n) { var out = O.flows.filter(function (f) { return f[0] === n.i; }).sort(function (a, b) { return b[2] - a[2]; }); S.showTip(ev, "<b>" + n.name + "</b><br>" + kt(O.supply[n.i]) + " of OCC recovered a year<br>one more ton here is worth $" + O.county_value[n.i].toFixed(0) + "/t to the network" + (O.surplus[n.i] > 1000 ? "<br>" + kt(O.surplus[n.i]) + " finds no taker in the model" : "") + "<br>" + out.slice(0, 3).map(function (f) { var s = O.sinks[f[1]]; return "→ " + (s[0] === "mill" ? byId[s[1]].name + " (" + byId[s[1]].owner + ")" : O.ports[s[1]].name) + " " + kt(f[2]); }).join("<br>")); }).on("mouseleave", S.hideTip);
+    var ps = L.ports.selectAll("path").data(O.ports, function (p) { return p.name; }); ps.exit().remove();
+    ps.enter().append("path").attr("class", "port").merge(ps).attr("d", function (p) { var t = intake["port" + O.ports.indexOf(p)] || 0, r = Math.max(3, Math.sqrt(t / 1e6) * 9); return "M" + p.x + "," + (p.y - r) + "L" + (p.x + r) + "," + (p.y + r) + "L" + (p.x - r) + "," + (p.y + r) + "Z"; })
+      .on("mousemove", function (ev, p) { S.showTip(ev, "<b>" + p.name + "</b><br>OCC export dock · " + kt(intake["port" + O.ports.indexOf(p)] || 0) + " a year<br>" + fmtP(p.share) + " of US OCC exports (assumed split)"); }).on("mouseleave", S.hideTip);
+    S.drawMills({ radius: function (m) { var t = intake["mill" + m.id] || 0; return t ? Math.max(2.4, Math.sqrt(t / 1e6) * 9) : 1.8; }, dim: function (m) { return !intake["mill" + m.id]; },
+      tip: function (m) { var t = intake["mill" + m.id] || 0; return "<b>" + m.name + ", " + m.st + "</b> · " + m.owner + "<br>" + S.grades(m.grades) + "<br>" + (t ? "takes in " + kt(t) + " of OCC a year, average haul " + Math.round(intakeMiles["mill" + m.id] / t) + " mi" : "virgin-fiber mill: no OCC in this model"); } });
+    S.setRamp(S.fiberValue ? "counties: value of one more ton of OCC, $0 → $" + Math.round(valScale.domain()[1]) + "/t" : null);
+    var k = O.kpi, items = [["OCC recovered where boxes are used", kt(k.occ_supply)], ["to recycled mills", kt(k.occ_to_mills)], ["exported", kt(k.occ_exported)], ["no taker in the model", kt(k.occ_unplaced)], ["average haul to a mill or dock", Math.round(k.avg_haul) + " mi"]];
+    var kk = d3.select("#kpis-fiber").selectAll("div.k").data(items); kk.exit().remove(); kk.enter().append("div").attr("class", "k").merge(kk).html(function (d) { return "<span>" + d[0] + "</span><b>" + d[1] + "</b>"; });
+    var mills = Object.keys(intake).filter(function (k) { return k.indexOf("mill") === 0; }).map(function (k) { var m = byId[+k.slice(4)]; return { m: m, t: intake[k], mi: intakeMiles[k] / intake[k] }; }).sort(function (a, b) { return b.t - a.t; });
+    d3.select("#fiber-mills").html("<table><tr><th>Mill</th><th>Owner</th><th class='n'>OCC in</th><th class='n'>Avg haul</th></tr>" + mills.map(function (r) { return "<tr><td>" + r.m.name + ", " + r.m.st + "</td><td>" + r.m.owner + "</td><td class='n'>" + kt(r.t) + "</td><td class='n'>" + Math.round(r.mi) + " mi</td></tr>"; }).join("") + "</table>");
+  }
+  d3.selectAll("button[data-flayer]").on("click", function () { var k = this.dataset.flayer; if (k === "flows") S.fiberFlows = !S.fiberFlows; else S.fiberValue = !S.fiberValue; d3.selectAll("button[data-flayer]").attr("aria-pressed", function () { return (this.dataset.flayer === "flows" ? S.fiberFlows : S.fiberValue) ? "true" : "false"; }); S.render(); });
+  function drawFiberDetail() {
+    var F = D.facts.fiber, t = d3.select("#fiber-table"); t.html("<tr><th>Quantity</th><th class='n'>Model</th><th class='n'>Record</th><th>Source</th></tr>");
+    [["Corrugated recovered", kt(O.kpi.occ_supply), F.occ_collected, F.src_afpa], ["Recovered paper consumed by US mills (all grades)", "—", F.consumed, F.src_afpa], ["Recovered paper exported (all grades)", "—", F.exported, F.src_afpa], ["OCC exported (68% of exports)", kt(O.kpi.occ_exported), F.occ_exported, F.src_usitc], ["Top destinations 2024", "—", F.destinations, F.src_usitc], ["OCC per ton of recycled board", "1.15 t", F.yield, "assumption"]].forEach(function (r) {
+      t.append("tr").html("<td>" + r[0] + "</td><td class='n'>" + r[1] + "</td><td class='n'>" + r[2] + "</td><td>" + r[3] + "</td>"); });
+    d3.select("#fiber-note").html(F.note);
+  }
+
+  /* ---------- demand ---------- */
+  var plantsTotal = D.facts.plants_total, corrTons = 53500;
+  function renderDemand() {
+    S.clearLayers();
+    var dem = base.node_demand, tot = d3.sum(dem), plants = D.nodes.map(function (n) { return plantsTotal * dem[n.i] / tot; });
+    var sc = S.seq([0, d3.quantile(dem.slice().sort(d3.ascending), 0.95)]);
+    var ns = L.nodes.selectAll("rect").data(D.nodes, function (n) { return n.id; }); ns.exit().remove();
+    ns.enter().append("rect").attr("class", "node ramp").merge(ns).attr("width", function (n) { return S.sNode(dem[n.i]) * 1.2; }).attr("height", function (n) { return S.sNode(dem[n.i]) * 1.2; }).attr("x", function (n) { return n.x - S.sNode(dem[n.i]) * 0.6; }).attr("y", function (n) { return n.y - S.sNode(dem[n.i]) * 0.6; })
+      .style("fill", function (n) { return S.dlayer === "plants" ? "var(--s7)" : sc(dem[n.i]); }).style("opacity", 0.9)
+      .on("mousemove", function (ev, n) { var eu = D.enduse.map(function (e) { return e.name + " " + kt(dem[n.i] * e.share); }).slice(0, 4).join("<br>"); S.showTip(ev, "<b>" + n.name + "</b> · " + DIV[n.st] + "<br>" + kt(dem[n.i]) + " of board a year ≈ " + (dem[n.i] / corrTons).toFixed(1) + " corrugator-equivalents<br>≈ " + plants[n.i].toFixed(1) + " of the nation's " + plantsTotal.toLocaleString() + " corrugated facilities, if they follow demand<br><i>end use at national shares:</i><br>" + eu); }).on("mouseleave", S.hideTip);
+    S.drawMills({ dim: function () { return true; } });
+    S.setRamp(S.dlayer === "plants" ? null : "markets: board demand, 0 → " + kt(sc.domain()[1]) + " a year");
+    var items = [["US box-plant demand, 2026", kt(tot)], ["corrugator-equivalents at 1,000 MMSF each", Math.round(tot / corrTons)], ["FBA count: corrugator plants / facilities", D.facts.corrugator_plants + " / " + plantsTotal.toLocaleString()], ["food & beverage share", D.facts.fnb_share], ["e-commerce share", D.facts.ecom_share]];
+    var kk = d3.select("#kpis-demand").selectAll("div.k").data(items); kk.exit().remove(); kk.enter().append("div").attr("class", "k").merge(kk).html(function (d) { return "<span>" + d[0] + "</span><b>" + d[1] + "</b>"; });
+    var order = d3.range(D.nodes.length).sort(function (a, b) { return dem[b] - dem[a]; }).slice(0, 40);
+    d3.select("#demand-rank").html("<table><tr><th>Market</th><th class='n'>Board</th><th class='n'>Corrugators</th><th class='n'>Facilities</th></tr>" + order.map(function (i) { return "<tr data-node='" + i + "'><td>" + D.nodes[i].name + "</td><td class='n'>" + kt(dem[i]) + "</td><td class='n'>" + (dem[i] / corrTons).toFixed(1) + "</td><td class='n'>" + plants[i].toFixed(0) + "</td></tr>"; }).join("") + "</table>");
+  }
+  d3.selectAll("button[data-dlayer]").on("click", function () { S.dlayer = this.dataset.dlayer; d3.selectAll("button[data-dlayer]").attr("aria-pressed", function () { return this.dataset.dlayer === S.dlayer ? "true" : "false"; }); S.render(); });
+  function drawDemandDetail() {
+    var dem = base.node_demand, byDiv = {}; D.nodes.forEach(function (n) { var d = DIV[n.st] || "Other"; byDiv[d] = (byDiv[d] || 0) + dem[n.i]; });
+    var divs = Object.keys(byDiv).sort(function (a, b) { return byDiv[b] - byDiv[a]; }), eu = D.enduse.slice(0, 8), w = 900, h = 300, m = { l: 150, r: 20, t: 10, b: 40 }, iw = w - m.l - m.r, ih = h - m.t - m.b, g = S.chartFrame("#enduse-chart", w, h, m);
+    var y = d3.scaleBand().domain(divs).range([0, ih]).padding(0.25), x = d3.scaleLinear().domain([0, d3.max(divs, function (d) { return byDiv[d]; }) * 1.05]).nice().range([0, iw]);
+    g.append("g").attr("class", "grid-ax").attr("transform", "translate(0," + ih + ")").call(d3.axisBottom(x).ticks(6).tickSize(-ih).tickFormat(function (v) { return (v / 1e6).toFixed(1) + " Mt"; }));
+    g.append("g").attr("class", "axis").call(d3.axisLeft(y).tickSize(0));
+    divs.forEach(function (d) { var acc = 0; eu.forEach(function (e, i) { var v = byDiv[d] * e.share; g.append("rect").attr("x", x(acc) + (i ? 1 : 0)).attr("y", y(d)).attr("width", Math.max(0, x(acc + v) - x(acc) - 1)).attr("height", y.bandwidth()).attr("rx", 1.5).style("fill", "var(--s" + (i + 1) + ")")
+        .on("mousemove", function (ev) { S.showTipAt("#enduse-chart", ev, "<b>" + d + "</b><br>" + e.name + ": " + kt(v) + " (" + fmtP(e.share) + " national share)"); }).on("mouseleave", function () { S.hideTipAt("#enduse-chart"); }); acc += v; }); });
+    var lg = d3.select("#enduse-chart").append("div").attr("class", "legend"); eu.forEach(function (e, i) { lg.append("span").html("<i style='background:var(--s" + (i + 1) + ")'></i>" + e.name + " " + fmtP(e.share)); });
+    d3.select("#enduse-note").html(D.facts.enduse_note);
+  }
+
+  /* ---------- backtest ---------- */
+  function renderBacktest() { S.clearLayers(); S.scen = "fp2024"; S.drawMills({ fill: function (m) { return m.status === "closed" && (m.closed_year || 0) >= 2025 ? "var(--s8)" : ownerVar(S.ownerIn(m)); }, dim: function (m) { return !(m.status === "closed" && (m.closed_year || 0) >= 2025); } }); S.setRamp(null);
+    var B = D.facts.backtest, items = [["US capacity end-2024: model vs AF&PA", B.cap_2024], ["IP US capacity end-2024: model vs 10-K", B.ip_2024], ["2024 US mill shipments: model vs AF&PA production", B.ship_2024], ["Operating rate 2026: model vs AF&PA Q2-2026", B.oprate], ["IP integration: model vs 10-K", B.ip_int], ["Smurfit Westrock integration: model vs implied", B.sw_int]];
+    var kk = d3.select("#kpis-bt").selectAll("div.k").data(items); kk.exit().remove(); kk.enter().append("div").attr("class", "k").merge(kk).html(function (d) { return "<span>" + d[0] + "</span><b>" + d[1] + "</b>"; });
+    d3.select("#bt-note").html(B.note); }
+  function drawBacktestDetail() {
+    var t = d3.select("#bt-table"); t.html("<tr><th>Check</th><th class='n'>Model</th><th class='n'>Record</th><th>Source</th></tr>");
+    D.facts.reconciliation.forEach(function (r) { t.append("tr").html("<td>" + r[0] + "</td><td class='n'>" + r[1] + "</td><td class='n'>" + r[2] + "</td><td>" + r[3] + "</td>"); });
+    var bt = D.backtest.slice().sort(function (a, b) { return a.utilization - b.utilization || a.shadow - b.shadow; }), rank = {}; bt.forEach(function (r, i) { rank[r.mill] = i + 1; });
+    var ls = D.local_surplus || {}, lsRank = {}; Object.keys(ls).map(function (k) { return [+k, ls[k]]; }).sort(function (a, b) { return b[1] - a[1]; }).forEach(function (p, i) { lsRank[p[0]] = i + 1; });
+    var c = d3.select("#closure-table"); c.html("<tr><th>Mill closed 2025–26</th><th>Owner</th><th class='n'>Capacity</th><th class='n'>LP utilization at 2026 demand</th><th class='n'>Idle rank (1 = idlest of " + bt.length + ")</th><th class='n'>Capacity ÷ demand within 300 mi</th><th class='n'>Surplus rank</th></tr>");
+    bt.filter(function (r) { return r.closed_2025_26; }).forEach(function (r) { c.append("tr").html("<td>" + r.name + ", " + r.st + "</td><td>" + r.owner + "</td><td class='n'>" + kt(r.cap) + "</td><td class='n'>" + fmtP(r.utilization) + "</td><td class='n'>" + rank[r.mill] + "</td><td class='n'>" + (ls[r.mill] ? ls[r.mill].toFixed(2) : "—") + "</td><td class='n'>" + (lsRank[r.mill] || "—") + "</td>"); });
+    c.append("tr").html("<td colspan='7' style='color:var(--ink-3)'>Mills the LP would idle first instead (lowest utilization at 2026 demand on the 2024 footprint):</td>");
+    bt.slice(0, 8).forEach(function (r) { c.append("tr").html("<td>" + r.name + ", " + r.st + "</td><td>" + r.owner + "</td><td class='n'>" + kt(r.cap) + "</td><td class='n'>" + fmtP(r.utilization) + "</td><td class='n'>" + rank[r.mill] + "</td><td class='n'>" + (ls[r.mill] ? ls[r.mill].toFixed(2) : "—") + "</td><td class='n'>" + (lsRank[r.mill] || "—") + "</td>"); });
+    d3.select("#closure-note").html(D.facts.closure_note);
+  }
+
+  /* ---------- method ---------- */
+  function renderMethod() { S.clearLayers(); S.drawMills({}); S.setRamp(null);
+    var k = base.kpi, items = [["mills on the map", D.mills.length + " (" + D.facts.n_us_open + " open in the US)"], ["demand points", D.nodes.length], ["LP size, October 2026", k.n_vars.toLocaleString() + " variables × " + k.n_rows.toLocaleString() + " rows"], ["solve time", k.solve_seconds + " s (HiGHS)"], ["scenarios on this page", Object.keys(D.scenarios).length], ["generated", D.generated]];
+    var kk = d3.select("#kpis-method").selectAll("div.k").data(items); kk.exit().remove(); kk.enter().append("div").attr("class", "k").merge(kk).html(function (d) { return "<span>" + d[0] + "</span><b>" + d[1] + "</b>"; }); }
+
+  /* ---------- tabs and dispatch ---------- */
+  var TITLES = { flows: ["Where every ton of board goes", "{{n_us_open}} US containerboard mills, {{n_nodes}} box markets, and the min-cost flow between them. Hover anything; pick a scenario on the right."],
+    prospects: ["Will you switch?", "For each market, the cheapest mill by delivered freight and the one behind it. The gap is the price of loyalty. Pick an owner and raise its open-market price to see the call sheet."],
+    prices: ["What a thousand square feet of board costs, delivered", "Mill prices from the published index, freight from the flow model, diesel from EIA. Mullen or ECT, your numbers."],
+    fiber: ["The boxes come back", "Recovered corrugated flows from where it was used to the recycled mills and export docks that want it. Same network, reversed."],
+    demand: ["Where the boxes are used", "A statistical stand-in for the plant list: population tilted by manufacturing, read as corrugators and facilities. The next data layer replaces it."],
+    backtest: ["Does the model match the record?", "Capacity, shipments, integration and operating rates against the filings and the AF&PA survey, and an honest look at the 2025 closures."],
+    method: ["How it is built", "One min-cost flow, expanded for ownership and grade; public data in, a JSON out; every assumption on this page."] };
+  function setTab(tab) {
+    S.tab = tab; d3.selectAll("nav.tabs button").attr("aria-selected", function () { return this.dataset.tab === tab ? "true" : "false"; });
+    ["flows", "prospects", "prices", "fiber", "demand", "backtest", "method"].forEach(function (t) { document.getElementById("panel-" + t).hidden = t !== tab; document.getElementById("detail-" + t).hidden = t !== tab; });
+    document.getElementById("title").textContent = TITLES[tab][0]; document.getElementById("lede").textContent = TITLES[tab][1].replace("{{n_us_open}}", D.facts.n_us_open).replace("{{n_nodes}}", D.nodes.length);
+    document.getElementById("legend").hidden = tab === "prices" || tab === "demand";
+    if (tab !== "backtest" && S.scen === "fp2024" && S._autoScen) { S.scen = "fp2026"; S._autoScen = false; }
+    if (tab === "backtest") { S._autoScen = S.scen !== "fp2024"; }
+    S.render(); try { location.hash = tab; } catch (e) {}
+  }
+  S.render = function () { if (S.tab === "flows") S.renderFlows(); else if (S.tab === "prospects") renderProspects(); else if (S.tab === "prices") renderPrices(); else if (S.tab === "fiber") renderFiber(); else if (S.tab === "demand") renderDemand(); else if (S.tab === "backtest") renderBacktest(); else renderMethod(); };
+  d3.selectAll("nav.tabs button").on("click", function () { setTab(this.dataset.tab); });
+  d3.selectAll(".list").on("click", function (ev) { var tr = ev.target.closest("tr[data-node]"); if (!tr) return; var n = D.nodes[+tr.dataset.node]; document.getElementById("mapcard").scrollIntoView({ behavior: "smooth", block: "center" }); L.nodes.selectAll("rect").filter(function (d) { return d === n; }).each(function () { var r = this.getBoundingClientRect(); S.showTip({ clientX: r.left + r.width / 2, clientY: r.top }, "<b>" + n.name + "</b>"); }); });
+  var themeBtn = document.getElementById("theme"); if (themeBtn) themeBtn.addEventListener("click", function () { var root = document.documentElement, dark = window.matchMedia("(prefers-color-scheme: dark)").matches, cur = root.getAttribute("data-theme") || (dark ? "dark" : "light"), next = cur === "dark" ? "light" : "dark"; root.setAttribute("data-theme", next); try { localStorage.setItem("theme", next); } catch (e) {} });
+  try { var saved = localStorage.getItem("theme"); if (saved === "dark" || saved === "light") document.documentElement.setAttribute("data-theme", saved); } catch (e) {}
+  new MutationObserver(function () { S.render(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  if (window.matchMedia) window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { S.render(); });
+  /* boot */
+  S.renderLegend(); S.drawFlowsDetail(); drawProspectsDetail(); drawPricesDetail(); drawFiberDetail(); drawDemandDetail(); drawBacktestDetail();
+  var h = (location.hash || "").replace("#", ""); setTab(TITLES[h] ? h : "flows");
+})();

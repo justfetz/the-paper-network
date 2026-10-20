@@ -1,0 +1,127 @@
+<header class="app"><div class="wrap">
+  <div class="brand"><b>The Paper Network</b><span>US containerboard and corrugated, mapped from public data · {{generated}}</span></div>
+  {{theme_button}}
+  <nav class="tabs" role="tablist" aria-label="Views">
+    <button role="tab" data-tab="flows" aria-selected="true">Flows</button>
+    <button role="tab" data-tab="prospects" aria-selected="false">Will you switch?</button>
+    <button role="tab" data-tab="prices" aria-selected="false">Prices &amp; delivered cost</button>
+    <button role="tab" data-tab="fiber" aria-selected="false">Fiber loop</button>
+    <button role="tab" data-tab="demand" aria-selected="false">Demand</button>
+    <button role="tab" data-tab="backtest" aria-selected="false">Backtest</button>
+    <button role="tab" data-tab="method" aria-selected="false">Method &amp; data</button>
+  </nav>
+</div></header>
+<main class="wrap">
+  <h1 id="title">Where every ton of board goes</h1>
+  <p class="lede" id="lede">{{n_us_open}} US containerboard mills, {{n_nodes}} box markets, and the min-cost flow between them. Hover anything; pick a scenario on the right.</p>
+  <div class="grid">
+    <section class="card map" id="mapcard" aria-label="Map">
+      <div id="map"></div>
+      <div class="chips" id="legend" aria-label="Owners; click to isolate"></div>
+      <div class="ramp-legend" id="ramp" hidden><i></i><span id="ramp-text"></span></div>
+    </section>
+    <aside class="stack" id="side">
+      <section class="card" id="panel-flows">
+        <h2>Scenario</h2>
+        <div class="bar" id="scen">
+          <button type="button" data-scen="fp2024" aria-pressed="false">End of 2024</button>
+          <button type="button" data-scen="fp2026" aria-pressed="true">October 2026</button>
+          <button type="button" data-scen="cf2026" aria-pressed="false">2026 mills, 2024 demand</button>
+        </div>
+        <div class="bar"><select id="month" aria-label="Maintenance month"><option value="">Maintenance calendar…</option></select></div>
+        <div class="bar"><select id="ko" aria-label="Knock out a mill"><option value="">Knock out a mill…</option></select></div>
+        <h2>Layers</h2>
+        <div class="bar" id="layers">
+          <button type="button" data-layer="flows" aria-pressed="true">Own-system flows</button>
+          <button type="button" data-layer="market" aria-pressed="true">Open-market flows</button>
+          <button type="button" data-layer="exports" aria-pressed="false">Exports</button>
+          <button type="button" data-layer="demand" aria-pressed="true">Demand points</button>
+          <button type="button" data-layer="shadow" aria-pressed="false">Mills by scarcity value</button>
+          <button type="button" data-layer="mc" aria-pressed="false">Demand by delivered cost</button>
+        </div>
+        <div class="bar"><span class="lbl">Min flow</span><input type="range" id="minflow" min="0" max="50000" step="1000" value="2000" aria-label="Minimum flow to draw"><span id="minflow-v" class="pill">2 kt</span></div>
+        <h2>This scenario</h2>
+        <div class="kpis" id="kpis"></div>
+      </section>
+      <section class="card" id="panel-prospects" hidden>
+        <h2>Contestability</h2>
+        <p>For every market, the cheapest mill by delivered freight and the next one. Where the gap is a few dollars a ton, the account is a phone call away.</p>
+        <div class="bar"><span class="lbl">Grade</span><button type="button" data-grade="L" aria-pressed="true">Linerboard</button><button type="button" data-grade="M" aria-pressed="false">Medium</button></div>
+        <div class="bar"><span class="lbl">Shock</span><select id="shock" aria-label="Unilateral price increase"><option value="">No price shock</option></select></div>
+        <div class="kpis" id="kpis-pro"></div>
+        <h2 id="calls-h">Call sheet</h2>
+        <div class="list" id="calls"></div>
+      </section>
+      <section class="card" id="panel-prices" hidden>
+        <h2>Delivered board cost calculator</h2>
+        <p>Paper cost per thousand square feet of combined board, delivered. Set the mill prices and diesel; the map recolors every market.</p>
+        <div class="bar"><span class="lbl">Spec</span><button type="button" data-spec="ect32" aria-pressed="true">32 ECT (35-26-35)</button><button type="button" data-spec="mullen200" aria-pressed="false">200# Mullen (42-26-42)</button></div>
+        <div class="bar"><span class="lbl">Liner $/t</span><input type="number" id="p-liner" value="{{p_liner}}" step="10"><span class="lbl">Medium $/t</span><input type="number" id="p-medium" value="{{p_medium}}" step="10"></div>
+        <div class="bar"><span class="lbl">Diesel</span><select id="diesel" aria-label="Diesel price"><option value="3.0">$3.00/gal</option><option value="3.75" selected>$3.75/gal</option><option value="5.0">$5.00/gal</option></select><span class="lbl">Increase</span><input type="number" id="p-hike" value="70" step="10" aria-label="Announced increase $/t"></div>
+        <div class="kpis" id="kpis-price"></div>
+        <h2>Cheapest and dearest markets</h2>
+        <div class="list" id="price-rank"></div>
+      </section>
+      <section class="card" id="panel-fiber" hidden>
+        <h2>Recovered fiber</h2>
+        <p>Boxes come back as OCC where they were used. The same network, run in reverse: counties supply, recycled mills and export docks demand, freight decides.</p>
+        <div class="bar" id="fiber-layers"><button type="button" data-flayer="flows" aria-pressed="true">OCC flows</button><button type="button" data-flayer="value" aria-pressed="true">Counties by fiber value</button></div>
+        <div class="kpis" id="kpis-fiber"></div>
+        <h2>Recycled mills by fiber intake</h2>
+        <div class="list" id="fiber-mills"></div>
+      </section>
+      <section class="card" id="panel-demand" hidden>
+        <h2>Where the boxes are used</h2>
+        <p>Demand is allocated to counties by population, tilted toward manufacturing states, and read as corrugator-equivalents. A real plant list replaces this layer (see Method).</p>
+        <div class="bar"><span class="lbl">Color</span><button type="button" data-dlayer="demand" aria-pressed="true">Tons of board</button><button type="button" data-dlayer="plants" aria-pressed="false">Plants implied</button></div>
+        <div class="kpis" id="kpis-demand"></div>
+        <h2>Largest markets</h2>
+        <div class="list" id="demand-rank"></div>
+      </section>
+      <section class="card" id="panel-backtest" hidden>
+        <h2>Does the model match the record?</h2>
+        <div class="kpis" id="kpis-bt"></div>
+        <p id="bt-note"></p>
+      </section>
+      <section class="card" id="panel-method" hidden>
+        <h2>Read me first</h2>
+        <p>Every mill on the map comes from a filing, a press release or a closure notice. Every demand square is a statistical stand-in for the box plants that a free, public plant list will replace. The flows are a solver's answer to "what is the cheapest way to move the board", not a record of who ships to whom.</p>
+        <div class="kpis" id="kpis-method"></div>
+      </section>
+    </aside>
+  </div>
+
+  <div class="detail" id="detail-flows">
+    <section class="card"><h2>Board moved by distance band, October 2026 (Mt)</h2><div id="haul"></div><div class="legend"><span><i style="background:var(--s1)"></i>truck</span><span><i style="background:var(--s2)"></i>rail</span></div></section>
+    <section class="card wide2"><h2>Integration: model vs disclosed</h2><div class="tblwrap"><table class="rec" id="integ"></table></div></section>
+    <section class="card"><h2>Planned outages: capacity offline (kt per month, mills down)</h2><div class="bar"><button type="button" data-cal="m" aria-pressed="true">Staggered calendar</button><button type="button" data-cal="o" aria-pressed="false">Dual-priced assignment</button></div><div id="months-off"></div></section>
+    <section class="card"><h2>Network cost of that month's outages ($M, monthly rate)</h2><div id="months-cost"></div><p class="note" id="cal-note"></p></section>
+    <section class="card wide"><h2>Knock out one mill: extra network cost per year</h2><div id="ko-chart"></div><p class="note">Network cost is freight plus outside purchases valued at $150/t plus unmet demand at $400/t. Click a bar to see the re-routed map.</p></section>
+  </div>
+  <div class="detail" id="detail-prospects" hidden>
+    <section class="card wide"><h2>What a unilateral $70/t increase does to open-market volume</h2><div class="tblwrap"><table class="rec" id="shock-table"></table></div><p class="note">Integrated tonnage does not move: a company's own box plants keep buying from its own mills. The open-market tons are the ones that can walk, and in a market where the next mill is $5/t away, they all do. Real increases hold because the producers announce them together and the index follows.</p></section>
+    <section class="card"><h2>Distribution of the gap to the second-cheapest mill ($/t)</h2><div id="gap-hist"></div></section>
+    <section class="card"><h2>Open-market tons by owner, October 2026</h2><div id="market-by-owner"></div></section>
+  </div>
+  <div class="detail" id="detail-prices" hidden>
+    <section class="card wide"><h2>Published price points</h2><div id="price-charts" class="detail" style="margin-top:0"></div><p class="note" id="price-note"></p></section>
+    <section class="card"><h2>Mullen to ECT, in board weight</h2><div class="tblwrap"><table class="rec" id="ect-table"></table></div><p class="note">The 1991 change to Rule 41 / Item 222 let boxes be specified by edge crush instead of burst. Lighter liners carry the same stacking load, and the industry's tons per thousand square feet fell. The calculator prices both specs so the gap is visible by market.</p></section>
+    <section class="card wide2"><h2>Diesel and the freight bill</h2><div class="tblwrap"><table class="rec" id="diesel-table"></table></div></section>
+  </div>
+  <div class="detail" id="detail-fiber" hidden>
+    <section class="card wide"><h2>The loop in numbers</h2><div class="tblwrap"><table class="rec" id="fiber-table"></table></div><p class="note" id="fiber-note"></p></section>
+  </div>
+  <div class="detail" id="detail-demand" hidden>
+    <section class="card wide"><h2>Board demand by Census division and end use (Mt, allocated)</h2><div id="enduse-chart"></div><p class="note" id="enduse-note"></p></section>
+  </div>
+  <div class="detail" id="detail-backtest" hidden>
+    <section class="card wide"><h2>Model vs record</h2><div class="tblwrap"><table class="rec" id="bt-table"></table></div></section>
+    <section class="card wide"><h2>Did freight position predict the 2025 closures?</h2><div class="tblwrap"><table class="rec" id="closure-table"></table></div><p class="note" id="closure-note"></p></section>
+  </div>
+  <div class="detail" id="detail-method" hidden>
+    <section class="card wide"><h2>The model</h2>{{method_html}}</section>
+    <section class="card"><h2>Sources</h2><p class="note">{{sources}}</p></section>
+    <section class="card"><h2>What the next version needs</h2>{{needs_html}}</section>
+  </div>
+  <footer><span>The Paper Network · code MIT, data from public sources with per-row citations</span><span><a href="https://github.com/justfetz/the-paper-network">github.com/justfetz/the-paper-network</a></span></footer>
+</main>
