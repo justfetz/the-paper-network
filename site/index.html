@@ -284,6 +284,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--rule);font-fa
   </div>
   <div class="detail" id="detail-backtest" hidden>
     <section class="card wide"><h2>Model vs record</h2><div class="tblwrap"><table class="rec" id="bt-table"></table></div></section>
+    <section class="card wide"><h2>Error bars</h2><p id="errorbars" class="small" style="color:var(--ink-2);font-size:14px"></p></section>
     <section class="card wide"><h2>Did freight position predict the 2025 closures?</h2><div class="tblwrap"><table class="rec" id="closure-table"></table></div><p class="note" id="closure-note"></p></section>
   </div>
   <div class="detail" id="detail-method" hidden>
@@ -974,7 +975,7 @@ res = linprog(np.array(c_obj), A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bound
     bt.filter(function (r) { return r.closed_2025_26; }).forEach(function (r) { c.append("tr").html("<td>" + r.name + ", " + r.st + "</td><td>" + r.owner + "</td><td class='n'>" + kt(r.cap) + "</td><td class='n'>" + fmtP(r.utilization) + "</td><td class='n'>" + rank[r.mill] + "</td><td class='n'>" + (ls[r.mill] ? ls[r.mill].toFixed(2) : "—") + "</td><td class='n'>" + (lsRank[r.mill] || "—") + "</td>"); });
     c.append("tr").html("<td colspan='7' style='color:var(--ink-3)'>Mills the LP would idle first instead (lowest utilization at 2026 demand on the 2024 footprint):</td>");
     bt.slice(0, 8).forEach(function (r) { c.append("tr").html("<td>" + r.name + ", " + r.st + "</td><td>" + r.owner + "</td><td class='n'>" + kt(r.cap) + "</td><td class='n'>" + fmtP(r.utilization) + "</td><td class='n'>" + rank[r.mill] + "</td><td class='n'>" + (ls[r.mill] ? ls[r.mill].toFixed(2) : "—") + "</td><td class='n'>" + (lsRank[r.mill] || "—") + "</td>"); });
-    d3.select("#closure-note").html(D.facts.closure_note);
+    d3.select("#closure-note").html(D.facts.closure_note); d3.select("#errorbars").html(D.facts.errorbars || "");
   }
 
   /* ---------- method ---------- */

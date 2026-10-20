@@ -591,7 +591,7 @@
     bt.filter(function (r) { return r.closed_2025_26; }).forEach(function (r) { c.append("tr").html("<td>" + r.name + ", " + r.st + "</td><td>" + r.owner + "</td><td class='n'>" + kt(r.cap) + "</td><td class='n'>" + fmtP(r.utilization) + "</td><td class='n'>" + rank[r.mill] + "</td><td class='n'>" + (ls[r.mill] ? ls[r.mill].toFixed(2) : "—") + "</td><td class='n'>" + (lsRank[r.mill] || "—") + "</td>"); });
     c.append("tr").html("<td colspan='7' style='color:var(--ink-3)'>Mills the LP would idle first instead (lowest utilization at 2026 demand on the 2024 footprint):</td>");
     bt.slice(0, 8).forEach(function (r) { c.append("tr").html("<td>" + r.name + ", " + r.st + "</td><td>" + r.owner + "</td><td class='n'>" + kt(r.cap) + "</td><td class='n'>" + fmtP(r.utilization) + "</td><td class='n'>" + rank[r.mill] + "</td><td class='n'>" + (ls[r.mill] ? ls[r.mill].toFixed(2) : "—") + "</td><td class='n'>" + (lsRank[r.mill] || "—") + "</td>"); });
-    d3.select("#closure-note").html(D.facts.closure_note);
+    d3.select("#closure-note").html(D.facts.closure_note); d3.select("#errorbars").html(D.facts.errorbars || "");
   }
 
   /* ---------- method ---------- */
