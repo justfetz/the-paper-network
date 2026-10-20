@@ -15,16 +15,20 @@ permissions:
   contents: write
   pages: write
   id-token: write
-concurrency: { group: refresh, cancel-in-progress: false }
+concurrency:
+  group: refresh
+  cancel-in-progress: false
 jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
+        with:
+          python-version: "3.12"
       - uses: actions/setup-node@v4
-        with: { node-version: "22" }
+        with:
+          node-version: "22"
       - run: pip install numpy pandas scipy zipcodes geonamescache
       - name: Ingest what has keys (each step is skipped when its secret is absent)
         env:
@@ -50,12 +54,15 @@ jobs:
           git diff --cached --quiet && echo "no changes" || (git commit -m "refresh: $(date -u +%Y-%m-%d) scheduled data and model re-run" && git push)
       - name: Upload site for Pages
         uses: actions/upload-pages-artifact@v3
-        with: { path: site }
+        with:
+          path: site
   deploy:
     needs: refresh
     if: vars.DEPLOY_PAGES == 'true'   # set repository variable DEPLOY_PAGES=true after enabling Pages (source: GitHub Actions)
     runs-on: ubuntu-latest
-    environment: { name: github-pages, url: ${{ steps.deployment.outputs.page_url }} }
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
