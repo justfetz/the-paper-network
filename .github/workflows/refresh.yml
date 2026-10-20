@@ -33,15 +33,18 @@ jobs:
       - name: Ingest what has keys (each step is skipped when its secret is absent)
         env:
           EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
-          CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           EDGAR_UA: ${{ secrets.EDGAR_UA }}
         run: |
-          set -e
-          [ -n "$EIA_API_KEY" ] && python ingest/eia_diesel.py data/diesel_weekly.csv || echo "EIA: no key, skipped"
-          [ -n "$CENSUS_API_KEY" ] && python ingest/census_cbp.py 2022 data/cbp_322211_county.csv || echo "Census: no key, skipped"
-          [ -n "$EDGAR_UA" ] && [ "$(date +%m)" = "03" ] && python ingest/edgar_10k.py data/10k || echo "EDGAR: skipped (runs in March with EDGAR_UA set)"
+          set +e
+          if [ -n "$EIA_API_KEY" ]; then python ingest/eia_diesel.py data/diesel_weekly.csv || echo "EIA fetch failed"; else echo "EIA: no key, skipped"; fi
+          if [ -n "$FRED_API_KEY" ]; then python ingest/fred.py data/fred_series.csv || echo "FRED fetch failed"; else echo "FRED: no key, skipped"; fi
+          python ingest/bls_qcew.py data/qcew_322211_county.csv || echo "QCEW fetch failed"
+          if [ -n "$EDGAR_UA" ] && [ "$(date +%m)" = "03" ]; then python ingest/edgar_10k.py data/10k || echo "EDGAR fetch failed"; else echo "EDGAR: runs in March with EDGAR_UA set"; fi
+          true
       - name: Re-run the model (about 5 minutes)
         run: |
+          python model/plants_layer.py data/plants_frs.csv data/cbp_322211_county.csv data/paper_network.json data/plants_by_node.json || echo "plant layer skipped"
           cd model
           python export_json.py ../data/mills_final.csv ../data/paper_network.json
           python corrugators.py ../data/paper_network.json ../data/corrugators.json

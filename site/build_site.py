@@ -75,6 +75,15 @@ if os.path.exists(DW_PATH):
     reg = {r["region"]: float(r["usd_per_gal"]) for r in _csv.DictReader(open(DW_PATH)) if r["date"] == latest["date"]}
     D["prices"]["diesel_latest"] = {"date": latest["date"], **{k: round(v, 2) for k, v in reg.items()}}
     D["prices"]["notes"]["diesel"] = f"EIA weekly US on-highway diesel, monthly averages of the weekly series; latest week {latest['date']}: " + ", ".join(f"{k} ${v:.2f}" for k, v in sorted(reg.items())) + "."
+FR_PATH = os.path.join(os.path.dirname(JSON_PATH), "fred_series.csv")
+if os.path.exists(FR_PATH):
+    import csv as _csv2
+    from collections import defaultdict as _dd
+    fr = _dd(list); labels = {}
+    for r in _csv2.DictReader(open(FR_PATH)):
+        try: fr[r["series"]].append([r["date"][:7], round(float(r["value"]), 2)]); labels[r["series"]] = r["label"]
+        except ValueError: pass
+    D["prices"]["fred"] = {sid: {"label": labels[sid], "points": [p for i, p in enumerate(pts) if pts[i-1][0] != p[0] or i == 0][-84:]} for sid, pts in fr.items()}
 D["reported_integration"] = {"International Paper": "~80% to own plants (10-K FY2019–22)", "Smurfit Westrock": "~81% implied: WestRock ~23% long on board vs its plants (Fastmarkets)", "Packaging Corp of America": "\"majority\" in the 10-K; ~96% in secondary sources", "Georgia-Pacific": "not disclosed", "Pratt Industries": "not disclosed", "Green Bay Packaging": "not disclosed", "Cascades": "not disclosed"}
 D["enduse"] = [{"name": "Food & beverage", "share": 0.36}, {"name": "Retail, e-commerce & general merchandise", "share": 0.18}, {"name": "Durables: furniture, appliances, metal, electrical", "share": 0.12}, {"name": "Paper & allied products", "share": 0.09}, {"name": "Chemicals, plastics & pharma", "share": 0.09}, {"name": "Other nondurables", "share": 0.13}, {"name": "Glass, ceramics & stone", "share": 0.03}]
 D["facts"] = {
