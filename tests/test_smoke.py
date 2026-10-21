@@ -59,7 +59,7 @@ try:
     import re as _re; gq = json.load(open(os.path.join(ROOT, "evals", "chat_golden.json")))
     check("golden questions never double the state (no 'Tarrant, TX, TX')", not [q for q in gq if _re.search(r", ([A-Z]{2}), \1\b", q["question"])])
     mans = impl["find_mill"]("Mansfield")[0]
-    check("chat lookup: Mansfield has a knockout cost and named top markets", mans["if_this_mill_goes_down"]["network_cost_usd_per_year"] > 1e8 and mans["top_markets_served"] and ", TX, TX" not in mans["top_markets_served"][0])
+    check("chat lookup: Mansfield has a knockout cost and named top markets", mans["if_this_mill_goes_down"]["network_cost_usd_per_year"] > 1e7 and mans["top_markets_served"] and ", TX, TX" not in mans["top_markets_served"][0])
     fp_ = impl["find_plants"]("International Paper", "TX"); check("chat lookup: plant search returns rows as registered, no guessed owner", fp_["matches"] > 0 and "registered_name" in fp_["shown"][0] and "owner_guess" not in json.dumps(fp_))
     check("chat lookup: price shock and scenarios", impl["price_shock"]("IP")["open_market_tons_before"] > 0 and len(impl["scenarios"]()) > 20 and len(defs) == 6)
 except Exception as e: check("chat lookups import and run", False, repr(e))
@@ -72,6 +72,8 @@ check("site builds", r.returncode == 0, r.stderr[-300:])
 check("site has its data, the chat, the tape and no unfilled placeholders", "PN_DATA" in open(os.path.join(ROOT, "site", "data.js")).read()[:40] and "chat-fab" in open(os.path.join(ROOT, "site", "ui.js")).read() and "ticker" in open(os.path.join(ROOT, "site", "ui.js")).read() and "{{n_plants}}" not in idx and "{{generated}}" not in idx)
 ui_js = open(os.path.join(ROOT, "site", "ui.js")).read(); tpl = open(os.path.join(ROOT, "site", "src", "index.template.html")).read()
 check("guide is bundled: a How-to card per tab, the question index, the tour and the header button", "How to use · " in ui_js and "Which view answers what" in ui_js and "tour-card" in ui_js and 'id="guide-btn"' in tpl and all(k in ui_js for k in ["flows: {", "corr: {", "thru: {", "prospects: {", "prices: {", "fiber: {", "demand: {", "backtest: {", "method: {"]))
+r = subprocess.run([sys.executable, os.path.join(ROOT, "audit", "recompute.py"), "--no-solve", "--strict"], capture_output=True, text=True, cwd=ROOT)
+check("audit: headline totals sit inside the tolerance of their public anchors (capacity, production, IP, PCA, integration)", r.returncode == 0, (r.stdout + r.stderr)[-600:])
 check("model-run badge written", os.path.exists(os.path.join(ROOT, "site", "badge.json")))
 if shutil.which("node"):
     for js in sorted(glob.glob(os.path.join(ROOT, "site", "src", "*.js"))) + [os.path.join(ROOT, "chat", "worker.js")]:

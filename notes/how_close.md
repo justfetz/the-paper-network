@@ -1,5 +1,7 @@
 # How close is the model? A calibration note (October 2026 run)
 
+> **Superseded for current numbers** by [`audit/RECEIPTS.md`](../audit/RECEIPTS.md), regenerated from the data by `audit/recompute.py` (21 October 2026 audit: two missing Smurfit Westrock mills added, IP and PCA rows scaled to the companies' own totals). The method notes below still apply; the figures are from the run before the audit.
+
 Short version: the national totals are within the spread of the published numbers (about ±3–4%), the
 company-level supply side is within 1–5%, the regional demand geography is the weak part (±25–35% by
 state against the only independent signal we have), and the network outputs are precise given the inputs

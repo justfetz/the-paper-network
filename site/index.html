@@ -229,7 +229,7 @@ body.has-ticker .tour-card{bottom:calc(58px + env(safe-area-inset-bottom,0px))}
 </head>
 <body>
 <header class="app"><div class="wrap">
-  <div class="brand"><b>The Paper Network</b><span>US containerboard and corrugated, mapped from public data · 2026-10-20</span></div>
+  <div class="brand"><b>The Paper Network</b><span>US containerboard and corrugated, mapped from public data · 2026-10-21</span></div>
   <button type="button" class="theme" id="guide-btn" aria-expanded="false" title="How to use this page: a card per view, a tour, and which view answers what">Guide</button>
   <button class="theme" id="theme" type="button" aria-label="Toggle dark mode">light / dark</button>
   <nav class="tabs" role="tablist" aria-label="Views">
@@ -246,7 +246,7 @@ body.has-ticker .tour-card{bottom:calc(58px + env(safe-area-inset-bottom,0px))}
 </div></header>
 <main class="wrap">
   <h1 id="title">Where every ton of board goes</h1>
-  <p class="lede" id="lede">63 US containerboard mills, 441 box markets, and the min-cost flow between them. Hover anything; pick a scenario on the right.</p>
+  <p class="lede" id="lede">64 US containerboard mills, 441 box markets, and the min-cost flow between them. Hover anything; pick a scenario on the right.</p>
   <div class="grid">
     <section class="card map" id="mapcard" aria-label="Map">
       <div id="map"></div>
@@ -337,6 +337,7 @@ body.has-ticker .tour-card{bottom:calc(58px + env(safe-area-inset-bottom,0px))}
       <section class="card" id="panel-method" hidden>
         <h2>Read me first</h2>
         <p>Every mill on the map comes from a filing, a press release or a closure notice. Every demand square is a statistical stand-in for the box plants that a free, public plant list will replace. The flows are a solver's answer to "what is the cheapest way to move the board", not a record of who ships to whom.</p>
+        <p>Every headline number is checked against its public anchor (AF&amp;PA, the companies' own 10-Ks, Fastmarkets) in <a href="https://github.com/justfetz/the-paper-network/blob/main/audit/RECEIPTS.md" target="_blank" rel="noopener">the receipts</a>, regenerated from the data by <code>audit/recompute.py</code>.</p>
         <div class="kpis" id="kpis-method"></div>
       </section>
     </aside>
@@ -399,8 +400,8 @@ s.t. Σ_{j,g} (x_ijg + y_ijg) + Σ_p z_ip  ≤  c_i a_i          <span class="c"
      Σ_i y_ijg − Σ_k v_kjg + u_jg  =  s_open φ_g D_j         <span class="c"># open market at j</span><br>
      Σ_i z_ip  =  E_p                                        <span class="c"># exports through gateway p (kraft mills only)</span><br>
      f(d) = min(8 + 0.125 d·ft, 35 + 0.065 d·fr) $/ton,  d = 1.2 × great-circle miles, ft/fr = diesel factors (22% / 12% fuel share at $3.75)<br>
-<span class="c"># October 2026 instance: 93,423 variables, 7,139 constraints, 1.1 s with HiGHS. 55 scenarios on this page.</span></div>
-<p><b>Duals.</b> The multiplier on a mill's capacity row is what one more ton of that mill saves the network (the scarcity layer). The multiplier on a demand row is the delivered cost of the marginal ton in that county (the delivered-cost layer and the calculator's freight). <b>Prospects</b> rank, for every market, the active mills by delivered freight; the gap between the first two is the switching threshold. <b>Price shocks</b> add $70/t to one owner's open-market arcs only. <b>The fiber loop</b> is a second transportation LP: counties supply recovered OCC (92% of consumption, plus 3% for imported goods), recycled mills demand 1.15 t per ton of recycled board they ship, export docks take the AF&amp;PA/USITC export tonnage, and freight decides. <b>The maintenance calendar</b> is an assignment problem: for each mill and month the cost of an outage is estimated as capacity dual × tons lost, from twelve no-outage solves, then assigned with at most 9 mills per month and two per owner (a small MILP), and re-solved month by month to measure the true penalty. <b>Knockouts</b> remove one mill and re-solve. <b>The backtest</b> puts 2026 demand on the 2024 mill set and asks which mills the LP leaves idle.</p>
+<span class="c"># October 2026 instance: 95,211 variables, 7,141 constraints, 2.0 s with HiGHS. 55 scenarios on this page.</span></div>
+<p><b>Duals.</b> The multiplier on a mill's capacity row is what one more ton of that mill saves the network (the scarcity layer). The multiplier on a demand row is the delivered cost of the marginal ton in that county (the delivered-cost layer and the calculator's freight). <b>Prospects</b> rank, for every market, the active mills by delivered freight; the gap between the first two is the switching threshold. <b>Price shocks</b> add $70/t to one owner's open-market arcs only. <b>The fiber loop</b> is a second transportation LP: counties supply recovered OCC (92% of consumption, plus 3% for imported goods), recycled mills demand 1.15 t per ton of recycled board they ship, export docks take the AF&amp;PA/USITC export tonnage, and freight decides. <b>The maintenance calendar</b> is an assignment problem: for each mill and month the cost of an outage is estimated as capacity dual × tons lost, from twelve no-outage solves, then assigned with at most 10 mills per month and two per owner (a small MILP), and re-solved month by month to measure the true penalty. <b>Knockouts</b> remove one mill and re-solve. <b>The backtest</b> puts 2026 demand on the 2024 mill set and asks which mills the LP leaves idle.</p>
 <h3>Assumptions that matter</h3>
 <ul style="color:var(--ink-2);font-size:14px;padding-left:20px"><li>Demand geography is population tilted by state manufacturing share, rolled up to 441 points; two thirds liner, one third medium; 34.5 Mt domestic + 4.6 Mt exports in 2024, 32.2 + 3.6 in 2026. Canadian mills sell 35% of capacity south; Mexican mills are listed, not modeled.</li>
 <li>Owner shares of the box market are national; a state-level plant count by owner (in the 10-K property lists) would make them regional.</li>
@@ -1430,7 +1431,7 @@ res = linprog(np.array(c_obj), A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bound
 (function () {
   var D = window.PN_DATA, S = window.PN; if (!D || !S || !S.setTab || !window.d3) return;
   var side = document.getElementById("side"); if (!side) return;
-  var LS = "pn-guide", BLOG = "https://justfetz.github.io/posts/the-paper-network.html", REPO = "https://github.com/justfetz/the-paper-network";
+  var LS = "pn-guide", BLOG = "https://justfetz.github.io/posts/the-paper-network.html", REPO = "https://github.com/justfetz/the-paper-network"; var RECEIPTS = REPO + "/blob/main/audit/RECEIPTS.md";
   function store() { try { return JSON.parse(localStorage.getItem(LS) || "{}") || {}; } catch (e) { return {}; } }
   function save(patch) { try { var s = store(); Object.keys(patch).forEach(function (k) { s[k] = patch[k]; }); localStorage.setItem(LS, JSON.stringify(s)); } catch (e) {} }
   var expanded = !store().collapsed, mode = "tab", kt = S.kt, musd = S.musd, esc = function (s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;"); };
@@ -1521,13 +1522,13 @@ res = linprog(np.array(c_obj), A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bound
     backtest: { name: "Backtest", what: "Does the model match the record? Capacity, shipments, integration and operating rates against the filings and the AF&PA survey, and an honest look at the 2025 closures.",
       read: ["The map shows the 2024 network with the mills that closed in 2025 and 2026 in red.", "The table compares model and record line by line; the error bars come from fourteen Monte Carlo draws on the inputs."],
       controls: [["Model vs record", "Each row names the source it is checked against."], ["Did freight position predict the closures?", "It did not: the closed mills were all loaded. The surplus column does better, and the table shows both."]],
-      tries: [["The closures table", function () { see("#closure-table"); }], ["Error bars", function () { see("#errorbars"); }]],
+      tries: [["The closures table", function () { see("#closure-table"); }], ["Error bars", function () { see("#errorbars"); }], ["Open the receipts", function () { window.open(RECEIPTS, "_blank", "noopener"); }]],
       asks: ["How many tons does the October 2026 scenario ship, and how much is unmet?"],
-      caveat: "The supply side reconciles because it was built from the filings; the shipments match is the real check. The closures are the miss, shown rather than hidden." },
+      caveat: "Capacity, closures and production land within a few percent of AF&PA, Fastmarkets and the companies' own 10-Ks; the receipts list every anchor and every row the last audit changed. The closures are the miss, shown rather than hidden." },
     method: { name: "Method & data", what: "How it is built: one min-cost flow, expanded for ownership and grade; public data in, one JSON out; every assumption and source on this page.",
       read: ["The model section states the objective and the constraints. The sources list has a citation per anchor. The needs list is what the next version requires."],
       controls: [["The write-up", "The long version, with the algorithm, the data sources, the cleaning, the evals and the refresh clock."], ["The repository", "Code, data and the per-row citations, MIT licensed."]],
-      tries: [["Open the write-up", function () { window.open(BLOG, "_blank", "noopener"); }], ["Open the repository", function () { window.open(REPO, "_blank", "noopener"); }]],
+      tries: [["Open the receipts", function () { window.open(RECEIPTS, "_blank", "noopener"); }], ["Open the write-up", function () { window.open(BLOG, "_blank", "noopener"); }], ["Open the repository", function () { window.open(REPO, "_blank", "noopener"); }]],
       asks: ["What scenarios does this page have?"],
       caveat: "If a number on another tab looks wrong, this is where to see what it was built from. Then open an issue with a source, or a pull request against the row." }
   };
@@ -1544,7 +1545,7 @@ res = linprog(np.array(c_obj), A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq, bound
     ["How many trucks and railcars a day?", "Throughput", function () { S.setTab("thru"); see("#kpis-thru"); }],
     ["Where does the OCC go, and what is it worth?", "Fiber loop", function () { S.setTab("fiber"); see("#mapcard"); }],
     ["Where are the box plants, and is this one still running?", "Demand · Named plants", function () { S.setTab("demand"); named(true); see("#named-card"); }],
-    ["How much should I trust this?", "Backtest, then Method & data", function () { S.setTab("backtest"); see("#bt-table"); }],
+    ["How much should I trust this?", "Backtest, then the receipts", function () { S.setTab("backtest"); see("#bt-table"); }],
     ["Just ask, in words", "Ask the network", function () { if (S.chat) S.chat.open(true); }]
   ];
 

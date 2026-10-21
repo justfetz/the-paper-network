@@ -1,0 +1,1324 @@
+{
+ "generated": "2026-10-21 00:36 UTC",
+ "anchors": {
+  "cap24": {
+   "value": 41400000.0,
+   "tol": 0.06,
+   "label": "US containerboard capacity, 2024",
+   "source": "AF&PA capacity surveys: 2021 record 42.3 Mt, then -0.6%, -0.7%, -0.9% (derived)",
+   "url": "https://www.afandpa.org/news/2025/afpa-details-us-paper-production-and-capacity-trends"
+  },
+  "closures": {
+   "value": 3900000.0,
+   "tol": 0.1,
+   "label": "Capacity permanently retired, Feb 2025 to Mar 2026",
+   "source": "Fastmarkets: ~3.9 Mt, roughly 10% of capacity",
+   "url": "https://www.fastmarkets.com/insights/north-american-containerboard-market-capacity-cuts/"
+  },
+  "cap_after": {
+   "value": 37500000.0,
+   "tol": 0.05,
+   "label": "US capacity after those closures",
+   "source": "41.4 Mt less 3.9 Mt (derived); the model's October 2026 footprint also carries IP's Riverdale PM16 conversion, due by Q3 2026",
+   "url": "https://www.fastmarkets.com/insights/north-american-containerboard-market-capacity-cuts/"
+  },
+  "cap25": {
+   "value": 39300000.0,
+   "tol": 0.08,
+   "label": "US capacity, 2025 (AF&PA annual figure)",
+   "source": "AF&PA 66th survey: -5.1% in 2025 (derived). AF&PA counts a mill that closed in September for most of the year, so its annual figure sits above a year-end footprint",
+   "url": "https://www.afandpa.org/news/2026/afpa-releases-66th-annual-paper-industry-capacity-and-fiber-consumption-survey"
+  },
+  "prod24": {
+   "value": 37700000.0,
+   "tol": 0.05,
+   "label": "US containerboard production, 2024",
+   "source": "AF&PA: 2025 production of 36.1 Mt was -4.4% y/y (derived)",
+   "url": "https://www.afandpa.org/news/2026/afpa-releases-66th-annual-paper-industry-capacity-and-fiber-consumption-survey"
+  },
+  "prod25": {
+   "value": 36100000.0,
+   "tol": 0.05,
+   "label": "US containerboard production, 2025 (model: October 2026 footprint)",
+   "source": "AF&PA 66th survey",
+   "url": "https://www.afandpa.org/news/2026/afpa-releases-66th-annual-paper-industry-capacity-and-fiber-consumption-survey"
+  },
+  "ip_raw": {
+   "value": 12984000.0,
+   "tol": 0.06,
+   "label": "International Paper: public per-mill figures, summed, vs IP's own 2024 US total",
+   "source": "IP FY2024 annual report, Appendix II: 12,984 thousand short tons including Campti",
+   "url": "https://www.sec.gov/Archives/edgar/data/51434/000119312525069955/d856503dars.pdf"
+  },
+  "pca_raw": {
+   "value": 5800000.0,
+   "tol": 0.06,
+   "label": "PCA: last per-mill disclosures, summed, vs PCA's own year-end-2025 total",
+   "source": "PCA FY2025 10-K: about 5.8 million tons (358 BSF)",
+   "url": "https://www.sec.gov/Archives/edgar/data/75677/000119312526074129/pkg-20251231.htm"
+  },
+  "ip_int": {
+   "value": 0.8,
+   "tol": 0.12,
+   "label": "IP board to its own box plants (share)",
+   "source": "IP 10-K FY2019-22: about 80%",
+   "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000051434&type=10-K"
+  },
+  "imports": {
+   "value": 1400000.0,
+   "tol": 0.0,
+   "label": "Containerboard imports into the US, 2024 (model: Canadian mills' tons into US markets)",
+   "source": "Fastmarkets: 1.27 M tonnes, mostly from Canada",
+   "url": "https://www.fastmarkets.com/insights/north-american-linerboard-price-increases/"
+  }
+ },
+ "checks": [
+  {
+   "key": "cap24",
+   "check": "US containerboard capacity, 2024",
+   "model": 40758000.0,
+   "anchor": 41400000.0,
+   "deviation": -0.0155,
+   "tolerance": 0.06,
+   "ok": true,
+   "source": "AF&PA capacity surveys: 2021 record 42.3 Mt, then -0.6%, -0.7%, -0.9% (derived)",
+   "url": "https://www.afandpa.org/news/2025/afpa-details-us-paper-production-and-capacity-trends",
+   "note": "every US mill open in 2024, at its 2024 capacity"
+  },
+  {
+   "key": "closures",
+   "check": "Capacity permanently retired, Feb 2025 to Mar 2026",
+   "model": 4034000.0,
+   "anchor": 3900000.0,
+   "deviation": 0.0344,
+   "tolerance": 0.1,
+   "ok": true,
+   "source": "Fastmarkets: ~3.9 Mt, roughly 10% of capacity",
+   "url": "https://www.fastmarkets.com/insights/north-american-containerboard-market-capacity-cuts/",
+   "note": "mills the database closes in 2025, plus machines retired at mills that stay open"
+  },
+  {
+   "key": "cap_after",
+   "check": "US capacity after those closures",
+   "model": 37154000.0,
+   "anchor": 37500000.0,
+   "deviation": -0.0092,
+   "tolerance": 0.05,
+   "ok": true,
+   "source": "41.4 Mt less 3.9 Mt (derived); the model's October 2026 footprint also carries IP's Riverdale PM16 conversion, due by Q3 2026",
+   "url": "https://www.fastmarkets.com/insights/north-american-containerboard-market-capacity-cuts/",
+   "note": "the October 2026 footprint"
+  },
+  {
+   "key": "cap25",
+   "check": "US capacity, 2025 (AF&PA annual figure)",
+   "model": 36974000.0,
+   "anchor": 39300000.0,
+   "deviation": -0.0592,
+   "tolerance": 0.08,
+   "ok": true,
+   "source": "AF&PA 66th survey: -5.1% in 2025 (derived). AF&PA counts a mill that closed in September for most of the year, so its annual figure sits above a year-end footprint",
+   "url": "https://www.afandpa.org/news/2026/afpa-releases-66th-annual-paper-industry-capacity-and-fiber-consumption-survey",
+   "note": "mills open at the end of 2025, before the 2026 machine changes"
+  },
+  {
+   "key": "prod24",
+   "check": "US containerboard production, 2024",
+   "model": 38759555,
+   "anchor": 37700000.0,
+   "deviation": 0.0281,
+   "tolerance": 0.05,
+   "ok": true,
+   "source": "AF&PA: 2025 production of 36.1 Mt was -4.4% y/y (derived)",
+   "url": "https://www.afandpa.org/news/2026/afpa-releases-66th-annual-paper-industry-capacity-and-fiber-consumption-survey",
+   "note": "US mills' shipments plus exports in the solved 2024 network; the overshoot (+1.06 Mt) matches the Canadian import gap in the last row (1.06 Mt): board the solver makes at US mills that in reality crosses the border"
+  },
+  {
+   "key": "prod25",
+   "check": "US containerboard production, 2025 (model: October 2026 footprint)",
+   "model": 35321076,
+   "anchor": 36100000.0,
+   "deviation": -0.0216,
+   "tolerance": 0.05,
+   "ok": true,
+   "source": "AF&PA 66th survey",
+   "url": "https://www.afandpa.org/news/2026/afpa-releases-66th-annual-paper-industry-capacity-and-fiber-consumption-survey",
+   "note": "US mills' shipments plus exports in the solved October 2026 network; 2026 production is running below 2025"
+  },
+  {
+   "key": "ip_raw",
+   "check": "International Paper: public per-mill figures, summed, vs IP's own 2024 US total",
+   "model": 12417000.0,
+   "anchor": 12984000.0,
+   "deviation": -0.0437,
+   "tolerance": 0.06,
+   "ok": true,
+   "source": "IP FY2024 annual report, Appendix II: 12,984 thousand short tons including Campti",
+   "url": "https://www.sec.gov/Archives/edgar/data/51434/000119312525069955/d856503dars.pdf",
+   "note": "before calibration; the database now scales IP's 11 oldest rows x1.0674 so they sum to IP's figure"
+  },
+  {
+   "key": "pca_raw",
+   "check": "PCA: last per-mill disclosures, summed, vs PCA's own year-end-2025 total",
+   "model": 5551000.0,
+   "anchor": 5800000.0,
+   "deviation": -0.0429,
+   "tolerance": 0.06,
+   "ok": true,
+   "source": "PCA FY2025 10-K: about 5.8 million tons (358 BSF)",
+   "url": "https://www.sec.gov/Archives/edgar/data/75677/000119312526074129/pkg-20251231.htm",
+   "note": "PCA stopped publishing per-mill figures after FY2011-12; the database scales the last ones x1.0708 to PCA's total"
+  },
+  {
+   "key": "ip_int",
+   "check": "IP board to its own box plants (share)",
+   "model": 0.845941236321676,
+   "anchor": 0.8,
+   "deviation": 0.0574,
+   "tolerance": 0.12,
+   "ok": true,
+   "source": "IP 10-K FY2019-22: about 80%",
+   "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000051434&type=10-K",
+   "note": "known bias: a cost-minimizing solver keeps more of an integrated producer's board at home than contracts do"
+  },
+  {
+   "key": "imports",
+   "check": "Containerboard imports into the US, 2024 (model: Canadian mills' tons into US markets)",
+   "model": 340446,
+   "anchor": 1400000.0,
+   "deviation": -0.7568,
+   "tolerance": 0.0,
+   "ok": null,
+   "source": "Fastmarkets: 1.27 M tonnes, mostly from Canada",
+   "url": "https://www.fastmarkets.com/insights/north-american-linerboard-price-increases/",
+   "note": "known gap: the solver buys Canadian board only where freight favors it; contracts and currency move about three times as much"
+  }
+ ],
+ "mills": {
+  "n_us": 77,
+  "n_open_2026": 64,
+  "n_open_2024": 70,
+  "cap24": 40758000.0,
+  "cap26": 37154000.0,
+  "ye25": 36974000.0,
+  "retired": 4034000.0,
+  "pca_ye25": 5799000.0,
+  "by_owner_2024": {
+   "Cascades": 1205000.0,
+   "Domtar": 600000.0,
+   "Georgia-Pacific": 3857000.0,
+   "Green Bay Packaging": 1135000.0,
+   "Hood Container": 300000.0,
+   "International Paper": 12983000.0,
+   "DS Smith": 430000.0,
+   "NORPAC": 330000.0,
+   "Jackson Paper": 110000.0,
+   "Liberty Paper": 280000.0,
+   "McKinley Paper": 750000.0,
+   "ND Paper": 1100000.0,
+   "New-Indy": 1150000.0,
+   "Ox Industries": 88000.0,
+   "Packaging Corp of America": 4999000.0,
+   "Greif": 800000.0,
+   "Port Townsend Paper": 300000.0,
+   "Pratt Industries": 2435000.0,
+   "Smurfit Westrock": 7906000.0
+  },
+  "by_owner_2026": {
+   "Cascades": 1005000.0,
+   "Domtar": 600000.0,
+   "Georgia-Pacific": 2857000.0,
+   "Green Bay Packaging": 1135000.0,
+   "Hood Container": 300000.0,
+   "International Paper": 11943000.0,
+   "Jackson Paper": 110000.0,
+   "Liberty Paper": 280000.0,
+   "McKinley Paper": 750000.0,
+   "ND Paper": 1100000.0,
+   "New-Indy": 1150000.0,
+   "Ox Industries": 88000.0,
+   "Packaging Corp of America": 5549000.0,
+   "Port Townsend Paper": 300000.0,
+   "Pratt Industries": 2435000.0,
+   "Smurfit Westrock": 7552000.0
+  },
+  "closures": [
+   {
+    "mill": "Niagara Falls (corrugating medium)",
+    "st": "NY",
+    "owner": "Cascades",
+    "kt": 200
+   },
+   {
+    "mill": "Cedar Springs",
+    "st": "GA",
+    "owner": "Georgia-Pacific",
+    "kt": 1000
+   },
+   {
+    "mill": "Riceboro",
+    "st": "GA",
+    "owner": "International Paper",
+    "kt": 430
+   },
+   {
+    "mill": "Savannah",
+    "st": "GA",
+    "owner": "International Paper",
+    "kt": 1000
+   },
+   {
+    "mill": "Red River (Campti)",
+    "st": "LA",
+    "owner": "International Paper",
+    "kt": 800
+   },
+   {
+    "mill": "Forney",
+    "st": "TX",
+    "owner": "Smurfit Westrock",
+    "kt": 354
+   },
+   {
+    "mill": "Wallula (machine)",
+    "st": "WA",
+    "owner": "Packaging Corp of America",
+    "kt": 250
+   }
+  ],
+  "additions": [
+   {
+    "mill": "Riverdale (Selma)",
+    "st": "AL",
+    "owner": "International Paper",
+    "kt": 430
+   }
+  ],
+  "by_class": {
+   "company total, split by older public figures": {
+    "mills": 16,
+    "share": 0.343
+   },
+   "SEC filing": {
+    "mills": 17,
+    "share": 0.277
+   },
+   "company statement": {
+    "mills": 13,
+    "share": 0.198
+   },
+   "estimate": {
+    "mills": 10,
+    "share": 0.099
+   },
+   "trade press": {
+    "mills": 8,
+    "share": 0.083
+   }
+  },
+  "by_confidence": {
+   "medium": {
+    "mills": 23,
+    "share": 0.366
+   },
+   "high": {
+    "mills": 22,
+    "share": 0.34
+   },
+   "low": {
+    "mills": 19,
+    "share": 0.294
+   }
+  },
+  "estimates": [
+   {
+    "mill": "Toledo",
+    "st": "OR",
+    "owner": "Georgia-Pacific",
+    "kt": 950,
+    "basis": "estimate; trade press ~1999: >900,000 t/yr containerboard; three paper machines per 2019 report; no current disclosure found"
+   },
+   {
+    "mill": "Arkansas Kraft",
+    "st": "AR",
+    "owner": "Green Bay Packaging",
+    "kt": 450,
+    "basis": "estimate; company 2015: integrated two-machine virgin mill producing 420-440k t/yr; later press-section upgrade for lightweight linerboard"
+   },
+   {
+    "mill": "Shreveport (PM16)",
+    "st": "LA",
+    "owner": "Pratt Industries",
+    "kt": 360,
+    "basis": "estimate; 2008-09 project ($150M) described as processing up to 430,000 t/yr recovered paper (intake); output assumed ~360k t"
+   },
+   {
+    "mill": "NORPAC Longview",
+    "st": "WA",
+    "owner": "International Paper",
+    "kt": 330,
+    "basis": "estimate; mill ~1,000,000 t/yr all grades on three machines; 2019 plan shifted ~one-third of capacity to recycled packaging (NorLiner, NORFL"
+   },
+   {
+    "mill": "Conyers (PM14)",
+    "st": "GA",
+    "owner": "Pratt Industries",
+    "kt": 330,
+    "basis": "estimate; residual of Fastmarkets RISI five-mill total of 1.91 Mt/yr (2020) after Staten Island, Shreveport, Valparaiso, Wapakoneta"
+   },
+   {
+    "mill": "St. Francisville",
+    "st": "LA",
+    "owner": "Hood Container",
+    "kt": 300,
+    "basis": "estimate; 2015 reports: 650-700 tpd with stated goal of 300,000 t/yr; 2025 release: $118.9M primary-machine upgrade adds ~80,000 t/yr"
+   },
+   {
+    "mill": "Port Townsend",
+    "st": "WA",
+    "owner": "Port Townsend Paper",
+    "kt": 300,
+    "basis": "estimate; company FAQ ~950 tpd paper + market pulp; WA Ecology 2025: ~1,000 tpd incl. pulp; 2005 reference ~325,000 t/yr; machine count unce"
+   },
+   {
+    "mill": "Becker",
+    "st": "MN",
+    "owner": "Liberty Paper",
+    "kt": 280,
+    "basis": "estimate; company testimony Apr 2026: ~1,000 tpd OCC in, ~800 tpd paper out; older directories 200-240k t/yr"
+   },
+   {
+    "mill": "Oxnard",
+    "st": "CA",
+    "owner": "New-Indy",
+    "kt": 195,
+    "basis": "derived: Kraft Group states the two California mills produce 570,000 t/yr combined; minus Ontario 375k"
+   },
+   {
+    "mill": "Hartford City",
+    "st": "IN",
+    "owner": "New-Indy",
+    "kt": 180,
+    "basis": "derived: company says its three recycled mills total 750,000 t/yr; minus ~570k for the California mills"
+   }
+  ]
+ },
+ "model": {
+  "demand_2024": 34500000.0,
+  "exports_2024": 4600000.0,
+  "demand_2026": 32200000.0,
+  "exports_2026": 3600000.0,
+  "us_out_2024": 38759555,
+  "us_out_2026": 35321076,
+  "ca_2024": 340446,
+  "ca_2026": 478924,
+  "ip_int": 0.845941236321676,
+  "kpi_2026": {
+   "objective_usd": 2191618712.189,
+   "freight_usd": 2082590959.832,
+   "premium_usd": 109027752.357,
+   "unmet_usd": 0.0,
+   "tons_shipped_domestic": 32200000.0,
+   "tons_exported": 3600000.0,
+   "unmet_tons": 0.0,
+   "owner_purchased_from_market_tons": 726851.682,
+   "avg_haul_miles": 508.712,
+   "rail_share": 0.417,
+   "avg_freight_per_ton": 59.564,
+   "n_vars": 95211,
+   "n_rows": 7141,
+   "solve_seconds": 2.0
+  },
+  "kpi_2024": {
+   "objective_usd": 2377035351.782,
+   "freight_usd": 2292238290.192,
+   "premium_usd": 84797061.59,
+   "unmet_usd": 0.0,
+   "tons_shipped_domestic": 34500000.0,
+   "tons_exported": 4600000.0,
+   "unmet_tons": 0.0,
+   "owner_purchased_from_market_tons": 565313.744,
+   "avg_haul_miles": 515.854,
+   "rail_share": 0.445,
+   "avg_freight_per_ton": 60.407,
+   "n_vars": 100551,
+   "n_rows": 7147,
+   "solve_seconds": 2.0
+  },
+  "occ": {
+   "occ_supply": 30512720.0,
+   "occ_to_mills": 17686355.683,
+   "occ_exported": 8400000.0,
+   "occ_unplaced": 4426364.317,
+   "appetite_scale": 1.0,
+   "avg_haul": 258.588,
+   "freight_usd": 964115855.869
+  },
+  "premium": 150.0,
+  "freight": {
+   "road_factor": 1.2,
+   "truck_fixed": 8.0,
+   "truck_per_mi": 0.125,
+   "rail_fixed": 35.0,
+   "rail_per_mi": 0.065
+  },
+  "knockouts": [
+   {
+    "mill": "Monticello",
+    "st": "MS",
+    "owner": "Georgia-Pacific",
+    "cap_kt": 1000,
+    "musd": 97.9,
+    "unmet_kt": 0
+   },
+   {
+    "mill": "Cedar River",
+    "st": "IA",
+    "owner": "International Paper",
+    "cap_kt": 1089,
+    "musd": 91.5,
+    "unmet_kt": 0
+   },
+   {
+    "mill": "Toledo",
+    "st": "OR",
+    "owner": "Georgia-Pacific",
+    "cap_kt": 950,
+    "musd": 90.8,
+    "unmet_kt": 0
+   },
+   {
+    "mill": "Mansfield",
+    "st": "LA",
+    "owner": "International Paper",
+    "cap_kt": 1494,
+    "musd": 78.0,
+    "unmet_kt": 0
+   },
+   {
+    "mill": "DeRidder",
+    "st": "LA",
+    "owner": "Packaging Corp of America",
+    "cap_kt": 1065,
+    "musd": 62.6,
+    "unmet_kt": 0
+   },
+   {
+    "mill": "Counce",
+    "st": "TN",
+    "owner": "Packaging Corp of America",
+    "cap_kt": 1078,
+    "musd": 59.1,
+    "unmet_kt": 0
+   },
+   {
+    "mill": "Valliant",
+    "st": "OK",
+    "owner": "International Paper",
+    "cap_kt": 1420,
+    "musd": 58.9,
+    "unmet_kt": 0
+   },
+   {
+    "mill": "Hodge",
+    "st": "LA",
+    "owner": "Smurfit Westrock",
+    "cap_kt": 790,
+    "musd": 54.0,
+    "unmet_kt": 0
+   },
+   {
+    "mill": "Stevenson",
+    "st": "AL",
+    "owner": "Smurfit Westrock",
+    "cap_kt": 864,
+    "musd": 43.6,
+    "unmet_kt": 0
+   },
+   {
+    "mill": "Pine Hill",
+    "st": "AL",
+    "owner": "International Paper",
+    "cap_kt": 900,
+    "musd": 39.5,
+    "unmet_kt": 0
+   }
+  ]
+ },
+ "demand": {
+  "weighting": "state totals: CBP state file employment (complete); within state: 70% EPA FRS plant counts + 30% population proxy",
+  "vs_epa": {
+   "rms": 0.353,
+   "weighted_rms": 0.374,
+   "n_states": 38
+  },
+  "vs_cbp_state": {
+   "rms": 0.082,
+   "weighted_rms": 0.062,
+   "n_states": 39
+  },
+  "cbp": {
+   "establishments": 1159,
+   "employment": 90228,
+   "states": 41
+  },
+  "epa_sites": 1605,
+  "verified": {
+   "n": 26,
+   "operating": 24,
+   "closed": 0
+  }
+ },
+ "changes": {
+  "date": "2026-10-21",
+  "ip_factor": 1.0674,
+  "pca_factor": 1.0708,
+  "changes": [
+   {
+    "mill": "Riceboro",
+    "st": "GA",
+    "owner": "International Paper",
+    "why": "Riceboro belonged to DS Smith until IP closed the DS Smith acquisition in January 2025, so it is not in IP's 2024 total",
+    "before": {
+     "owner_2024": "International Paper"
+    },
+    "after": {
+     "owner_2024": "DS Smith"
+    }
+   },
+   {
+    "mill": "Forney",
+    "st": "TX",
+    "owner": "Smurfit Westrock",
+    "why": "SW FY2024 10-K mill table lists Forney at 354k; the 275k was an estimate",
+    "before": {
+     "capacity_tons_per_year": "275000",
+     "capacity_2024": "275000",
+     "confidence": "low",
+     "capacity_basis": "ESTIMATE: SW said Forney + St. Paul CRB closures cut >500k t combined; St. Paul CRB ~200-250k implies Forney ~250-300k; single 2-ply recycled linerboard machine",
+     "source_url": "https://www.smurfitwestrock.com/newsroom/press-releases/2025/smurfit-westrock-announces-capacity-reductions-and-facility-closures"
+    },
+    "after": {
+     "capacity_tons_per_year": "354000",
+     "capacity_2024": "354000",
+     "confidence": "high",
+     "capacity_basis": "SW FY2024 10-K mill table (31 Dec 2024): 354k recycled linerboard and medium; production discontinued May 2025 (SW 8-K 30 Apr 2025; 10-Q Q3 2025)",
+     "source_url": "https://www.sec.gov/Archives/edgar/data/2005951/000110465925042628/tm2513671d1_ex99-1.htm"
+    }
+   },
+   {
+    "mill": "Cerro Gordo",
+    "st": "Estado de Mexico",
+    "owner": "Smurfit Westrock",
+    "why": "replaced an estimate with the SW FY2025 10-K mill-table figure (Mexican mills are context only; they do not supply the US network in the model)",
+    "before": {
+     "capacity_tons_per_year": "750000",
+     "capacity_2024": "750000",
+     "confidence": "low",
+     "capacity_basis": "ESTIMATE: SW 10-K FY2024 NA containerboard total 9,630k less identified US mills (7,230k) and ex-WestRock Mexico (468k) leaves ~1,930k for Forney + 3 ex-Smurfit Kappa Mexican mills; allocated by relative size (Cerro Gordo = largest, multi-machine, PM5 modernized)",
+     "source_url": "https://www.sec.gov/Archives/edgar/data/2005951/000200595125000005/smur-20241231.htm"
+    },
+    "after": {
+     "capacity_tons_per_year": "259000",
+     "capacity_2024": "259000",
+     "confidence": "medium",
+     "capacity_basis": "SW FY2025 10-K North America mill table: 259k containerboard (+88k paperboard) (read from search excerpts of the filing)",
+     "source_url": "https://www.sec.gov/Archives/edgar/data/2005951/000162828026012555/smur-20251231.htm"
+    }
+   },
+   {
+    "mill": "Los Reyes",
+    "st": "Estado de Mexico",
+    "owner": "Smurfit Westrock",
+    "why": "replaced an estimate with the SW FY2025 10-K mill-table figure (Mexican mills are context only; they do not supply the US network in the model)",
+    "before": {
+     "capacity_tons_per_year": "500000",
+     "capacity_2024": "500000",
+     "confidence": "low",
+     "capacity_basis": "ESTIMATE (see Cerro Gordo reconciliation); PM6 alone = 100k tpy recycled containerboard (SK press release 2017/18); mill also makes coated paperboard",
+     "source_url": "https://www.packaging-gateway.com/projects/smurfit-kappas-los-reyes-paper-mill/"
+    },
+    "after": {
+     "capacity_tons_per_year": "158000",
+     "capacity_2024": "158000",
+     "confidence": "medium",
+     "capacity_basis": "SW FY2025 10-K North America mill table: 158k containerboard (read from search excerpts of the filing)",
+     "source_url": "https://www.sec.gov/Archives/edgar/data/2005951/000162828026012555/smur-20251231.htm"
+    }
+   },
+   {
+    "mill": "San Luis Potosi",
+    "st": "San Luis Potosi",
+    "owner": "Smurfit Westrock",
+    "why": "replaced an estimate with the SW FY2025 10-K mill-table figure (Mexican mills are context only; they do not supply the US network in the model)",
+    "before": {
+     "capacity_tons_per_year": "68000",
+     "capacity_2024": "68000",
+     "confidence": "low",
+     "capacity_basis": "WestRock 10-K FY2023: 68k (column/grade unverified; may be recycled paperboard rather than containerboard)",
+     "source_url": "https://www.sec.gov/Archives/edgar/data/1732845/000095017023064855/wrk-20230930.htm"
+    },
+    "after": {
+     "capacity_tons_per_year": "71000",
+     "capacity_2024": "71000",
+     "confidence": "medium",
+     "capacity_basis": "SW FY2025 10-K North America mill table: 71k (recycled medium) (read from search excerpts of the filing)",
+     "source_url": "https://www.sec.gov/Archives/edgar/data/2005951/000162828026012555/smur-20251231.htm"
+    }
+   },
+   {
+    "mill": "Monterrey",
+    "st": "Nuevo Leon",
+    "owner": "Smurfit Westrock",
+    "why": "SW FY2025 10-K mill table lists Monterrey at 402k",
+    "before": {
+     "capacity_tons_per_year": "400000",
+     "capacity_2024": "400000",
+     "confidence": "medium",
+     "capacity_basis": "WestRock 10-K FY2023 (Sept 2023): 400k; SW 10-K 2024/2025 row not retrieved",
+     "source_url": "https://www.sec.gov/Archives/edgar/data/1732845/000095017023064855/wrk-20230930.htm"
+    },
+    "after": {
+     "capacity_tons_per_year": "402000",
+     "capacity_2024": "402000",
+     "confidence": "medium",
+     "capacity_basis": "SW FY2025 10-K North America mill table: 402k (Grupo Gondi PM7, started Jan 2021); WestRock FY2023 10-K: 400k",
+     "source_url": "https://www.sec.gov/Archives/edgar/data/2005951/000162828026012555/smur-20251231.htm"
+    }
+   },
+   {
+    "mill": "Monterrey",
+    "st": "Nuevo Leon",
+    "owner": "Smurfit Westrock",
+    "why": "flagged as a possible duplicate: the retrieved SW table shows one Monterrey row; kept (context only, no effect on the US network) until the full table is read",
+    "before": {
+     "confidence": "low",
+     "status_note": "2025 Mexico machine closure (site unidentified) may be here - verify"
+    },
+    "after": {
+     "confidence": "low",
+     "status_note": "2025 Mexico machine closure (site unidentified) may be here - verify | POSSIBLE DUPLICATE of the Gondi Monterrey row (402k); SW's NA containerboard total of 9,241k leaves ~0.46 Mt unidentified, which could be a second Mexican mill"
+    }
+   },
+   {
+    "mill": "Big Island",
+    "st": "VA",
+    "owner": "Georgia-Pacific",
+    "why": "GP's own later 10-K lists 319k medium + 288k recycled linerboard; the 480k came from 1995-96 start-up reports",
+    "before": {
+     "capacity_tons_per_year": "480000",
+     "capacity_2024": "480000",
+     "confidence": "low",
+     "capacity_basis": "estimate; 1995-96 reports: 820 tpd corrugating medium plus new 600 tpd recycled linerboard machine (1996); no current disclosure found",
+     "source_url": "https://scholar.lib.vt.edu/VA-news/ROA-Times/issues/1995/rt9504/950416/04140010.htm"
+    },
+    "after": {
+     "capacity_tons_per_year": "607000",
+     "capacity_2024": "607000",
+     "confidence": "low",
+     "capacity_basis": "GP 10-K FY1999/FY2000 mill list: 319k corrugating medium + 288k recycled linerboard = 607k (GP is private; nothing newer public)",
+     "source_url": "https://www.sec.gov/Archives/edgar/data/0000041077/000095010901000432/0025.txt"
+    }
+   },
+   {
+    "mill": "Wallula",
+    "st": "WA",
+    "owner": "Packaging Corp of America",
+    "why": "PCA 8-K (3 Dec 2025): W2 and kraft pulping shutdown removes ~250k; W3 continues at ~285k, so the year-end-2025 mill was ~535k",
+    "before": {
+     "capacity_2024": "450000",
+     "capacity_basis": "press release 2025: W3 machine 285,000 t/yr after reconfiguration (a 250,000 t reduction from ~535,000 t)",
+     "source_url": "https://ir.packagingcorp.com/news-releases/news-release-details/packaging-corporation-america-announces-reconfiguration-wallula"
+    },
+    "after": {
+     "capacity_2024": "535000",
+     "capacity_basis": "PCA 8-K 3 Dec 2025: W2 machine and kraft pulping permanently shut by end Q1 2026, ~250k capacity reduction; W3 continues (~285k)",
+     "source_url": "https://www.sec.gov/Archives/edgar/data/75677/000119312525307535/d50663dex991.htm"
+    }
+   },
+   {
+    "mill": "Counce",
+    "st": "TN",
+    "owner": "Packaging Corp of America",
+    "why": "last public per-mill figure scaled x1.071 so PCA's mills sum to its disclosed ~5.8 Mt at year-end 2025 (FY2025 10-K)",
+    "before": {
+     "capacity_tons_per_year": "1150000",
+     "capacity_2024": "1150000",
+     "confidence": "low",
+     "capacity_basis": "estimate; 10-K FY2008 reported ~1,007,000 t (AF&PA basis); upgrades since, scaled toward PCA's disclosed ~5.8 Mt system capacity at end-2025 (10-K FY2025)"
+    },
+    "after": {
+     "capacity_tons_per_year": "1078000",
+     "capacity_2024": "1078000",
+     "confidence": "low",
+     "capacity_basis": "PCA FY2008 10-K: 1,007k (two machines, AF&PA basis); PCA has not disclosed per-mill capacity since FY2011-12, so the last figure is scaled x1.071 to PCA's year-end-2025 total of ~5.8 Mt (358 BSF, FY2025 10-K); the split across mills is an estimate"
+    }
+   },
+   {
+    "mill": "DeRidder",
+    "st": "LA",
+    "owner": "Packaging Corp of America",
+    "why": "last public per-mill figure scaled x1.071 so PCA's mills sum to its disclosed ~5.8 Mt at year-end 2025 (FY2025 10-K)",
+    "before": {
+     "capacity_tons_per_year": "1050000",
+     "capacity_2024": "1050000",
+     "confidence": "medium",
+     "capacity_basis": "estimate; 10-K FY2016 reported 994,000 t (D1 kraft linerboard produced 645k t in 2016; D3 converted from newsprint 2014 with 355k t liner/medium capacity)"
+    },
+    "after": {
+     "capacity_tons_per_year": "1065000",
+     "capacity_2024": "1065000",
+     "confidence": "low",
+     "capacity_basis": "PCA FY2015 10-K: 995k (two machines); a 2014 plan converted the D3 newsprint machine to ~355k linerboard; PCA has not disclosed per-mill capacity since FY2011-12, so the last figure is scaled x1.071 to PCA's year-end-2025 total of ~5.8 Mt (358 BSF, FY2025 10-K); the split across mills is an estimate"
+    }
+   },
+   {
+    "mill": "Tomahawk",
+    "st": "WI",
+    "owner": "Packaging Corp of America",
+    "why": "last public per-mill figure scaled x1.071 so PCA's mills sum to its disclosed ~5.8 Mt at year-end 2025 (FY2025 10-K)",
+    "before": {
+     "capacity_tons_per_year": "600000",
+     "capacity_2024": "600000",
+     "confidence": "low",
+     "capacity_basis": "estimate; 10-K FY2006 reported 580,000 t semi-chemical corrugating medium (3 machines)"
+    },
+    "after": {
+     "capacity_tons_per_year": "560000",
+     "capacity_2024": "560000",
+     "confidence": "low",
+     "capacity_basis": "PCA FY2010 10-K: ~523k (FY2006: 580k on three machines); PCA has not disclosed per-mill capacity since FY2011-12, so the last figure is scaled x1.071 to PCA's year-end-2025 total of ~5.8 Mt (358 BSF, FY2025 10-K); the split across mills is an estimate"
+    }
+   },
+   {
+    "mill": "Valdosta",
+    "st": "GA",
+    "owner": "Packaging Corp of America",
+    "why": "last public per-mill figure scaled x1.071 so PCA's mills sum to its disclosed ~5.8 Mt at year-end 2025 (FY2025 10-K)",
+    "before": {
+     "capacity_tons_per_year": "580000",
+     "capacity_2024": "580000",
+     "confidence": "low",
+     "capacity_basis": "estimate; 10-K FY2010 reported ~495,000 t (single machine); only PCA mill that uses no recycled fiber (10-K FY2025)"
+    },
+    "after": {
+     "capacity_tons_per_year": "595000",
+     "capacity_2024": "595000",
+     "confidence": "low",
+     "capacity_basis": "PCA FY2011 10-K: 556k (FY2010: 495k); PCA has not disclosed per-mill capacity since FY2011-12, so the last figure is scaled x1.071 to PCA's year-end-2025 total of ~5.8 Mt (358 BSF, FY2025 10-K); the split across mills is an estimate"
+    }
+   },
+   {
+    "mill": "Filer City",
+    "st": "MI",
+    "owner": "Packaging Corp of America",
+    "why": "last public per-mill figure scaled x1.071 so PCA's mills sum to its disclosed ~5.8 Mt at year-end 2025 (FY2025 10-K)",
+    "before": {
+     "capacity_tons_per_year": "430000",
+     "capacity_2024": "430000",
+     "confidence": "low",
+     "capacity_basis": "estimate; 10-K FY2006 reported 405,000 t semi-chemical corrugating medium (3 machines)"
+    },
+    "after": {
+     "capacity_tons_per_year": "466000",
+     "capacity_2024": "466000",
+     "confidence": "low",
+     "capacity_basis": "PCA FY2010 10-K: 435k (three machines); PCA has not disclosed per-mill capacity since FY2011-12, so the last figure is scaled x1.071 to PCA's year-end-2025 total of ~5.8 Mt (358 BSF, FY2025 10-K); the split across mills is an estimate"
+    }
+   },
+   {
+    "mill": "Mansfield",
+    "st": "LA",
+    "owner": "International Paper",
+    "why": "figure dated 2010 or earlier (or an estimate) scaled x1.067 so IP's 2024 US mills sum to IP's disclosed 12,984 kt (FY2024 annual report)",
+    "before": {
+     "capacity_tons_per_year": "1400000",
+     "capacity_2024": "1400000",
+     "capacity_basis": "ESTIMATE: two original PMs ~1.0M tpy combined (trade press) plus PM3 recycled linerboard machine (~1,100 tpd class, ~0.4M tpy); no current disclosure"
+    },
+    "after": {
+     "capacity_tons_per_year": "1494000",
+     "capacity_2024": "1494000",
+     "capacity_basis": "ESTIMATE: two original PMs ~1.0M tpy combined (trade press) plus PM3 recycled linerboard machine (~1,100 tpd class, ~0.4M tpy); no current disclosure | scaled x1.067 so IP's 2024 US mills sum to its disclosed 12,984k (FY2024 annual report, Appendix II); the split across mills is an estimate"
+    }
+   },
+   {
+    "mill": "Valliant",
+    "st": "OK",
+    "owner": "International Paper",
+    "why": "figure dated 2010 or earlier (or an estimate) scaled x1.067 so IP's 2024 US mills sum to IP's disclosed 12,984 kt (FY2024 annual report)",
+    "before": {
+     "capacity_tons_per_year": "1330000",
+     "capacity_2024": "1330000",
+     "capacity_basis": "Weyerhaeuser 2007 investor guide 1,760k less No.3 PM (~430k) permanently shut 2009 = ~1,330k; c.2010 local source ~7.6M lb/day (~1.39M t/yr)"
+    },
+    "after": {
+     "capacity_tons_per_year": "1420000",
+     "capacity_2024": "1420000",
+     "capacity_basis": "Weyerhaeuser 2007 investor guide 1,760k less No.3 PM (~430k) permanently shut 2009 = ~1,330k; c.2010 local source ~7.6M lb/day (~1.39M t/yr) | scaled x1.067 so IP's 2024 US mills sum to its disclosed 12,984k (FY2024 annual report, Appendix II); the split across mills is an estimate"
+    }
+   },
+   {
+    "mill": "Cedar River",
+    "st": "IA",
+    "owner": "International Paper",
+    "why": "figure dated 2010 or earlier (or an estimate) scaled x1.067 so IP's 2024 US mills sum to IP's disclosed 12,984 kt (FY2024 annual report)",
+    "before": {
+     "capacity_tons_per_year": "1020000",
+     "capacity_2024": "1020000",
+     "capacity_basis": "Weyerhaeuser 2007 investor guide 1,020k; trade press cites ~1.0-1.1M tpy (2 PMs averaging ~3,000 tpd)"
+    },
+    "after": {
+     "capacity_tons_per_year": "1089000",
+     "capacity_2024": "1089000",
+     "capacity_basis": "Weyerhaeuser 2007 investor guide 1,020k; trade press cites ~1.0-1.1M tpy (2 PMs averaging ~3,000 tpd) | scaled x1.067 so IP's 2024 US mills sum to its disclosed 12,984k (FY2024 annual report, Appendix II); the split across mills is an estimate"
+    }
+   },
+   {
+    "mill": "Springfield",
+    "st": "OR",
+    "owner": "International Paper",
+    "why": "figure dated 2010 or earlier (or an estimate) scaled x1.067 so IP's 2024 US mills sum to IP's disclosed 12,984 kt (FY2024 annual report)",
+    "before": {
+     "capacity_tons_per_year": "630000",
+     "capacity_2024": "630000",
+     "capacity_basis": "Weyerhaeuser 2007 investor guide 630k; IP mill fact sheet ~1,700 tpd linerboard (~620k/yr); n_machines unverified"
+    },
+    "after": {
+     "capacity_tons_per_year": "672000",
+     "capacity_2024": "672000",
+     "capacity_basis": "Weyerhaeuser 2007 investor guide 630k; IP mill fact sheet ~1,700 tpd linerboard (~620k/yr); n_machines unverified | scaled x1.067 so IP's 2024 US mills sum to its disclosed 12,984k (FY2024 annual report, Appendix II); the split across mills is an estimate"
+    }
+   },
+   {
+    "mill": "Henderson",
+    "st": "KY",
+    "owner": "International Paper",
+    "why": "figure dated 2010 or earlier (or an estimate) scaled x1.067 so IP's 2024 US mills sum to IP's disclosed 12,984 kt (FY2024 annual report)",
+    "before": {
+     "capacity_tons_per_year": "210000",
+     "capacity_2024": "210000",
+     "capacity_basis": "Weyerhaeuser 2007 investor guide 210k; no IP disclosure found (n_machines unverified)"
+    },
+    "after": {
+     "capacity_tons_per_year": "224000",
+     "capacity_2024": "224000",
+     "capacity_basis": "Weyerhaeuser 2007 investor guide 210k; no IP disclosure found (n_machines unverified) | scaled x1.067 so IP's 2024 US mills sum to its disclosed 12,984k (FY2024 annual report, Appendix II); the split across mills is an estimate"
+    }
+   },
+   {
+    "mill": "Pensacola (Cantonment)",
+    "st": "FL",
+    "owner": "International Paper",
+    "why": "figure dated 2010 or earlier (or an estimate) scaled x1.067 so IP's 2024 US mills sum to IP's disclosed 12,984 kt (FY2024 annual report)",
+    "before": {
+     "capacity_tons_per_year": "500000",
+     "capacity_2024": "500000",
+     "capacity_basis": "IP 2007 press release: machine converted to 500,000 tpy lightweight linerboard; 2017 trade report repeats 500k tpy kraftliner+medium"
+    },
+    "after": {
+     "capacity_tons_per_year": "534000",
+     "capacity_2024": "534000",
+     "capacity_basis": "IP 2007 press release: machine converted to 500,000 tpy lightweight linerboard; 2017 trade report repeats 500k tpy kraftliner+medium | scaled x1.067 so IP's 2024 US mills sum to its disclosed 12,984k (FY2024 annual report, Appendix II); the split across mills is an estimate"
+    }
+   },
+   {
+    "mill": "Vicksburg",
+    "st": "MS",
+    "owner": "International Paper",
+    "why": "figure dated 2010 or earlier (or an estimate) scaled x1.067 so IP's 2024 US mills sum to IP's disclosed 12,984 kt (FY2024 annual report)",
+    "before": {
+     "capacity_tons_per_year": "550000",
+     "capacity_2024": "550000",
+     "capacity_basis": "2008 trade report: ~550,000 t/yr linerboard; no current disclosure; n_machines unverified"
+    },
+    "after": {
+     "capacity_tons_per_year": "587000",
+     "capacity_2024": "587000",
+     "capacity_basis": "2008 trade report: ~550,000 t/yr linerboard; no current disclosure; n_machines unverified | scaled x1.067 so IP's 2024 US mills sum to its disclosed 12,984k (FY2024 annual report, Appendix II); the split across mills is an estimate"
+    }
+   },
+   {
+    "mill": "Bogalusa",
+    "st": "LA",
+    "owner": "International Paper",
+    "why": "figure dated 2010 or earlier (or an estimate) scaled x1.067 so IP's 2024 US mills sum to IP's disclosed 12,984 kt (FY2024 annual report)",
+    "before": {
+     "capacity_tons_per_year": "895000",
+     "capacity_2024": "895000",
+     "capacity_basis": "Temple-Inland 10-K FY2010 annual capacity 895,000 t (2010 production 859,883 t); IP has not disclosed a current figure"
+    },
+    "after": {
+     "capacity_tons_per_year": "955000",
+     "capacity_2024": "955000",
+     "capacity_basis": "Temple-Inland 10-K FY2010 annual capacity 895,000 t (2010 production 859,883 t); IP has not disclosed a current figure | scaled x1.067 so IP's 2024 US mills sum to its disclosed 12,984k (FY2024 annual report, Appendix II); the split across mills is an estimate"
+    }
+   },
+   {
+    "mill": "Maysville",
+    "st": "KY",
+    "owner": "International Paper",
+    "why": "figure dated 2010 or earlier (or an estimate) scaled x1.067 so IP's 2024 US mills sum to IP's disclosed 12,984 kt (FY2024 annual report)",
+    "before": {
+     "capacity_tons_per_year": "525000",
+     "capacity_2024": "525000",
+     "capacity_basis": "Temple-Inland 10-K FY2010: 524,900 t; Maysville Online (~2017): 500,000 tpy linerboard+medium"
+    },
+    "after": {
+     "capacity_tons_per_year": "560000",
+     "capacity_2024": "560000",
+     "capacity_basis": "Temple-Inland 10-K FY2010: 524,900 t; Maysville Online (~2017): 500,000 tpy linerboard+medium | scaled x1.067 so IP's 2024 US mills sum to its disclosed 12,984k (FY2024 annual report, Appendix II); the split across mills is an estimate"
+    }
+   },
+   {
+    "mill": "Newport",
+    "st": "IN",
+    "owner": "International Paper",
+    "why": "figure dated 2010 or earlier (or an estimate) scaled x1.067 so IP's 2024 US mills sum to IP's disclosed 12,984 kt (FY2024 annual report)",
+    "before": {
+     "capacity_tons_per_year": "357000",
+     "capacity_2024": "357000",
+     "capacity_basis": "Temple-Inland 10-K FY2010: 356,570 t (corrugating medium, white-top linerboard and gypsum facing paper)"
+    },
+    "after": {
+     "capacity_tons_per_year": "381000",
+     "capacity_2024": "381000",
+     "capacity_basis": "Temple-Inland 10-K FY2010: 356,570 t (corrugating medium, white-top linerboard and gypsum facing paper) | scaled x1.067 so IP's 2024 US mills sum to its disclosed 12,984k (FY2024 annual report, Appendix II); the split across mills is an estimate"
+    }
+   },
+   {
+    "mill": "Prattville",
+    "st": "AL",
+    "owner": "International Paper",
+    "why": "figure dated 2010 or earlier (or an estimate) scaled x1.067 so IP's 2024 US mills sum to IP's disclosed 12,984 kt (FY2024 annual report)",
+    "before": {
+     "capacity_tons_per_year": "1000000",
+     "capacity_2024": "1000000",
+     "capacity_basis": "Business Alabama county profile: ~1 million tons of paper per year; no company disclosure found"
+    },
+    "after": {
+     "capacity_tons_per_year": "1067000",
+     "capacity_2024": "1067000",
+     "capacity_basis": "Business Alabama county profile: ~1 million tons of paper per year; no company disclosure found | scaled x1.067 so IP's 2024 US mills sum to its disclosed 12,984k (FY2024 annual report, Appendix II); the split across mills is an estimate"
+    }
+   },
+   {
+    "mill": "Roanoke Rapids",
+    "st": "NC",
+    "owner": "Smurfit Westrock",
+    "why": "added: missing from the database; Smurfit Westrock's 10-K lists 322k of containerboard",
+    "before": null,
+    "after": {
+     "capacity_tons_per_year": "322000",
+     "status_oct2026": "open"
+    }
+   },
+   {
+    "mill": "La Tuque",
+    "st": "QC",
+    "owner": "Smurfit Westrock",
+    "why": "added: missing from the database; Smurfit Westrock's 10-K lists 341k of containerboard (Canada)",
+    "before": null,
+    "after": {
+     "capacity_tons_per_year": "341000",
+     "status_oct2026": "open"
+    }
+   },
+   {
+    "mill": "St. Paul (corrugating medium)",
+    "st": "MN",
+    "owner": "Smurfit Westrock",
+    "why": "added: recorded as a closure for completeness (medium ended Oct 2022, so it is in no modeled footprint)",
+    "before": null,
+    "after": {
+     "capacity_tons_per_year": "200000",
+     "status_oct2026": "closed"
+    }
+   }
+  ],
+  "ip_per_mill_sum_2024_before_kt": 12417,
+  "ip_disclosed_2024_kt": 12984,
+  "pca_last_disclosed_sum_ye2025_kt": 5551,
+  "pca_disclosed_ye2025_kt": 5800,
+  "sw_us_ca_rows_from_10k": "11 US mills + Roanoke Rapids (US) + La Tuque (CA) read from the Smurfit Westrock FY2025 10-K North America mill table; SW's NA containerboard total 9,241k includes Mexico"
+ },
+ "sensitivity": {
+  "cases": [
+   {
+    "case": "base",
+    "avg_haul_miles": 509,
+    "rail_share": 0.417,
+    "freight_per_ton": 59.6,
+    "freight_musd": 2083,
+    "unmet_kt": 0,
+    "ip_internal_share": 0.846,
+    "top_knockout": "Monticello",
+    "top_knockout_musd": 97.9,
+    "top_knockout_unmet_kt": 0,
+    "seconds": 4.2
+   },
+   {
+    "case": "truck cost +20%",
+    "avg_haul_miles": 511,
+    "rail_share": 0.533,
+    "freight_per_ton": 62.1,
+    "freight_musd": 2168,
+    "unmet_kt": 0,
+    "ip_internal_share": 0.854,
+    "top_knockout": "Monticello",
+    "top_knockout_musd": 102.7,
+    "top_knockout_unmet_kt": 0,
+    "seconds": 4.2
+   },
+   {
+    "case": "truck cost -20%",
+    "avg_haul_miles": 507,
+    "rail_share": 0.219,
+    "freight_per_ton": 55.4,
+    "freight_musd": 1932,
+    "unmet_kt": 0,
+    "ip_internal_share": 0.859,
+    "top_knockout": "Monticello",
+    "top_knockout_musd": 96.9,
+    "top_knockout_unmet_kt": 0,
+    "seconds": 3.8
+   },
+   {
+    "case": "rail cost +20%",
+    "avg_haul_miles": 494,
+    "rail_share": 0.322,
+    "freight_per_ton": 63.2,
+    "freight_musd": 2215,
+    "unmet_kt": 0,
+    "ip_internal_share": 0.845,
+    "top_knockout": "Monticello",
+    "top_knockout_musd": 89.7,
+    "top_knockout_unmet_kt": 0,
+    "seconds": 4.0
+   },
+   {
+    "case": "rail cost -20%",
+    "avg_haul_miles": 523,
+    "rail_share": 0.485,
+    "freight_per_ton": 55.0,
+    "freight_musd": 1922,
+    "unmet_kt": 0,
+    "ip_internal_share": 0.849,
+    "top_knockout": "Monticello",
+    "top_knockout_musd": 104.2,
+    "top_knockout_unmet_kt": 0,
+    "seconds": 4.1
+   },
+   {
+    "case": "open-market premium $80/t",
+    "avg_haul_miles": 451,
+    "rail_share": 0.37,
+    "freight_per_ton": 54.9,
+    "freight_musd": 1932,
+    "unmet_kt": 0,
+    "ip_internal_share": 0.818,
+    "top_knockout": "Monticello",
+    "top_knockout_musd": 32.4,
+    "top_knockout_unmet_kt": 0,
+    "seconds": 4.5
+   },
+   {
+    "case": "open-market premium $200/t",
+    "avg_haul_miles": 540,
+    "rail_share": 0.432,
+    "freight_per_ton": 61.9,
+    "freight_musd": 2164,
+    "unmet_kt": 0,
+    "ip_internal_share": 0.836,
+    "top_knockout": "Monticello",
+    "top_knockout_musd": 142.2,
+    "top_knockout_unmet_kt": 0,
+    "seconds": 3.6
+   },
+   {
+    "case": "diesel $5.00/gal",
+    "avg_haul_miles": 507,
+    "rail_share": 0.455,
+    "freight_per_ton": 61.5,
+    "freight_musd": 2149,
+    "unmet_kt": 0,
+    "ip_internal_share": 0.848,
+    "top_knockout": "Monticello",
+    "top_knockout_musd": 97.9,
+    "top_knockout_unmet_kt": 0,
+    "seconds": 4.0
+   },
+   {
+    "case": "integrated share 80%",
+    "avg_haul_miles": 485,
+    "rail_share": 0.387,
+    "freight_per_ton": 57.5,
+    "freight_musd": 2015,
+    "unmet_kt": 0,
+    "ip_internal_share": 0.805,
+    "top_knockout": "Monticello",
+    "top_knockout_musd": 94.1,
+    "top_knockout_unmet_kt": 0,
+    "seconds": 3.9
+   },
+   {
+    "case": "integrated share 92%",
+    "avg_haul_miles": 525,
+    "rail_share": 0.438,
+    "freight_per_ton": 61.1,
+    "freight_musd": 2133,
+    "unmet_kt": 0,
+    "ip_internal_share": 0.882,
+    "top_knockout": "Monticello",
+    "top_knockout_musd": 104.3,
+    "top_knockout_unmet_kt": 0,
+    "seconds": 4.5
+   }
+  ],
+  "ranking": [
+   {
+    "case": "open-market premium $80/t",
+    "order": [
+     "Toledo",
+     "Cedar River",
+     "Mansfield",
+     "DeRidder",
+     "Monticello"
+    ],
+    "musd": {
+     "Monticello": 32.4,
+     "Cedar River": 67.4,
+     "Toledo": 72.1,
+     "Mansfield": 44.7,
+     "DeRidder": 39.2
+    }
+   },
+   {
+    "case": "open-market premium $200/t",
+    "order": [
+     "Monticello",
+     "Toledo",
+     "Cedar River",
+     "Mansfield",
+     "DeRidder"
+    ],
+    "musd": {
+     "Monticello": 142.2,
+     "Cedar River": 95.9,
+     "Toledo": 120.6,
+     "Mansfield": 87.9,
+     "DeRidder": 85.8
+    }
+   }
+  ],
+  "base_order": [
+   "Monticello",
+   "Cedar River",
+   "Toledo",
+   "Mansfield",
+   "DeRidder"
+  ]
+ },
+ "before_after": [
+  {
+   "metric": "US mills open (Oct 2026)",
+   "before": 63,
+   "after": 64
+  },
+  {
+   "metric": "US capacity, Oct 2026 (Mt)",
+   "before": 36.19,
+   "after": 37.15
+  },
+  {
+   "metric": "US mill utilization",
+   "before": "97.7%",
+   "after": "95.1%"
+  },
+  {
+   "metric": "Average haul (mi)",
+   "before": 514,
+   "after": 509
+  },
+  {
+   "metric": "Rail share",
+   "before": "41.9%",
+   "after": "41.7%"
+  },
+  {
+   "metric": "Freight ($/t)",
+   "before": 60.0,
+   "after": 59.6
+  },
+  {
+   "metric": "Freight bill ($M/yr)",
+   "before": "2,096",
+   "after": "2,083"
+  },
+  {
+   "metric": "Unmet demand (kt)",
+   "before": 0,
+   "after": 0
+  },
+  {
+   "metric": "Bought outside own system (kt)",
+   "before": "901",
+   "after": "727"
+  },
+  {
+   "metric": "Mills with a positive scarcity value",
+   "before": 64,
+   "after": 57
+  },
+  {
+   "metric": "Median scarcity value ($/t)",
+   "before": 32.2,
+   "after": 18.5
+  },
+  {
+   "metric": "Costliest knockout",
+   "before": "Mansfield +$171M/yr",
+   "after": "Monticello +$98M/yr"
+  },
+  {
+   "metric": "Second",
+   "before": "Valliant +$134M/yr",
+   "after": "Cedar River +$92M/yr"
+  },
+  {
+   "metric": "Third",
+   "before": "Toledo +$117M/yr",
+   "after": "Toledo +$91M/yr"
+  },
+  {
+   "metric": "Mansfield knockout",
+   "before": "+$171M/yr, 201 kt unmet",
+   "after": "+$78M/yr, 0 kt unmet"
+  },
+  {
+   "metric": "International Paper +$70/t alone: open-market tons lost (kt)",
+   "before": 355,
+   "after": 534
+  },
+  {
+   "metric": "Smurfit Westrock +$70/t alone: open-market tons lost (kt)",
+   "before": 71,
+   "after": 142
+  },
+  {
+   "metric": "Packaging Corp of America +$70/t alone: open-market tons lost (kt)",
+   "before": 105,
+   "after": 140
+  },
+  {
+   "metric": "Georgia-Pacific +$70/t alone: open-market tons lost (kt)",
+   "before": 35,
+   "after": 45
+  },
+  {
+   "metric": "Pratt Industries +$70/t alone: open-market tons lost (kt)",
+   "before": 517,
+   "after": 522
+  }
+ ]
+}

@@ -21,11 +21,11 @@ and drawn on a map. With the dual prices, the scenarios, a chat that shows its l
 ## What it answers
 
 - **Who could ship to whom, and at what delivered cost.** 63 US mills, 441 markets, 93,423 variables, solved to the optimum in about two seconds; a $2.1 billion freight bill at 513 miles average haul and 42% rail (October 2026 footprint).
-- **What a ton of capacity is worth where.** The dual on each mill's capacity: about $62 on the West Coast against $35 east of the Rockies.
-- **Who would switch supplier for how much.** For every market the cheapest mill by freight and the one behind it; median gap $5.20 a ton, 49% of markets within $5.
+- **What a ton of capacity is worth where.** The dual on each mill's capacity: about $49 on the West Coast against $20 east of the Rockies.
+- **Who would switch supplier for how much.** For every market the cheapest mill by freight and the one behind it; median gap $5.30 a ton, 49% of markets within $5.
 - **What a unilateral price increase does.** Raise one producer's open-market price $70 and the model lists the accounts that move and the mill that takes each.
-- **Which outage hurts most.** Twenty single-mill knockouts; Mansfield, LA costs the network $171M a year and leaves 201 kt unserved.
-- **When to take maintenance.** Twelve monthly solves price an outage calendar as an assignment problem: $122M a year against $276M for a staggered one.
+- **Which outage hurts most.** Twenty single-mill knockouts; Georgia-Pacific's Monticello, MS costs the network about $98M a year, Cedar River and Toledo about $91M each, Mansfield $78M.
+- **When to take maintenance.** Twelve monthly solves price an outage calendar as an assignment problem: $30M a year against $180M for a staggered one.
 - **The middle tier and the loop back.** 458 corrugator plants, 70 sheet feeders and 634 sheet plants as a statistical layer with the sheet trade priced; 30 Mt of OCC routed to the recycled mills and the docks.
 
 ## The idea
@@ -149,19 +149,28 @@ jumps to its tab and scenario. Links carry the scenario: `#flows/ko31` opens Flo
 
 ## How close is it
 
-| Check | Model | Reported |
-|---|---|---|
-| US containerboard capacity, 2024 | 39.6 Mt | ~41.4 Mt (AF&PA), most of the gap Canadian imports the LP under-pulls |
-| International Paper US capacity | 12.8 Mt | 12.98 Mt (10-K) |
-| Packaging Corp of America | 5.59 Mt | 5.8 Mt |
-| 2024 tons shipped | 38.8 Mt | 37.7 Mt produced (a check, not a fit) |
-| Operating rate | 98% | ~95% |
-| IP board to own plants | 88% own + 9% exported | ~80% own |
-| Demand by state | exact | by construction, from Census employment |
+Every headline number is checked against its public anchor in [`audit/RECEIPTS.md`](audit/RECEIPTS.md), which
+`python audit/recompute.py` regenerates from the committed data (no network needed). From the 21 October 2026 audit:
 
-Fourteen Monte Carlo draws on the inputs: haul 544 ± 26 mi, rail share 0.43 ± 0.02, freight $62 ± 2/t. The capacity duals
-are the fragile part, because the network runs within 3% of sold out. The 2025 closures were not where freight said they
-would be; the Backtest tab shows the miss. Full note: `notes/how_close.md`.
+| Check | Model | Public figure |
+|---|---|---|
+| US containerboard capacity, 2024 | 40.8 Mt | ~41.4 Mt (AF&PA), -1.6% |
+| Capacity retired, Feb 2025 to Mar 2026 | 4.03 Mt | ~3.9 Mt (Fastmarkets), +3.4% |
+| US capacity after those closures | 37.2 Mt | ~37.5 Mt, -0.9% |
+| 2024 US mill output | 38.8 Mt | 37.7 Mt produced; the +1.06 Mt is the Canadian board the LP under-pulls |
+| International Paper, 2024 | 12.98 Mt | 12.98 Mt (10-K); public per-mill figures alone sum to -4.4% and are scaled to it |
+| PCA, year-end 2025 | 5.80 Mt | 5.8 Mt (10-K); last per-mill disclosures sum to -4.3% and are scaled to it |
+| Smurfit Westrock, US | 7.55 Mt | the 10-K mill table, row by row |
+| Operating rate, 2026 | 95% | ~95% |
+| IP board to own plants | 85% own + 11% exported | ~80% own (known bias of a cost-minimizer) |
+
+The audit added two mills the first version missed (Smurfit Westrock's Roanoke Rapids, NC and La Tuque, QC), fixed
+Riceboro's 2024 owner (DS Smith), replaced start-up-era figures for Forney and Big Island, and scaled the oldest IP
+and PCA rows to the companies' own totals; every change and its source is in `audit/changes_2026-10-21.json`. With 1.3
+Mt more capacity the network has more slack, so the costliest single outage moved from Mansfield ($171M) to Monticello
+($98M). Re-solving with truck or rail costs 20% either way keeps freight between $55 and $63 a ton; the open-market
+premium is the assumption that drives outage costs, and the receipts show it at $80 and $200 a ton. The 2025 closures
+were not where freight said they would be; the Backtest tab shows the miss.
 
 ## Evals and guardrails
 

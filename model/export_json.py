@@ -125,6 +125,7 @@ def main(mills_csv, out_json, demand_2024=34.5e6, exports_2024=4.6e6, demand_202
                         d_freight=round(r["kpi"]["freight_usd"]-base_f), d_total=round(r["kpi"]["objective_usd"]-base_obj),
                         unmet=round(r["kpi"]["unmet_tons"]), d_haul=round(r["kpi"]["avg_haul_miles"]-r26["kpi"]["avg_haul_miles"],1),
                         owner_buys=round(r["kpi"]["owner_purchased_from_market_tons"])))
+    kos.sort(key=lambda k: -k["d_total"])   # consumers (chat digest, ticker, golden set) read the first entries as the costliest outages
     print(f"knockouts done {time.time()-t0:.0f}s")
     # ---- unilateral price increases on the open market: who switches?
     base_y = r26["ship"][r26["ship"].kind == "y"].groupby(["m", "j", "g"]).tons.sum()

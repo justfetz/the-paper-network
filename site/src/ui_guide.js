@@ -5,7 +5,7 @@
 (function () {
   var D = window.PN_DATA, S = window.PN; if (!D || !S || !S.setTab || !window.d3) return;
   var side = document.getElementById("side"); if (!side) return;
-  var LS = "pn-guide", BLOG = "https://justfetz.github.io/posts/the-paper-network.html", REPO = "https://github.com/justfetz/the-paper-network";
+  var LS = "pn-guide", BLOG = "https://justfetz.github.io/posts/the-paper-network.html", REPO = "https://github.com/justfetz/the-paper-network"; var RECEIPTS = REPO + "/blob/main/audit/RECEIPTS.md";
   function store() { try { return JSON.parse(localStorage.getItem(LS) || "{}") || {}; } catch (e) { return {}; } }
   function save(patch) { try { var s = store(); Object.keys(patch).forEach(function (k) { s[k] = patch[k]; }); localStorage.setItem(LS, JSON.stringify(s)); } catch (e) {} }
   var expanded = !store().collapsed, mode = "tab", kt = S.kt, musd = S.musd, esc = function (s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;"); };
@@ -96,13 +96,13 @@
     backtest: { name: "Backtest", what: "Does the model match the record? Capacity, shipments, integration and operating rates against the filings and the AF&PA survey, and an honest look at the 2025 closures.",
       read: ["The map shows the 2024 network with the mills that closed in 2025 and 2026 in red.", "The table compares model and record line by line; the error bars come from fourteen Monte Carlo draws on the inputs."],
       controls: [["Model vs record", "Each row names the source it is checked against."], ["Did freight position predict the closures?", "It did not: the closed mills were all loaded. The surplus column does better, and the table shows both."]],
-      tries: [["The closures table", function () { see("#closure-table"); }], ["Error bars", function () { see("#errorbars"); }]],
+      tries: [["The closures table", function () { see("#closure-table"); }], ["Error bars", function () { see("#errorbars"); }], ["Open the receipts", function () { window.open(RECEIPTS, "_blank", "noopener"); }]],
       asks: ["How many tons does the October 2026 scenario ship, and how much is unmet?"],
-      caveat: "The supply side reconciles because it was built from the filings; the shipments match is the real check. The closures are the miss, shown rather than hidden." },
+      caveat: "Capacity, closures and production land within a few percent of AF&PA, Fastmarkets and the companies' own 10-Ks; the receipts list every anchor and every row the last audit changed. The closures are the miss, shown rather than hidden." },
     method: { name: "Method & data", what: "How it is built: one min-cost flow, expanded for ownership and grade; public data in, one JSON out; every assumption and source on this page.",
       read: ["The model section states the objective and the constraints. The sources list has a citation per anchor. The needs list is what the next version requires."],
       controls: [["The write-up", "The long version, with the algorithm, the data sources, the cleaning, the evals and the refresh clock."], ["The repository", "Code, data and the per-row citations, MIT licensed."]],
-      tries: [["Open the write-up", function () { window.open(BLOG, "_blank", "noopener"); }], ["Open the repository", function () { window.open(REPO, "_blank", "noopener"); }]],
+      tries: [["Open the receipts", function () { window.open(RECEIPTS, "_blank", "noopener"); }], ["Open the write-up", function () { window.open(BLOG, "_blank", "noopener"); }], ["Open the repository", function () { window.open(REPO, "_blank", "noopener"); }]],
       asks: ["What scenarios does this page have?"],
       caveat: "If a number on another tab looks wrong, this is where to see what it was built from. Then open an issue with a source, or a pull request against the row." }
   };
@@ -119,7 +119,7 @@
     ["How many trucks and railcars a day?", "Throughput", function () { S.setTab("thru"); see("#kpis-thru"); }],
     ["Where does the OCC go, and what is it worth?", "Fiber loop", function () { S.setTab("fiber"); see("#mapcard"); }],
     ["Where are the box plants, and is this one still running?", "Demand · Named plants", function () { S.setTab("demand"); named(true); see("#named-card"); }],
-    ["How much should I trust this?", "Backtest, then Method & data", function () { S.setTab("backtest"); see("#bt-table"); }],
+    ["How much should I trust this?", "Backtest, then the receipts", function () { S.setTab("backtest"); see("#bt-table"); }],
     ["Just ask, in words", "Ask the network", function () { if (S.chat) S.chat.open(true); }]
   ];
 
