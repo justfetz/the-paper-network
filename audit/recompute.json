@@ -427,7 +427,7 @@
    "avg_freight_per_ton": 59.564,
    "n_vars": 95211,
    "n_rows": 7141,
-   "solve_seconds": 1.3
+   "solve_seconds": 1.2
   },
   "kpi_2024": {
    "objective_usd": 2377035351.782,
@@ -443,7 +443,7 @@
    "avg_freight_per_ton": 60.407,
    "n_vars": 100551,
    "n_rows": 7147,
-   "solve_seconds": 1.3
+   "solve_seconds": 1.2
   },
   "occ": {
    "occ_supply": 30512720.0,
