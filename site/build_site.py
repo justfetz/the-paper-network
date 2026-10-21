@@ -224,6 +224,7 @@ page = f"""<!doctype html>
 <script src="data.js"></script>
 <script>
 {js}</script>
+<script data-goatcounter="https://justfetz.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
 """
