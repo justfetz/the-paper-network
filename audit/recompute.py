@@ -213,14 +213,14 @@ def receipts_md(res):
     if mc["additions"]: A(""); A("Added at mills that stay open: " + "; ".join(f"{x['mill']}, {x['st']} ({x['owner']}) +{x['kt']:,} kt" for x in mc["additions"]) + ".")
     A("")
     if ba:
-        A("## 5. How the headline outputs moved with the corrected data"); A("")
+        A(f"## 5. How the headline outputs moved with the {chg['date'] if chg else 'last'} corrections"); A("")
         A("| October 2026 footprint | Before the audit | After |"); A("|---|---|---|")
         for x in ba: A(f"| {x['metric']} | {x['before']} | {x['after']} |")
         A(""); A("More capacity in the database means a network with more slack: lower scarcity values, less unmet demand when a big mill goes down, and smaller knockout costs. The corrected figures are the ones to quote.")
         A("")
     if sens:
         A("## 6. How far the outputs move when the assumptions move"); A("")
-        A(f"Each row re-solves the October 2026 network with one assumption changed, then takes {sens['base_order'][0]} out again.")
+        A(f"Each row re-solves the October 2026 network with one assumption changed, then takes {sens['base_order'][0]} out again (re-solved {sens.get('generated', '2026-10-21')}; `python audit/recompute.py` without `--no-solve` refreshes this table).")
         A(""); A(f"| Case | Haul (mi) | Rail | Freight $/t | Freight bill $M | IP own-plant share | Unmet kt | {sens['base_order'][0]} out, $M/yr |"); A("|---|---|---|---|---|---|---|---|")
         for x in sens["cases"]: A(f"| {x['case']} | {x['avg_haul_miles']} | {x['rail_share'] * 100:.0f}% | {x['freight_per_ton']} | {x['freight_musd']:,} | {x['ip_internal_share'] * 100:.0f}% | {x['unmet_kt']} | +{x['top_knockout_musd']} ({x['top_knockout_unmet_kt']} kt unmet) |")
         A(""); A("The five costliest single-mill outages, re-ranked under the premium extremes (base order " + ", ".join(sens["base_order"]) + "):"); A("")
@@ -252,9 +252,9 @@ def main():
     print(f"{'check':74s} {'model':>10s} {'anchor':>10s} {'gap':>7s}  status")
     for c in an: print(f"{c['check'][:74]:74s} {fmt_t(c['model']):>10s} {fmt_t(c['anchor']):>10s} {c['deviation']:+7.1%}  {'ok' if c['ok'] is True else ('CHECK' if c['ok'] is False else 'known gap')}")
     sens = prev.get("sensitivity") if isinstance(prev.get("sensitivity"), dict) else None
-    if not a.no_solve: print("Sensitivity re-solves (October 2026 footprint):"); sens = sensitivity(D)
+    if not a.no_solve: print("Sensitivity re-solves (October 2026 footprint):"); sens = sensitivity(D); sens["generated"] = time.strftime("%Y-%m-%d", time.gmtime())
     ba = before_after(json.load(open(a.before)), D) if a.before else prev.get("before_after")
-    res = dict(generated=time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()), anchors=ANCHORS, checks=an, mills=mc, model=md, demand=dd, changes=chg, sensitivity=sens, before_after=ba)
+    res = dict(generated=time.strftime("%Y-%m-%d", time.gmtime()), anchors=ANCHORS, checks=an, mills=mc, model=md, demand=dd, changes=chg, sensitivity=sens, before_after=ba)
     json.dump(res, open(prev_path, "w"), indent=1, default=float)
     open(os.path.join(ROOT, "audit", "RECEIPTS.md"), "w").write(receipts_md(res))
     bad = [c for c in an if c["ok"] is False]

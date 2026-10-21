@@ -1,6 +1,6 @@
 # Receipts: how The Paper Network's numbers are checked
 
-Generated 2026-10-21 00:36 UTC by `audit/recompute.py` from `data/mills_final.csv` and `data/paper_network.json`. It needs no network access; run it yourself and you get these tables.
+Generated 2026-10-21 by `audit/recompute.py` from `data/mills_final.csv` and `data/paper_network.json`. It needs no network access; run it yourself and you get these tables.
 
 Every figure in the model is public, and every mill row carries its source. This page sets the model's totals against the public anchors, shows what each mill figure rests on, lists what the last audit changed and why, and shows how far the outputs move when the assumptions move. If a number here is wrong, the fix is one row and one source: see the end of the page.
 
@@ -121,7 +121,7 @@ Checked against SEC filings, company releases and trade press. International Pap
 
 Added at mills that stay open: Riverdale (Selma), AL (International Paper) +430 kt.
 
-## 5. How the headline outputs moved with the corrected data
+## 5. How the headline outputs moved with the 2026-10-21 corrections
 
 | October 2026 footprint | Before the audit | After |
 |---|---|---|
@@ -150,7 +150,7 @@ More capacity in the database means a network with more slack: lower scarcity va
 
 ## 6. How far the outputs move when the assumptions move
 
-Each row re-solves the October 2026 network with one assumption changed, then takes Monticello out again.
+Each row re-solves the October 2026 network with one assumption changed, then takes Monticello out again (re-solved 2026-10-21; `python audit/recompute.py` without `--no-solve` refreshes this table).
 
 | Case | Haul (mi) | Rail | Freight $/t | Freight bill $M | IP own-plant share | Unmet kt | Monticello out, $M/yr |
 |---|---|---|---|---|---|---|---|

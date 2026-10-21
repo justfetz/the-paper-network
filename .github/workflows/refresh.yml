@@ -46,6 +46,8 @@ jobs:
           cd model
           python export_json.py ../data/mills_final.csv ../data/paper_network.json
           python corrugators.py ../data/paper_network.json ../data/corrugators.json
+      - name: Regenerate the receipts (anchors checked against the new run; no network)
+        run: python audit/recompute.py --no-solve || echo "receipts skipped"
       - name: Rebuild the site
         run: cd site && python build_site.py ../data/paper_network.json ../data/basemap.json
       - name: Commit if anything changed

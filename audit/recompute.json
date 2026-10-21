@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-21 00:36 UTC",
+ "generated": "2026-10-21",
  "anchors": {
   "cap24": {
    "value": 41400000.0,
@@ -1217,7 +1217,8 @@
    "Toledo",
    "Mansfield",
    "DeRidder"
-  ]
+  ],
+  "generated": "2026-10-21"
  },
  "before_after": [
   {
