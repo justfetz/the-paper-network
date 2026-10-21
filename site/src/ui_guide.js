@@ -49,7 +49,8 @@
     flows: { name: "Flows", what: "The whole network in one scenario: " + n_mills + " US containerboard mills, " + n_nodes + " box markets, and the cheapest way the solver found to move the board between them.",
       read: ["Circles are mills, sized by capacity and colored by owner (the chips under the map; click one to isolate that owner). A dashed hollow circle is a mill that is closed, or knocked out in this scenario.",
         "Squares are box markets, sized by board demand. Lines are flows: a colored line stays inside one company's system, a gray line is an open-market sale, a dashed line goes to an export dock (the triangles).",
-        "Hover a mill for its utilization, scarcity value and where its tons go; hover a market for its demand, delivered marginal cost and suppliers."],
+        "Hover a mill for its utilization, scarcity value and where its tons go; hover a market for its demand, delivered marginal cost and suppliers.",
+        "Click a mill, a market or any dotted figure to see where the number comes from: the filing or report, the method, and how sure it is."],
       controls: [["Scenario", "End of 2024, October 2026, or 2026 mills on 2024 demand. Every number on the page follows the scenario."], ["Maintenance calendar", "Twelve months of planned outages. The mills down that month hollow out and the network re-routes around them."], ["Knock out a mill", "Remove one mill and re-solve. The KPIs show the extra cost per year against October 2026."],
         ["Layers", "Own-system flows, open-market flows, exports and demand points switch on and off. Mills by scarcity value recolors mills by what one more ton of capacity is worth to the network (dark is tight). Demand by delivered cost recolors markets by what the marginal ton costs to reach."], ["Min flow", "Hides lines thinner than the slider, to see the big lanes."],
         ["Below the map", "Tons by haul distance band, the integration table (the model's own-plant share against what each company discloses), the planned-outage months and what each costs, and the knockout chart: click a bar to see the re-routed map."]],
@@ -120,6 +121,7 @@
     ["Where does the OCC go, and what is it worth?", "Fiber loop", function () { S.setTab("fiber"); see("#mapcard"); }],
     ["Where are the box plants, and is this one still running?", "Demand · Named plants", function () { S.setTab("demand"); named(true); see("#named-card"); }],
     ["How much should I trust this?", "Backtest, then the receipts", function () { S.setTab("backtest"); see("#bt-table"); }],
+    ["Where does a number come from?", "Click it: mills, markets, plants and figures", function () { if (S.sources) S.sources.intro(); }],
     ["Just ask, in words", "Ask the network", function () { if (S.chat) S.chat.open(true); }]
   ];
 

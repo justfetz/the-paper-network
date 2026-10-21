@@ -28,6 +28,18 @@ if os.path.exists(PLN_PATH):
         D["params"]["demand_weighting"] = "85% measured (" + D["plant_layer"]["weighting_note"] + ") + 15% population proxy"
 D["corr"] = json.load(open(CORR_PATH)) if os.path.exists(CORR_PATH) else None
 mills, S, P, nodes = D["mills"], D["scenarios"], D["params"], D["nodes"]
+# provenance: each mill's source, capacity basis and confidence from the mill list, so the page can cite them next to the number
+import csv as _csv
+try:
+    sys.path.insert(0, os.path.join(ROOT, "audit")); from recompute import basis_class as _basis_class
+except Exception:
+    _basis_class = lambda r: ""
+_rows = [r for r in _csv.DictReader(open(os.path.join(ROOT, "data", "mills_final.csv"))) if (r.get("lat") or "").strip()]
+_by_key = {}
+for _r in _rows: _by_key.setdefault((_r["mill_name"], _r["state"]), []).append(_r)
+for m in mills:
+    _r = _rows[m["id"]] if m["id"] < len(_rows) and _rows[m["id"]]["mill_name"] == m["name"] and _rows[m["id"]]["state"] == m["st"] else (_by_key.get((m["name"], m["st"])) or [None])[0]
+    if _r: m["src"] = _r.get("source_url") or ""; m["basis"] = (_r.get("capacity_basis") or "")[:360]; m["basis_class"] = _basis_class(_r); m["conf"] = _r.get("confidence") or m.get("conf")
 kt = lambda v: f"{v/1e6:.2f} Mt" if v >= 950000 else f"{round(v/1e3):,} kt"
 MT1 = lambda v: f"{v/1e6:.1f}"
 caps = {}
@@ -178,7 +190,7 @@ def render(extra):
     miss = re.findall(r"{{(\w+)}}", out)
     if miss: raise SystemExit("unfilled: " + ", ".join(miss))
     return out
-css = open(os.path.join(SRC, "ui.css")).read(); js = open(os.path.join(SRC, "ui_core.js")).read() + "\n" + open(os.path.join(SRC, "ui_corr.js")).read() + "\n" + open(os.path.join(SRC, "ui_thru.js")).read() + "\n" + open(os.path.join(SRC, "ui_tabs.js")).read() + "\n" + open(os.path.join(SRC, "ui_chat.js")).read() + "\n" + open(os.path.join(SRC, "ui_ticker.js")).read() + "\n" + open(os.path.join(SRC, "ui_guide.js")).read()
+css = open(os.path.join(SRC, "ui.css")).read(); js = open(os.path.join(SRC, "ui_core.js")).read() + "\n" + open(os.path.join(SRC, "ui_corr.js")).read() + "\n" + open(os.path.join(SRC, "ui_thru.js")).read() + "\n" + open(os.path.join(SRC, "ui_tabs.js")).read() + "\n" + open(os.path.join(SRC, "ui_chat.js")).read() + "\n" + open(os.path.join(SRC, "ui_ticker.js")).read() + "\n" + open(os.path.join(SRC, "ui_guide.js")).read() + "\n" + open(os.path.join(SRC, "ui_sources.js")).read()
 data_js = "window.PN_DATA=" + json.dumps(D, separators=(",", ":")) + ";\nwindow.PN_BASEMAP=" + json.dumps(BM, separators=(",", ":")) + ";\n" + "window.PN_ARTIFACT_URL=" + json.dumps(ARTIFACT_URL) + ";\n" + ("window.PN_CHAT_ENDPOINT=" + json.dumps(CHAT_ENDPOINT) + ";\n" if CHAT_ENDPOINT else "")
 
 D3 = '<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>'

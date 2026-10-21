@@ -74,6 +74,8 @@ ui_js = open(os.path.join(ROOT, "site", "ui.js")).read(); tpl = open(os.path.joi
 check("guide is bundled: a How-to card per tab, the question index, the tour and the header button", "How to use · " in ui_js and "Which view answers what" in ui_js and "tour-card" in ui_js and 'id="guide-btn"' in tpl and all(k in ui_js for k in ["flows: {", "corr: {", "thru: {", "prospects: {", "prices: {", "fiber: {", "demand: {", "backtest: {", "method: {"]))
 r = subprocess.run([sys.executable, os.path.join(ROOT, "audit", "recompute.py"), "--no-solve", "--strict"], capture_output=True, text=True, cwd=ROOT)
 check("audit: headline totals sit inside the tolerance of their public anchors (capacity, production, IP, PCA, integration)", r.returncode == 0, (r.stdout + r.stderr)[-600:])
+_pd = open(os.path.join(ROOT, "site", "data.js")).read(); _D = json.loads(_pd[len("window.PN_DATA="):_pd.index(";\nwindow.PN_BASEMAP=")])
+check("sources: the page data cites a source for nearly every mill, and the sources card is bundled", sum(1 for m in _D["mills"] if m.get("src")) >= 0.9 * len(_D["mills"]) and all("basis" in m for m in _D["mills"]) and "Where this comes from" in open(os.path.join(ROOT, "site", "ui.js")).read())
 check("model-run badge written", os.path.exists(os.path.join(ROOT, "site", "badge.json")))
 if shutil.which("node"):
     for js in sorted(glob.glob(os.path.join(ROOT, "site", "src", "*.js"))) + [os.path.join(ROOT, "chat", "worker.js")]:

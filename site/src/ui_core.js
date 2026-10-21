@@ -44,7 +44,7 @@
   /* ---------- map scaffold ---------- */
   var W = 975, H = 610, root = d3.select("#map");
   var svg = root.append("svg").attr("viewBox", "0 0 " + W + " " + H).attr("role", "img").attr("aria-label", "Map of US containerboard mills, demand and modeled flows");
-  var gBase = svg.append("g"), gArcs = svg.append("g"), gExp = svg.append("g"), gNodes = svg.append("g"), gPorts = svg.append("g"), gMills = svg.append("g"), gLab = svg.append("g");
+  var gBase = svg.append("g"), gArcs = svg.append("g"), gExp = svg.append("g"), gNodes = svg.append("g"), gPorts = svg.append("g"), gMills = svg.append("g"), gLab = svg.append("g").attr("pointer-events", "none");   // mill names must not block hovers and clicks on the markets under them
   gBase.append("path").attr("d", BM.nation).attr("class", "nation"); gBase.append("path").attr("d", BM.mesh).attr("class", "mesh");
   var tip = d3.select("#mapcard").append("div").attr("class", "tip").style("display", "none");
   function showTip(ev, html) {

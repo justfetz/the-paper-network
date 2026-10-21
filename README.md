@@ -133,6 +133,12 @@ help. The Guide button in the header opens an index of which view answers which 
 nine-stop tour that walks the tabs and highlights the control it is talking about. The card remembers whether you hid
 it. All of it lives in `site/src/ui_guide.js` and only drives controls that already exist.
 
+Every number can be traced from where it sits. Click a mill for its capacity, the filing or report it comes from (with
+the link), its confidence grade and how the solver uses it; click a market for where its demand comes from and what its
+delivered cost means; click a named plant for its EPA registry row and verification evidence; click any dotted figure for
+the method behind it. Mill sources are joined from `data/mills_final.csv` at build time, so the card and the data cannot
+drift apart (`site/src/ui_sources.js`).
+
 ## Ask the network, and the tape
 
 The chat drawer (bottom right) answers questions about mills, markets, outages, switching and prices from the page's own
