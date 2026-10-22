@@ -1,7 +1,9 @@
 /* The Paper Network dashboard, part 7: the guide. Per tab, a "How to use this view" card at the top of the side panel
    (what you see, how to read it, what each control and layer does, Try buttons that set the view up, questions to click
-   into the chat); hover help on every control; a guided tour across the tabs; and, behind the Guide button in the header,
-   an index of which view answers which question. It only reads the model and drives the controls that already exist. */
+   into the chat); hover help on every control; an overview tour across the tabs and a short tour per tab; a one-time
+   welcome on the first visit and a nudge the first time each tab opens (both remembered in localStorage); and, behind
+   the Guide button in the header, an index of which view answers which question. It only reads the model and drives the
+   controls that already exist. */
 (function () {
   var D = window.PN_DATA, S = window.PN; if (!D || !S || !S.setTab || !window.d3) return;
   var side = document.getElementById("side"); if (!side) return;
@@ -132,11 +134,11 @@
     var g = GUIDE[S.tab] || GUIDE.flows, h = "";
     card.classList.toggle("slim", !expanded); if (btnTop) btnTop.setAttribute("aria-expanded", expanded ? "true" : "false");
     h += "<div class='ghead'><h2>" + (mode === "index" ? "Which view answers what" : "How to use · " + esc(g.name)) + "</h2><div class='gbtns'>";
-    if (expanded) h += "<button type='button' data-g='tour'>Tour</button><button type='button' data-g='" + (mode === "index" ? "tab" : "index") + "'>" + (mode === "index" ? "This view" : "All views") + "</button><button type='button' data-g='hide' aria-label='Hide the guide'>Hide</button>";
-    else h += "<button type='button' data-g='show'>Show</button><button type='button' data-g='tour'>Tour</button>";
+    if (expanded) h += (mode === "index" ? "<button type='button' data-g='tour'>Overview tour</button>" : "<button type='button' data-g='tourtab'>Tour this view</button>") + "<button type='button' data-g='" + (mode === "index" ? "tab" : "index") + "'>" + (mode === "index" ? "This view" : "All views") + "</button><button type='button' data-g='hide' aria-label='Hide the guide'>Hide</button>";
+    else h += "<button type='button' data-g='show'>Show</button><button type='button' data-g='tourtab'>Tour this view</button>";
     h += "</div></div>";
     if (expanded && mode === "index") {
-      h += "<div class='gbody'><p class='gwhat'>Every tab is a view of the same solved network. Pick the question; the page sets itself up.</p><ul class='gindex'>" + INDEX.map(function (r, i) { return "<li><button type='button' data-jump='" + i + "'>" + esc(r[0]) + "</button><span>" + esc(r[1]) + "</span></li>"; }).join("") + "</ul>" +
+      h += "<div class='gbody'><p class='gwhat'>Every tab is a view of the same solved network. Pick the question; the page sets itself up. New here? The overview tour walks the five views that matter most in two minutes.</p><ul class='gindex'>" + INDEX.map(function (r, i) { return "<li><button type='button' data-jump='" + i + "'>" + esc(r[0]) + "</button><span>" + esc(r[1]) + "</span></li>"; }).join("") + "</ul>" +
         "<h3>Words that recur</h3><dl class='gdl'><dt>Delivered marginal cost</dt><dd>The model's price of one more ton delivered to a market: freight plus any premium on the cheapest route left. Not a market price.</dd><dt>Scarcity value</dt><dd>What one more ton of a mill's capacity would save the network. $0 means the mill has slack.</dd><dt>Own-system vs open-market</dt><dd>A company's mill feeding its own plants, or selling to someone else's at the model's $150/t premium.</dd><dt>Unmet demand</dt><dd>Tons no mill can reach in the scenario, charged at $400/t.</dd><dt>Gap</dt><dd>Freight difference between a market's cheapest mill and its second cheapest: the price of loyalty.</dd><dt>MSF, ECT, Mullen</dt><dd>A thousand square feet of board; a box spec by edge crush; a box spec by burst strength.</dd><dt>OCC</dt><dd>Old corrugated containers, the recovered fiber.</dd></dl></div>";
     } else if (expanded) {
       h += "<div class='gbody'><p class='gwhat'>" + esc(g.what) + "</p><h3>How to read it</h3><ul>" + g.read.map(function (r) { return "<li>" + esc(r) + "</li>"; }).join("") + "</ul>";
@@ -154,15 +156,16 @@
     else if (b.dataset.g === "index") { mode = "index"; render(); }
     else if (b.dataset.g === "tab") { mode = "tab"; render(); }
     else if (b.dataset.g === "tour") tourStart();
+    else if (b.dataset.g === "tourtab") tourStart(S.tab);
     else if (b.dataset.try != null) { try { g.tries[+b.dataset.try][1](); } catch (e) {} }
     else if (b.dataset.ask != null) ask(g.asks[+b.dataset.ask]);
     else if (b.dataset.jump != null) { mode = "tab"; try { INDEX[+b.dataset.jump][2](); } catch (e) {} render(); }
   });
   if (btnTop) btnTop.addEventListener("click", function () { if (expanded && mode === "index") { expanded = false; save({ collapsed: true }); } else { expanded = true; mode = "index"; save({ collapsed: false }); } render(); if (expanded) see("#guide"); });
-  var render0 = S.render; S.render = function () { render0(); if (S.tab !== lastTab) { if (mode === "index" && lastTab !== null) mode = "tab"; render(); } };
+  var render0 = S.render; S.render = function () { render0(); if (S.tab !== lastTab) { var first = lastTab === null; if (mode === "index" && !first) mode = "tab"; render(); if (!first) maybeNudge(S.tab); } };
 
-  /* ---------- the tour ---------- */
-  var STEPS = [
+  /* ---------- the tours: one overview across the tabs, and a short one per tab ---------- */
+  var OVERVIEW = [
     { tab: "flows", target: "#mapcard", title: "The map", text: "Circles are mills, sized by capacity and colored by owner. Squares are box markets, sized by demand. The lines are the solver's cheapest routing: colored inside one company's system, gray on the open market, dashed to the export docks. Hover anything for its numbers." },
     { tab: "flows", target: "#ko", title: "One scenario at a time", prep: function () { scen("ko" + topKo.mill); }, undo: function () { scen("fp2026"); },
       text: "Every number on the page belongs to the scenario chosen here. This is the network with " + topKo.name + ", its costliest single mill, knocked out: the lines redraw from a fresh solve and the KPIs below show the extra cost against October 2026. The buttons above switch footprints; the calendar runs the maintenance months." },
@@ -174,27 +177,109 @@
     { tab: "demand", target: "#panel-demand", title: "The plants, as registered", prep: function () { this.was = pressed("#named-toggle"); named(true); }, undo: function () { named(!!this.was); },
       text: "EPA's box-plant list, one dot per site, shown exactly as registered. Green is verified operating, red verified closed, gray not yet checked; nothing is inferred. Search by name, city, state or a verified owner." },
     { tab: "backtest", target: "#panel-backtest", title: "The honest miss", text: "Model against the record: capacity and shipments reconcile with the filings; the 2025 closures were not where freight said they would be, and the page shows it rather than hiding it. Method & data, next door, has every assumption and source." },
-    { tab: "flows", target: ".chat-fab", title: "Ask the network", text: "Ask in words. The chat answers only from the page's own functions and lists every lookup under its answer, with the raw numbers one click away. An answer with no lookup behind it is flagged. That is the end of the tour; the Guide button in the header brings it back, and each tab keeps its own How to use card." }
+    { tab: "flows", target: ".chat-fab", title: "Ask the network", text: "Ask in words. The chat answers only from the page's own functions and lists every lookup under its answer, with the raw numbers one click away. An answer with no lookup behind it is flagged. That is the end of the tour; each tab has its own short tour under How to use, and the Guide button in the header brings everything back." }
   ];
-  var ring, tcard, step = -1, saved = null;
-  function tourStart() { if (ring) return; saved = { tab: S.tab, scen: S.scen, expanded: expanded }; expanded = false; render(); document.body.classList.add("touring");   // the card folds away so the map and the highlighted control share the screen
-    ring = document.createElement("div"); ring.className = "tour-ring"; tcard = document.createElement("div"); tcard.className = "tour-card"; tcard.setAttribute("role", "dialog"); tcard.setAttribute("aria-label", "Guided tour"); document.body.appendChild(ring); document.body.appendChild(tcard);
+  var TOURS = {
+    flows: [
+      { tab: "flows", target: "#mapcard", title: "What you are looking at", text: "The whole network in one scenario. Circles are mills, sized by capacity and colored by owner; squares are box markets, sized by demand; lines are the cheapest routing the solver found. Hover anything for its numbers, click anything for its source." },
+      { tab: "flows", target: "#scen", title: "Pick a scenario", text: "Every number on the page follows the scenario chosen here: end of 2024, October 2026, or 2026 mills on 2024 demand. The two menus below run a maintenance month or knock out one mill and re-solve." },
+      { tab: "flows", target: "#layers", title: "Turn layers on and off", prep: function () { this.was = pressed("#layers [data-layer=shadow]"); setLayer("#layers [data-layer=shadow]", true); }, undo: function () { setLayer("#layers [data-layer=shadow]", !!this.was); },
+        text: "Own-system flows, open-market flows, exports and demand points. Mills by scarcity value is on now: dark mills are the tight ones, where one more ton of capacity is worth most." },
+      { tab: "flows", target: "#kpis", title: "Read the bill", text: "Network cost, freight, average haul, rail share and unmet demand, each with its change against October 2026. Below the map: haul distance, integration against what each company discloses, the outage calendar and the knockout chart." }
+    ],
+    corr: [
+      { tab: "corr", target: "#mapcard", title: "The middle tier", text: "Sharp-cornered squares are markets with corrugators, sized by machine capacity. Small rounded squares have only sheet plants and buy their board as sheets. Hover a market for its load, its sheet trade and the value of one more machine hour." },
+      { tab: "corr", target: "#corr-layers", title: "Three ways to color it", prep: function () { this.was = pressed("#corr-layers [data-clayer=value]"); setLayer("#corr-layers [data-clayer=value]", true); }, undo: function () { setLayer("#corr-layers [data-clayer=value]", !!this.was); },
+        text: "Load on corrugator capacity, the sheet flows from feeders to the markets that import, and, on now, the freight carried in the marginal sheet in dollars per thousand square feet." },
+      { tab: "corr", target: "#detail-corr .card", title: "One corrugator, in numbers", text: "Width, speed, hours and OEE make a machine's yearly capacity; the calculator below the map prices sheets against converting. Change a setting and every market's load changes with it." },
+      { tab: "corr", target: "#corr-rank", title: "Where hours are worth most", text: "The list ranks markets by the value of one more corrugator hour. That is the model's answer to where a machine would pay back fastest; the caveat under How to use says what it is not." }
+    ],
+    thru: [
+      { tab: "thru", target: "#kpis-thru", title: "The same network as rates", text: "Tons a day out of the mills, truckloads and railcars on the lanes, thousand square feet a day through the corrugators, sheets to the sheet plants, OCC back to the recycled mills." },
+      { tab: "thru", target: "#piece", title: "Choose the basis and the piece", text: "Per calendar day or per year, then which part of the chain to list: mills, corrugator markets, sheet buyers, docks, recycled mills, or whole owner systems. The map recolors to match." },
+      { tab: "thru", target: "#chain", title: "Walk one day of board", text: "The chain chart follows a single day end to end. Hover a band for its number. Every rate uses the conversions in the table below it; change a conversion and every rate changes." }
+    ],
+    prospects: [
+      { tab: "prospects", target: "#mapcard", title: "The price of loyalty", text: "Every market is colored by the gap between its cheapest mill and the next one. Dark is a few dollars a ton, a phone call; light is $25 or more, sticky. Squares are sized by open-market tons." },
+      { tab: "prospects", target: "#shock", title: "Raise one producer's price", prep: function () { this.was = (q("#shock") || {}).value || ""; setSelect("#shock", shockOwner); }, undo: function () { setSelect("#shock", this.was || ""); },
+        text: shockOwner + " has just raised its open-market price $70 a ton and the network re-solved. The markets that switch turn red, the lines show where their tons go, and the producer's mills dim." },
+      { tab: "prospects", target: "#calls", title: "The call sheet", text: "With no shock, the most contestable open-market board. With a shock on, who the producer loses and to whom. Grade switches between linerboard and medium; the tables below the map show every producer." }
+    ],
+    prices: [
+      { tab: "prices", target: "#mapcard", title: "Board, delivered", text: "Every market is colored by the paper cost of a thousand square feet of combined board delivered there: mill prices from the published index, freight from the flow model, diesel from the EIA. Hover for the split." },
+      { tab: "prices", target: "#diesel", title: "Your numbers, not ours", prep: function () { this.was = (q("#diesel") || {}).value || "3.75"; setSelect("#diesel", "5.0"); }, undo: function () { setSelect("#diesel", this.was || "3.75"); },
+        text: "Type your own liner and medium prices, switch between a 32 ECT and a 200# Mullen spec, change the diesel. Diesel is at $5.00 now; the KPIs below show what it did to the freight bill." },
+      { tab: "prices", target: "#kpis-price", title: "An increase, in board terms", text: "The Increase box turns an announced dollars-per-ton mill increase into dollars per thousand square feet, and shows what share of delivered cost that is. The published price series sits below the map." }
+    ],
+    fiber: [
+      { tab: "fiber", target: "#mapcard", title: "The boxes come back", text: "The same network run backwards. Squares are counties sized by recovered corrugated; gray lines carry it to the recycled mills and the export docks; virgin-fiber mills dim." },
+      { tab: "fiber", target: "#fiber-layers", title: "Flows, or what a ton is worth", text: "OCC flows draws the lines. Counties by fiber value colors each county by what the network would pay for one more ton collected there, the dual on its supply." },
+      { tab: "fiber", target: "#fiber-table", title: "The loop in numbers", text: "Recovered, to mills, exported, and the tons that find no taker at today's mill appetite. Recovery rates are national rates applied to local box use; the caveat under How to use says so." }
+    ],
+    demand: [
+      { tab: "demand", target: "#mapcard", title: "Where the boxes are made", text: "Markets colored by tons of board demanded a year, or shown as the number of plants that demand implies. Census employment sets each state's share; the EPA registry places it within the state." },
+      { tab: "demand", target: "#named-toggle", title: "The plants, by name", prep: function () { this.was = pressed("#named-toggle"); named(true); }, undo: function () { named(!!this.was); },
+        text: "One dot per EPA-registered box plant, exactly as registered. Green is verified operating, red verified closed, gray not yet checked. Nothing about a plant is inferred; owner, type and status appear only after the verification pass, with a source." },
+      { tab: "demand", target: "#enduse-chart", title: "Who uses the boxes", text: "Below the map: the named-plant table with search, the population proxy against the measured distribution by state, and demand by Census division and end use." }
+    ],
+    backtest: [
+      { tab: "backtest", target: "#kpis-bt", title: "Does the model match the record?", text: "Capacity, shipments, integration and operating rates against the filings and the AF&PA survey. The map shows the 2024 network with the mills that closed in 2025 and 2026 in red." },
+      { tab: "backtest", target: "#bt-table", title: "Line by line", text: "Each row names the source it is checked against; the error bars come from fourteen Monte Carlo draws on the inputs. The receipts file in the repository lists every anchor and every row the last audit changed." },
+      { tab: "backtest", target: "#closure-table", title: "The honest miss", text: "Freight position did not predict the 2025 closures: the closed mills were all loaded. The surplus column does better, and the table shows both rather than hiding the miss." }
+    ],
+    method: [
+      { tab: "method", target: "#panel-method", title: "Read me first", text: "Every mill comes from a filing, a press release or a closure notice; every demand square is a statistical stand-in; the flows are a solver's answer to the cheapest routing, not a record of shipments." },
+      { tab: "method", target: "#detail-method .card", title: "The model", text: "One min-cost flow, expanded for ownership and grade. The objective and the constraints are stated here in full, with the sources list and the per-anchor citations beside it." },
+      { tab: "method", target: "#detail-method .card:last-child", title: "What the next version needs", text: "The open list. If a number elsewhere looks wrong, this tab shows what it was built from; then open an issue with a source, or a pull request against the row." }
+    ]
+  };
+  var ring, tcard, steps = OVERVIEW, tourName = "", step = -1, saved = null;
+  function tourStart(kind) { if (ring) return; closeWelcome(); hideNudge(); steps = (kind && TOURS[kind]) ? TOURS[kind] : OVERVIEW; tourName = (kind && TOURS[kind]) ? GUIDE[kind].name : "Overview";
+    saved = { tab: S.tab, scen: S.scen, expanded: expanded }; expanded = false; render(); document.body.classList.add("touring");   // the card folds away so the map and the highlighted control share the screen
+    ring = document.createElement("div"); ring.className = "tour-ring"; tcard = document.createElement("div"); tcard.className = "tour-card"; tcard.setAttribute("role", "dialog"); tcard.setAttribute("aria-label", "Guided tour: " + tourName); document.body.appendChild(ring); document.body.appendChild(tcard);
     tcard.addEventListener("click", function (ev) { var b = ev.target.closest("button"); if (!b) return; if (b.dataset.t === "next") go(step + 1); else if (b.dataset.t === "back") go(step - 1); else tourEnd(); });
     window.addEventListener("resize", place); window.addEventListener("scroll", place, { passive: true }); document.addEventListener("keydown", keys); go(0); }
   function keys(ev) { if (!ring) return; if (ev.key === "Escape") tourEnd(); else if (ev.key === "ArrowRight") go(step + 1); else if (ev.key === "ArrowLeft") go(step - 1); }
   function go(i) {
-    if (i < 0) return; if (i >= STEPS.length) return tourEnd();
-    var prev = STEPS[step]; if (prev && prev.undo) try { prev.undo(); } catch (e) {}
-    step = i; var s = STEPS[i]; if (S.tab !== s.tab) S.setTab(s.tab); if (s.prep) try { s.prep(); } catch (e) {}
-    tcard.innerHTML = "<div class='tstep'>" + (i + 1) + " of " + STEPS.length + "</div><b>" + esc(s.title) + "</b><p>" + esc(s.text) + "</p><div class='tbtns'>" + (i > 0 ? "<button type='button' data-t='back'>Back</button>" : "") + "<button type='button' data-t='next' class='primary'>" + (i === STEPS.length - 1 ? "Done" : "Next") + "</button><button type='button' data-t='end'>" + (i === STEPS.length - 1 ? "Close" : "Skip the tour") + "</button></div>";
+    if (i < 0) return; if (i >= steps.length) return tourEnd();
+    var prev = steps[step]; if (prev && prev.undo) try { prev.undo(); } catch (e) {}
+    step = i; var s = steps[i]; if (S.tab !== s.tab) S.setTab(s.tab); if (s.prep) try { s.prep(); } catch (e) {}
+    tcard.innerHTML = "<div class='tstep'>" + esc(tourName) + " · " + (i + 1) + " of " + steps.length + "</div><b>" + esc(s.title) + "</b><p>" + esc(s.text) + "</p><div class='tbtns'>" + (i > 0 ? "<button type='button' data-t='back'>Back</button>" : "") + "<button type='button' data-t='next' class='primary'>" + (i === steps.length - 1 ? "Done" : "Next") + "</button><button type='button' data-t='end'>" + (i === steps.length - 1 ? "Close" : "Skip") + "</button><span class='tkeys'>Esc closes · arrow keys move</span></div>";
     var el = q(s.target); if (el && !el.hidden) el.scrollIntoView({ behavior: "smooth", block: "center" });
     place(); setTimeout(place, 400); setTimeout(place, 900); var nb = tcard.querySelector("[data-t=next]"); if (nb) nb.focus({ preventScroll: true });
   }
-  function place() { if (!ring) return; var s = STEPS[step], el = s && q(s.target); if (!el || el.hidden) { ring.style.display = "none"; return; } var r = el.getBoundingClientRect(); if (!r.width) { ring.style.display = "none"; return; }
+  function place() { if (!ring) return; var s = steps[step], el = s && q(s.target); if (!el || el.hidden) { ring.style.display = "none"; return; } var r = el.getBoundingClientRect(); if (!r.width) { ring.style.display = "none"; return; }
     ring.style.display = "block"; ring.style.left = (r.left + window.scrollX - 6) + "px"; ring.style.top = (r.top + window.scrollY - 6) + "px"; ring.style.width = (r.width + 12) + "px"; ring.style.height = (r.height + 12) + "px"; }
-  function tourEnd() { if (!ring) return; var cur = STEPS[step]; if (cur && cur.undo) try { cur.undo(); } catch (e) {}
+  function tourEnd() { if (!ring) return; var cur = steps[step]; if (cur && cur.undo) try { cur.undo(); } catch (e) {}
     ring.remove(); tcard.remove(); ring = tcard = null; step = -1; document.body.classList.remove("touring"); window.removeEventListener("resize", place); window.removeEventListener("scroll", place); document.removeEventListener("keydown", keys);
-    if (saved) { if (saved.scen && D.scenarios[saved.scen]) scen(saved.scen); S.setTab(saved.tab); expanded = saved.expanded; } save({ toured: true }); render(); see("#guide"); }
-  S.guide = { render: render, tour: tourStart, end: tourEnd, index: INDEX, spec: GUIDE, steps: STEPS };
-  render();
+    var toured = store().toured; if (typeof toured !== "object" || !toured) toured = {}; toured[tourName === "Overview" ? "overview" : (saved && saved.tab) || S.tab] = true;
+    if (saved) { if (saved.scen && D.scenarios[saved.scen]) scen(saved.scen); S.setTab(saved.tab); expanded = saved.expanded; } save({ toured: toured }); render(); see("#guide"); }
+
+  /* ---------- the soft landing: a one-time welcome, and a nudge the first time each tab opens ---------- */
+  var welcome = null, nudge = null, nudgeTimer = null;
+  function seenTabs() { var s = store().seen; return (s && typeof s === "object") ? s : {}; }
+  function markSeen(tab) { var s = seenTabs(); if (!s[tab]) { s[tab] = true; save({ seen: s }); } }
+  function closeWelcome() { if (!welcome) return; welcome.remove(); welcome = null; document.body.classList.remove("welcoming"); save({ welcomed: true }); markSeen(S.tab); }
+  function showWelcome() {
+    if (welcome || store().welcomed) return;
+    welcome = document.createElement("div"); welcome.className = "welcome-backdrop"; document.body.classList.add("welcoming");
+    welcome.innerHTML = "<div class='welcome' role='dialog' aria-modal='true' aria-labelledby='welcome-h'><div class='wk'>The Paper Network</div><h2 id='welcome-h'>Where every ton of board goes</h2>" +
+      "<p>A public, free model of the US containerboard network: <b>" + n_mills + " mills</b>, <b>" + n_nodes + " box markets</b>, and the cheapest way the board moves between them, solved from filings and public data. Nothing here is a private order book, and every number has its source one click away.</p>" +
+      "<p class='wsub'>Nine views, one solved network. Three ways in:</p>" +
+      "<div class='wbtns'><button type='button' data-w='tour' class='primary'>Take the two-minute tour</button><button type='button' data-w='ask'>Start from a question</button><button type='button' data-w='explore'>Explore on my own</button></div>" +
+      "<p class='wnote'>Each view keeps a short tour and a How to use card; the Guide button in the header brings them back any time.</p></div>";
+    welcome.addEventListener("click", function (ev) { var b = ev.target.closest("button"); if (b) { var w = b.dataset.w; closeWelcome(); if (w === "tour") tourStart(); else if (w === "ask") { expanded = true; mode = "index"; save({ collapsed: false }); render(); see("#guide"); } return; } if (ev.target === welcome) closeWelcome(); });
+    document.addEventListener("keydown", function esc(ev) { if (ev.key === "Escape") { closeWelcome(); document.removeEventListener("keydown", esc); } });
+    document.body.appendChild(welcome); var first = welcome.querySelector("button.primary"); if (first) first.focus({ preventScroll: true });
+  }
+  function hideNudge() { if (nudgeTimer) { clearTimeout(nudgeTimer); nudgeTimer = null; } if (nudge) { nudge.remove(); nudge = null; } }
+  function maybeNudge(tab) {
+    hideNudge(); if (ring || welcome || !TOURS[tab]) return; if (seenTabs()[tab]) return; markSeen(tab);
+    nudge = document.createElement("div"); nudge.className = "tour-nudge"; nudge.setAttribute("role", "status");
+    nudge.innerHTML = "<span>First time on <b>" + esc(GUIDE[tab].name) + "</b>? There is a " + TOURS[tab].length + "-step tour.</span><button type='button' data-n='tour' class='primary'>Tour this view</button><button type='button' data-n='no'>Not now</button>";
+    nudge.addEventListener("click", function (ev) { var b = ev.target.closest("button"); if (!b) return; var t = b.dataset.n; hideNudge(); if (t === "tour") tourStart(tab); });
+    document.body.appendChild(nudge); nudgeTimer = setTimeout(hideNudge, 14000);
+  }
+  S.guide = { render: render, tour: tourStart, end: tourEnd, index: INDEX, spec: GUIDE, steps: OVERVIEW, tours: TOURS, welcome: showWelcome, nudge: maybeNudge };
+  render(); markSeen(S.tab); showWelcome();
 })();
