@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-25",
+ "generated": "2026-10-22",
  "anchors": {
   "cap24": {
    "value": 41400000.0,
@@ -412,8 +412,6 @@
   "us_out_2026": 35321076,
   "ca_2024": 340446,
   "ca_2026": 478924,
-  "haul_2026": 508.712,
-  "rail_2026": 0.417,
   "ip_int": 0.845941236321676,
   "kpi_2026": {
    "objective_usd": 2191618712.189,
@@ -429,7 +427,7 @@
    "avg_freight_per_ton": 59.564,
    "n_vars": 95211,
    "n_rows": 7141,
-   "solve_seconds": 1.2
+   "solve_seconds": 0.7
   },
   "kpi_2024": {
    "objective_usd": 2377035351.782,
@@ -445,7 +443,7 @@
    "avg_freight_per_ton": 60.407,
    "n_vars": 100551,
    "n_rows": 7147,
-   "solve_seconds": 1.2
+   "solve_seconds": 0.7
   },
   "occ": {
    "occ_supply": 30512720.0,
