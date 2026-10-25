@@ -24,8 +24,13 @@ dms_orig / dms_dest (FAF zones) instead of the state columns; both are accepted.
 against the release you download; the script fails loudly on a mismatch rather than guessing.
 
 YEAR. The file carries observed years (2017-2023 in FAF5.6.1) AND forecast columns (2025, 2030, ... 2050)
-side by side. Only an observed year is a measurement: the default is the latest year not after the pull
-year, never a forecast column (the 2026-10-25 run took the maximum and summarised 2050). `--year` overrides.
+side by side, with nothing in the file that tells them apart; the 2026-10-25 run took the maximum and
+summarised 2050, and a wall-clock rule would take the 2025 forecast in 2026. So the boundary is explicit:
+OBSERVED_THROUGH names the last observed year of the release this script was checked against, and the
+default year is the latest annual column at or before it. A release that carries annual columns past the
+boundary (a newer observed year, or the forecast adjacent to it) is reported in the summary as
+annual_columns_past_boundary and the pull stays on the boundary year: a year is never promoted to
+"measured" by a rule. Raise OBSERVED_THROUGH (or pass `--observed-through`) after reading the release notes.
 
 MODES (dms_mode): 1 truck, 2 rail, 3 water, 4 air, 5 multiple modes and mail, 6 pipeline, 7 other/unknown,
 8 no domestic mode. TRADE TYPE: 1 domestic, 2 import, 3 export.
@@ -34,6 +39,7 @@ import argparse, io, json, os, sys, urllib.request, zipfile
 import pandas as pd
 
 DEFAULT_URL = "https://faf.ornl.gov/faf5/data/download_files/FAF5.6.1_State.zip"
+OBSERVED_THROUGH = 2023   # FAF5.6.1: annual estimates 2017-2023; 2025, 2030, ... 2050 are forecasts. Raise it with the release.
 MODES = {1: "truck", 2: "rail", 3: "water", 4: "air", 5: "multiple", 6: "pipeline", 7: "other", 8: "no_domestic_mode"}
 TRADE = {1: "domestic", 2: "import", 3: "export"}
 SCTG = {27: "paper (pulp, newsprint, paper, paperboard)", 28: "paper articles (boxes, containers, converted paper)"}
@@ -45,19 +51,38 @@ def years_in(columns):
     return sorted(int(c.split("_")[1]) for c in columns if c.startswith("tons_") and c.split("_")[1].isdigit())
 
 
-def latest_year(columns, today_year: int | None = None):
-    """The latest OBSERVED year: the greatest tons_<year> not after the pull year. FAF forecast columns run to 2050."""
+def annual_run(years):
+    """The leading run of consecutive years (FAF's annual estimates); the forecast columns step by five after it."""
+    run = years[:1]
+    for y in years[1:]:
+        if y != run[-1] + 1:
+            break
+        run.append(y)
+    return run
+
+
+def latest_year(columns, observed_through: int = OBSERVED_THROUGH):
+    """The latest OBSERVED year: the last annual column at or before the explicit boundary, never a forecast column.
+
+    A column past the boundary is never chosen, whatever the date: it is either a forecast (2025 sits next to 2024
+    in the annual run of a newer release) or a newer observed year the boundary has not been raised to, and the
+    file cannot say which. `past_boundary()` names those columns so the summary shows a stale boundary.
+    """
     years = years_in(columns)
     if not years:
         raise SystemExit("no tons_<year> column found; FAF column names changed — read the release notes and update faf5.py")
-    today_year = today_year or pd.Timestamp.now("UTC").year
-    observed = [y for y in years if y <= today_year]
+    observed = [y for y in annual_run(years) if y <= observed_through]
     if not observed:
-        raise SystemExit(f"every tons_<year> column ({years[0]}-{years[-1]}) is after {today_year}: no observed year to measure")
+        raise SystemExit(f"no annual column at or before the observed boundary {observed_through}; years in file: {years}")
     return observed[-1]
 
 
-def tidy(raw: pd.DataFrame, year: int | None = None) -> pd.DataFrame:
+def past_boundary(columns, observed_through: int = OBSERVED_THROUGH):
+    """Annual-run years after the boundary: a newer release's observed year, or its adjacent forecast. Reported, never used."""
+    return [y for y in annual_run(years_in(columns)) if y > observed_through]
+
+
+def tidy(raw: pd.DataFrame, year: int | None = None, observed_through: int = OBSERVED_THROUGH) -> pd.DataFrame:
     """Filter to SCTG 27/28 and reshape one FAF frame into the output schema (all trade types kept, flagged)."""
     cols = {c.lower(): c for c in raw.columns}
     orig = cols.get("dms_origst") or cols.get("dms_orig")
@@ -65,7 +90,7 @@ def tidy(raw: pd.DataFrame, year: int | None = None) -> pd.DataFrame:
     need = [orig, dest, cols.get("sctg2"), cols.get("dms_mode"), cols.get("trade_type")]
     if any(n is None for n in need):
         raise SystemExit(f"FAF columns missing; have {list(raw.columns)[:12]}...")
-    year = year or latest_year([c.lower() for c in raw.columns])
+    year = year or latest_year([c.lower() for c in raw.columns], observed_through)
     tons_c, tmi_c = cols.get(f"tons_{year}"), cols.get(f"tmiles_{year}")
     if tons_c is None or tmi_c is None:
         raise SystemExit(f"no tons_{year}/tmiles_{year} columns")
@@ -131,7 +156,9 @@ def load_zip(path_or_bytes) -> pd.DataFrame:
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("dst"); ap.add_argument("--zip"); ap.add_argument("--url", default=DEFAULT_URL); ap.add_argument("--year", type=int)
+    ap.add_argument("dst"); ap.add_argument("--zip"); ap.add_argument("--url", default=DEFAULT_URL)
+    ap.add_argument("--year", type=int, help="summarise this tons_<year> column (overrides the observed-year rule)")
+    ap.add_argument("--observed-through", type=int, default=OBSERVED_THROUGH, help=f"last observed year of the release (default {OBSERVED_THROUGH}); later annual columns are forecasts")
     a = ap.parse_args()
     if a.zip:
         raw = load_zip(a.zip); provenance = os.path.abspath(a.zip)
@@ -139,11 +166,17 @@ def main():
         print("downloading", a.url)
         req = urllib.request.Request(a.url, headers={"User-Agent": "the-paper-network/ingest (public model; https://github.com/justfetz/the-paper-network)"})
         raw = load_zip(io.BytesIO(urllib.request.urlopen(req, timeout=600).read())); provenance = a.url
-    df = tidy(raw, a.year)
+    df = tidy(raw, a.year, a.observed_through)
     df.to_csv(a.dst, index=False)
     summary = summarize(df); summary["provenance"] = provenance; summary["pulled"] = pd.Timestamp.now("UTC").strftime("%Y-%m-%d")
     summary["years_in_file"] = years_in([c.lower() for c in raw.columns])
-    summary["year_rule"] = "latest observed year (not after the pull year); FAF forecast columns are never summarised" if a.year is None else f"--year {a.year} given on the command line"
+    summary["observed_through"] = a.observed_through
+    summary["annual_columns_past_boundary"] = past_boundary([c.lower() for c in raw.columns], a.observed_through)
+    if summary["annual_columns_past_boundary"]:
+        print(f"NOTE annual columns {summary['annual_columns_past_boundary']} lie past the observed boundary {a.observed_through} and were not used: "
+              f"a newer FAF release? read its notes and raise OBSERVED_THROUGH / pass --observed-through")
+    summary["year_rule"] = (f"latest annual column at or before the observed boundary {a.observed_through}; FAF forecast columns (2025, 2030, ... 2050) are never summarised"
+                            if a.year is None else f"--year {a.year} given on the command line")
     spath = os.path.join(os.path.dirname(os.path.abspath(a.dst)), "faf5_summary.json")
     json.dump(summary, open(spath, "w"), indent=1)
     c27 = summary["commodities"]["27"]

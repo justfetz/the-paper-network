@@ -25,12 +25,17 @@ raw = pd.DataFrame([
 ], columns=["fr_orig", "dms_origst", "dms_destst", "fr_dest", "dms_mode", "sctg2", "trade_type", "tons_2023", "tmiles_2023"])
 # The real file carries blank fr_orig on domestic rows (floats with NaN); the 2026-10-25 run failed on the cast.
 raw["fr_orig"] = raw["fr_orig"].astype(float).where(raw["fr_orig"] != 0, other=float("nan"))
-# The real file also carries forecast columns to 2050 beside the observed years; the 2026-10-25 run summarised 2050.
-raw["tons_2050"], raw["tmiles_2050"] = raw["tons_2023"] * 3, raw["tmiles_2023"] * 5
-check("faf5 latest_year is the latest OBSERVED year, never a forecast column", faf5.latest_year(["tons_2017", "tons_2023", "tons_2050"], today_year=2026) == 2023 and faf5.years_in(["tons_2023", "tmiles_2023", "tons_2050"]) == [2023, 2050])
+# The real file carries forecast columns (2025, 2030, ... 2050) beside the observed years, nothing marks them, and the
+# 2026-10-25 run summarised 2050. The 2025 forecast is before today's date, so the boundary is explicit, not the clock.
+for fy in (2025, 2030, 2050):
+    raw[f"tons_{fy}"], raw[f"tmiles_{fy}"] = raw["tons_2023"] * 3, raw["tmiles_2023"] * 5
+faf561 = [f"tons_{y}" for y in (2017, 2018, 2019, 2020, 2021, 2022, 2023, 2025, 2030, 2035, 2040, 2045, 2050)]
+check("faf5 latest_year is the last annual column at or before the observed boundary (2023, not the 2025 forecast)", faf5.latest_year(faf561) == 2023 and faf5.OBSERVED_THROUGH == 2023 and faf5.annual_run([2017, 2018, 2019, 2025, 2030]) == [2017, 2018, 2019] and faf5.years_in(["tons_2023", "tmiles_2023", "tons_2050"]) == [2023, 2050])
+check("faf5 a newer release's 2024 column stays unused on a stale boundary and is reported, never promoted", faf5.latest_year(faf561 + ["tons_2024"]) == 2023 and faf5.past_boundary(faf561 + ["tons_2024"]) == [2024, 2025] and faf5.past_boundary(faf561) == [])
+check("faf5 the boundary raised with the release admits 2024 and still refuses the adjacent 2025 forecast", faf5.latest_year(faf561 + ["tons_2024"], observed_through=2024) == 2024)
 try:
-    faf5.latest_year(["tons_2050"], today_year=2026); check("faf5 fails loudly when only forecast years exist", False)
-except SystemExit as e: check("faf5 fails loudly when only forecast years exist", "no observed year" in str(e))
+    faf5.latest_year(["tons_2025", "tons_2030"]); check("faf5 fails loudly when no annual column is at or before the boundary", False)
+except SystemExit as e: check("faf5 fails loudly when no annual column is at or before the boundary", "no annual column" in str(e))
 t = faf5.tidy(raw)
 check("faf5 tidy keeps SCTG 27/28 only and maps modes and trade types", set(t.sctg2) == {27, 28} and set(t["mode"]) == {"truck", "rail"} and set(t.trade_type) == {"domestic", "import"} and t.year.iloc[0] == 2023)
 s = faf5.summarize(t)
