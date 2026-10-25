@@ -116,6 +116,7 @@ json.dump(dict(year=2023, commodities={"27": dict(avg_haul_mi=410.0, rail_tons_s
 json.dump(dict(imports=dict(total_short_tons=1_500_000.0, periods=["2025-01", "2025-12"], canada_share=0.8)), open(os.path.join(tmp, "data", "trade_paper_ports_summary.json"), "w"))
 rows = rc.measured_freight_anchors(dict(haul_2026=509.0, rail_2026=0.417, ca_2024=340_000.0))
 keys = {r["key"]: r for r in rows}
+check("receipts: measured rows report but never gate (strict False on every one)", all(r.get("strict") is False for r in rows))
 check("receipts: FAF5 haul and rail rows with deviations, Census imports as a shown gap", set(keys) == {"haul_faf5", "rail_faf5", "imports_census"} and abs(keys["haul_faf5"]["deviation"] - (509 - 410) / 410) < 1e-4 and keys["haul_faf5"]["ok"] is True and keys["rail_faf5"]["ok"] is False and keys["imports_census"]["ok"] is None)
 rc.ROOT = saved_root
 

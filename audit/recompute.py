@@ -109,24 +109,27 @@ def measured_freight_anchors(md):
     Absent files add no rows and fail nothing; the receipts say the measurement is pending."""
     rows = []
     fpath = os.path.join(ROOT, "data", "faf5_summary.json")
+    # These rows carry strict False: a data pull must never turn CI red. They print CHECK / outside tolerance in
+    # the receipts when the model disagrees with the measurement, which is the point; the gate stays on the
+    # capacity, production and company anchors above.
     if os.path.exists(fpath):
         f = json.load(open(fpath)); c27 = f.get("commodities", {}).get("27", {}); yr = f.get("year")
         src = f"FAF5 {yr}, SCTG 27 (all paper and paperboard; containerboard is inside it): ton-miles / tons, domestic flows"
         url = "https://faf.ornl.gov/faf5"
         if c27.get("avg_haul_mi"):
             dev = (md["haul_2026"] - c27["avg_haul_mi"]) / c27["avg_haul_mi"]
-            rows.append(dict(key="haul_faf5", check="Average haul, October 2026 network vs FAF5 paper", model=md["haul_2026"], anchor=c27["avg_haul_mi"], deviation=round(dev, 4), tolerance=0.25, ok=abs(dev) <= 0.25, source=src, url=url,
+            rows.append(dict(key="haul_faf5", check="Average haul, October 2026 network vs FAF5 paper", model=md["haul_2026"], anchor=c27["avg_haul_mi"], deviation=round(dev, 4), tolerance=0.25, ok=abs(dev) <= 0.25, strict=False, source=src, url=url,
                              note="tons-weighted miles of the solved domestic flows against FAF5's measured ton-miles over tons; a wide tolerance because SCTG 27 mixes pulp and printing grades with containerboard"))
         if c27.get("rail_tons_share") is not None:
             dev = (md["rail_2026"] - c27["rail_tons_share"]) / max(c27["rail_tons_share"], 1e-9)
-            rows.append(dict(key="rail_faf5", check="Rail share of domestic tons vs FAF5 paper", model=md["rail_2026"], anchor=c27["rail_tons_share"], deviation=round(dev, 4), tolerance=0.30, ok=abs(dev) <= 0.30, source=src, url=url,
+            rows.append(dict(key="rail_faf5", check="Rail share of domestic tons vs FAF5 paper", model=md["rail_2026"], anchor=c27["rail_tons_share"], deviation=round(dev, 4), tolerance=0.30, ok=abs(dev) <= 0.30, strict=False, source=src, url=url,
                              note="the model's rail flag is the cheaper-mode rule in freight_cost; FAF5 reports the mode actually used"))
     tpath = os.path.join(ROOT, "data", "trade_paper_ports_summary.json")
     if os.path.exists(tpath):
         imp = (json.load(open(tpath)).get("imports") or {})
         if imp.get("total_short_tons"):
             dev = (md["ca_2024"] - imp["total_short_tons"]) / imp["total_short_tons"]
-            rows.append(dict(key="imports_census", check="Containerboard imports vs Census HS 4804+4805 imports, last 12 months", model=md["ca_2024"], anchor=imp["total_short_tons"], deviation=round(dev, 4), tolerance=0.0, ok=None,
+            rows.append(dict(key="imports_census", check="Containerboard imports vs Census HS 4804+4805 imports, last 12 months", model=md["ca_2024"], anchor=imp["total_short_tons"], deviation=round(dev, 4), tolerance=0.0, ok=None, strict=False,
                              source=f"Census trade API, imports by port, HS 4804+4805, {imp.get('periods')}; Canada share {imp.get('canada_share')}", url="https://api.census.gov/data/timeseries/intltrade/imports/porths",
                              note="known gap, shown with a measured anchor: HS 4804+4805 is wider than containerboard, so the anchor is an upper bound"))
     return rows
@@ -286,7 +289,7 @@ def main():
     res = dict(generated=time.strftime("%Y-%m-%d", time.gmtime()), anchors=ANCHORS, checks=an, mills=mc, model=md, demand=dd, changes=chg, sensitivity=sens, before_after=ba)
     json.dump(res, open(prev_path, "w"), indent=1, default=float)
     open(os.path.join(ROOT, "audit", "RECEIPTS.md"), "w").write(receipts_md(res))
-    bad = [c for c in an if c["ok"] is False]
+    bad = [c for c in an if c["ok"] is False and c.get("strict", True)]   # measured-freight rows report, never gate (see measured_freight_anchors)
     if a.strict and bad: print("FAILED anchors:", [c["check"] for c in bad]); sys.exit(1)
 
 if __name__ == "__main__": main()
