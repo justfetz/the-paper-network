@@ -197,12 +197,12 @@
    "key": "haul_faf5",
    "check": "Average haul, October 2026 network vs FAF5 paper",
    "model": 509.958,
-   "anchor": 590.1,
-   "deviation": -0.1358,
+   "anchor": 581.0,
+   "deviation": -0.1223,
    "tolerance": 0.25,
    "ok": true,
    "strict": false,
-   "source": "FAF5 2050, SCTG 27 (all paper and paperboard; containerboard is inside it): ton-miles / tons, domestic flows",
+   "source": "FAF5 2023, SCTG 27 (all paper and paperboard; containerboard is inside it): ton-miles / tons, domestic flows",
    "url": "https://faf.ornl.gov/faf5",
    "note": "tons-weighted miles of the solved domestic flows against FAF5's measured ton-miles over tons; a wide tolerance because SCTG 27 mixes pulp and printing grades with containerboard"
   },
@@ -210,12 +210,12 @@
    "key": "rail_faf5",
    "check": "Rail share of domestic tons vs FAF5 paper",
    "model": 0.426,
-   "anchor": 0.0814,
-   "deviation": 4.2334,
+   "anchor": 0.0812,
+   "deviation": 4.2463,
    "tolerance": 0.3,
    "ok": false,
    "strict": false,
-   "source": "FAF5 2050, SCTG 27 (all paper and paperboard; containerboard is inside it): ton-miles / tons, domestic flows",
+   "source": "FAF5 2023, SCTG 27 (all paper and paperboard; containerboard is inside it): ton-miles / tons, domestic flows",
    "url": "https://faf.ornl.gov/faf5",
    "note": "the model's rail flag is the cheaper-mode rule in freight_cost; FAF5 reports the mode actually used"
   }
@@ -455,7 +455,7 @@
    "avg_freight_per_ton": 59.843,
    "n_vars": 95211,
    "n_rows": 7141,
-   "solve_seconds": 1.1
+   "solve_seconds": 1.2
   },
   "kpi_2024": {
    "objective_usd": 2384441370.18,
@@ -471,7 +471,7 @@
    "avg_freight_per_ton": 60.636,
    "n_vars": 100551,
    "n_rows": 7147,
-   "solve_seconds": 1.0
+   "solve_seconds": 1.1
   },
   "occ": {
    "occ_supply": 30512720.0,

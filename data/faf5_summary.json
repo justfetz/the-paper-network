@@ -1,0 +1,522 @@
+{
+ "source": "FAF5 (FHWA/BTS/ORNL), https://faf.ornl.gov/faf5",
+ "units": "tons thousand short tons; ton-miles million; haul miles = tmiles*1e6/(tons*1e3)",
+ "year": 2023,
+ "commodities": {
+  "27": {
+   "label": "paper (pulp, newsprint, paper, paperboard)",
+   "domestic_tons_kt": 110407.9,
+   "domestic_tmiles_mmi": 64150.0,
+   "avg_haul_mi": 581.0,
+   "rail_tons_share": 0.0812,
+   "truck_tons_share": 0.7597,
+   "by_mode": {
+    "air": {
+     "tons_share": 0.0,
+     "avg_haul_mi": 2097.8
+    },
+    "multiple": {
+     "tons_share": 0.1589,
+     "avg_haul_mi": 886.2
+    },
+    "rail": {
+     "tons_share": 0.0812,
+     "avg_haul_mi": 682.0
+    },
+    "truck": {
+     "tons_share": 0.7597,
+     "avg_haul_mi": 506.4
+    },
+    "water": {
+     "tons_share": 0.0001,
+     "avg_haul_mi": 27.6
+    }
+   },
+   "by_origin_state": {
+    "AK": {
+     "tons_kt": 37.0,
+     "avg_haul_mi": 225.5
+    },
+    "AL": {
+     "tons_kt": 5955.8,
+     "avg_haul_mi": 589.7
+    },
+    "AR": {
+     "tons_kt": 2451.4,
+     "avg_haul_mi": 672.4
+    },
+    "AZ": {
+     "tons_kt": 411.0,
+     "avg_haul_mi": 277.0
+    },
+    "CA": {
+     "tons_kt": 9614.8,
+     "avg_haul_mi": 1086.2
+    },
+    "CO": {
+     "tons_kt": 568.0,
+     "avg_haul_mi": 203.3
+    },
+    "CT": {
+     "tons_kt": 833.7,
+     "avg_haul_mi": 297.6
+    },
+    "DC": {
+     "tons_kt": 5.1,
+     "avg_haul_mi": 5.7
+    },
+    "DE": {
+     "tons_kt": 15.5,
+     "avg_haul_mi": 66.7
+    },
+    "FL": {
+     "tons_kt": 3046.3,
+     "avg_haul_mi": 608.3
+    },
+    "GA": {
+     "tons_kt": 8007.8,
+     "avg_haul_mi": 436.6
+    },
+    "HI": {
+     "tons_kt": 41.3,
+     "avg_haul_mi": 35.3
+    },
+    "IA": {
+     "tons_kt": 1576.2,
+     "avg_haul_mi": 350.8
+    },
+    "ID": {
+     "tons_kt": 532.7,
+     "avg_haul_mi": 1489.3
+    },
+    "IL": {
+     "tons_kt": 3789.4,
+     "avg_haul_mi": 125.6
+    },
+    "IN": {
+     "tons_kt": 1641.5,
+     "avg_haul_mi": 434.2
+    },
+    "KS": {
+     "tons_kt": 333.8,
+     "avg_haul_mi": 316.8
+    },
+    "KY": {
+     "tons_kt": 2314.7,
+     "avg_haul_mi": 486.9
+    },
+    "LA": {
+     "tons_kt": 5571.4,
+     "avg_haul_mi": 770.3
+    },
+    "MA": {
+     "tons_kt": 1672.0,
+     "avg_haul_mi": 292.0
+    },
+    "MD": {
+     "tons_kt": 732.1,
+     "avg_haul_mi": 316.6
+    },
+    "ME": {
+     "tons_kt": 2232.7,
+     "avg_haul_mi": 719.6
+    },
+    "MI": {
+     "tons_kt": 3496.8,
+     "avg_haul_mi": 501.7
+    },
+    "MN": {
+     "tons_kt": 1942.6,
+     "avg_haul_mi": 501.6
+    },
+    "MO": {
+     "tons_kt": 679.0,
+     "avg_haul_mi": 338.7
+    },
+    "MS": {
+     "tons_kt": 1900.4,
+     "avg_haul_mi": 657.6
+    },
+    "MT": {
+     "tons_kt": 28.9,
+     "avg_haul_mi": 241.1
+    },
+    "NC": {
+     "tons_kt": 3183.0,
+     "avg_haul_mi": 455.4
+    },
+    "ND": {
+     "tons_kt": 9.7,
+     "avg_haul_mi": 197.6
+    },
+    "NE": {
+     "tons_kt": 359.8,
+     "avg_haul_mi": 350.9
+    },
+    "NH": {
+     "tons_kt": 165.7,
+     "avg_haul_mi": 654.8
+    },
+    "NJ": {
+     "tons_kt": 2091.1,
+     "avg_haul_mi": 222.7
+    },
+    "NM": {
+     "tons_kt": 568.7,
+     "avg_haul_mi": 721.3
+    },
+    "NV": {
+     "tons_kt": 263.7,
+     "avg_haul_mi": 183.4
+    },
+    "NY": {
+     "tons_kt": 3734.3,
+     "avg_haul_mi": 396.7
+    },
+    "OH": {
+     "tons_kt": 5141.9,
+     "avg_haul_mi": 254.8
+    },
+    "OK": {
+     "tons_kt": 2082.9,
+     "avg_haul_mi": 994.7
+    },
+    "OR": {
+     "tons_kt": 1771.5,
+     "avg_haul_mi": 596.9
+    },
+    "PA": {
+     "tons_kt": 2325.9,
+     "avg_haul_mi": 349.8
+    },
+    "RI": {
+     "tons_kt": 15.1,
+     "avg_haul_mi": 621.7
+    },
+    "SC": {
+     "tons_kt": 6390.6,
+     "avg_haul_mi": 679.0
+    },
+    "SD": {
+     "tons_kt": 47.3,
+     "avg_haul_mi": 164.4
+    },
+    "TN": {
+     "tons_kt": 3010.1,
+     "avg_haul_mi": 549.9
+    },
+    "TX": {
+     "tons_kt": 4474.8,
+     "avg_haul_mi": 879.1
+    },
+    "UT": {
+     "tons_kt": 90.0,
+     "avg_haul_mi": 136.4
+    },
+    "VA": {
+     "tons_kt": 2565.2,
+     "avg_haul_mi": 538.2
+    },
+    "VT": {
+     "tons_kt": 103.8,
+     "avg_haul_mi": 199.7
+    },
+    "WA": {
+     "tons_kt": 3242.5,
+     "avg_haul_mi": 885.0
+    },
+    "WI": {
+     "tons_kt": 9128.8,
+     "avg_haul_mi": 484.6
+    },
+    "WV": {
+     "tons_kt": 208.1,
+     "avg_haul_mi": 525.9
+    },
+    "WY": {
+     "tons_kt": 1.9,
+     "avg_haul_mi": 244.6
+    }
+   },
+   "imports_tons_kt": 14119.5,
+   "imports_by_foreign_origin_share": {
+    "801": 0.5341,
+    "804": 0.1998,
+    "803": 0.1067,
+    "807": 0.0552,
+    "806": 0.0418,
+    "808": 0.0395,
+    "802": 0.0174,
+    "805": 0.0055
+   }
+  },
+  "28": {
+   "label": "paper articles (boxes, containers, converted paper)",
+   "domestic_tons_kt": 68448.2,
+   "domestic_tmiles_mmi": 22348.6,
+   "avg_haul_mi": 326.5,
+   "rail_tons_share": 0.0109,
+   "truck_tons_share": 0.9433,
+   "by_mode": {
+    "air": {
+     "tons_share": 0.0002,
+     "avg_haul_mi": 1215.1
+    },
+    "multiple": {
+     "tons_share": 0.0431,
+     "avg_haul_mi": 1064.6
+    },
+    "rail": {
+     "tons_share": 0.0109,
+     "avg_haul_mi": 368.3
+    },
+    "truck": {
+     "tons_share": 0.9433,
+     "avg_haul_mi": 292.0
+    },
+    "water": {
+     "tons_share": 0.0025,
+     "avg_haul_mi": 341.6
+    }
+   },
+   "by_origin_state": {
+    "AK": {
+     "tons_kt": 12.8,
+     "avg_haul_mi": 339.4
+    },
+    "AL": {
+     "tons_kt": 1257.2,
+     "avg_haul_mi": 393.9
+    },
+    "AR": {
+     "tons_kt": 1979.1,
+     "avg_haul_mi": 333.1
+    },
+    "AZ": {
+     "tons_kt": 716.9,
+     "avg_haul_mi": 231.5
+    },
+    "CA": {
+     "tons_kt": 7065.3,
+     "avg_haul_mi": 199.3
+    },
+    "CO": {
+     "tons_kt": 547.7,
+     "avg_haul_mi": 200.3
+    },
+    "CT": {
+     "tons_kt": 934.0,
+     "avg_haul_mi": 272.2
+    },
+    "DC": {
+     "tons_kt": 7.4,
+     "avg_haul_mi": 6.9
+    },
+    "DE": {
+     "tons_kt": 30.5,
+     "avg_haul_mi": 695.0
+    },
+    "FL": {
+     "tons_kt": 1800.5,
+     "avg_haul_mi": 347.6
+    },
+    "GA": {
+     "tons_kt": 2830.3,
+     "avg_haul_mi": 330.6
+    },
+    "HI": {
+     "tons_kt": 113.8,
+     "avg_haul_mi": 80.7
+    },
+    "IA": {
+     "tons_kt": 457.5,
+     "avg_haul_mi": 379.2
+    },
+    "ID": {
+     "tons_kt": 353.2,
+     "avg_haul_mi": 285.8
+    },
+    "IL": {
+     "tons_kt": 3832.3,
+     "avg_haul_mi": 388.9
+    },
+    "IN": {
+     "tons_kt": 1282.7,
+     "avg_haul_mi": 276.4
+    },
+    "KS": {
+     "tons_kt": 348.3,
+     "avg_haul_mi": 271.3
+    },
+    "KY": {
+     "tons_kt": 1331.0,
+     "avg_haul_mi": 425.6
+    },
+    "LA": {
+     "tons_kt": 2665.2,
+     "avg_haul_mi": 508.9
+    },
+    "MA": {
+     "tons_kt": 1039.7,
+     "avg_haul_mi": 147.5
+    },
+    "MD": {
+     "tons_kt": 533.3,
+     "avg_haul_mi": 136.6
+    },
+    "ME": {
+     "tons_kt": 389.8,
+     "avg_haul_mi": 484.1
+    },
+    "MI": {
+     "tons_kt": 1662.1,
+     "avg_haul_mi": 200.7
+    },
+    "MN": {
+     "tons_kt": 1420.7,
+     "avg_haul_mi": 177.3
+    },
+    "MO": {
+     "tons_kt": 2308.0,
+     "avg_haul_mi": 303.3
+    },
+    "MS": {
+     "tons_kt": 675.9,
+     "avg_haul_mi": 269.4
+    },
+    "MT": {
+     "tons_kt": 10.3,
+     "avg_haul_mi": 228.6
+    },
+    "NC": {
+     "tons_kt": 1892.5,
+     "avg_haul_mi": 298.4
+    },
+    "ND": {
+     "tons_kt": 77.6,
+     "avg_haul_mi": 191.9
+    },
+    "NE": {
+     "tons_kt": 376.9,
+     "avg_haul_mi": 204.5
+    },
+    "NH": {
+     "tons_kt": 114.2,
+     "avg_haul_mi": 127.5
+    },
+    "NJ": {
+     "tons_kt": 2212.8,
+     "avg_haul_mi": 135.7
+    },
+    "NM": {
+     "tons_kt": 167.9,
+     "avg_haul_mi": 264.1
+    },
+    "NV": {
+     "tons_kt": 187.6,
+     "avg_haul_mi": 411.2
+    },
+    "NY": {
+     "tons_kt": 1758.0,
+     "avg_haul_mi": 244.5
+    },
+    "OH": {
+     "tons_kt": 3208.3,
+     "avg_haul_mi": 389.7
+    },
+    "OK": {
+     "tons_kt": 846.6,
+     "avg_haul_mi": 645.1
+    },
+    "OR": {
+     "tons_kt": 1917.9,
+     "avg_haul_mi": 365.7
+    },
+    "PA": {
+     "tons_kt": 6026.8,
+     "avg_haul_mi": 506.5
+    },
+    "RI": {
+     "tons_kt": 203.4,
+     "avg_haul_mi": 463.7
+    },
+    "SC": {
+     "tons_kt": 1543.4,
+     "avg_haul_mi": 437.0
+    },
+    "SD": {
+     "tons_kt": 67.5,
+     "avg_haul_mi": 342.4
+    },
+    "TN": {
+     "tons_kt": 1132.7,
+     "avg_haul_mi": 350.8
+    },
+    "TX": {
+     "tons_kt": 3102.0,
+     "avg_haul_mi": 213.8
+    },
+    "UT": {
+     "tons_kt": 512.9,
+     "avg_haul_mi": 546.2
+    },
+    "VA": {
+     "tons_kt": 2067.8,
+     "avg_haul_mi": 258.4
+    },
+    "VT": {
+     "tons_kt": 159.7,
+     "avg_haul_mi": 100.5
+    },
+    "WA": {
+     "tons_kt": 1766.9,
+     "avg_haul_mi": 462.5
+    },
+    "WI": {
+     "tons_kt": 3396.1,
+     "avg_haul_mi": 307.8
+    },
+    "WV": {
+     "tons_kt": 90.4,
+     "avg_haul_mi": 192.3
+    },
+    "WY": {
+     "tons_kt": 13.1,
+     "avg_haul_mi": 152.5
+    }
+   },
+   "imports_tons_kt": 5161.4,
+   "imports_by_foreign_origin_share": {
+    "807": 0.3459,
+    "801": 0.2192,
+    "808": 0.1095,
+    "804": 0.1071,
+    "806": 0.0939,
+    "802": 0.0809,
+    "803": 0.0369,
+    "805": 0.0068
+   }
+  }
+ },
+ "caveat": "SCTG 27 is all paper and paperboard including pulp and newsprint; containerboard is inside it and not separable.",
+ "provenance": "https://faf.ornl.gov/faf5/data/download_files/FAF5.6.1_State.zip",
+ "pulled": "2026-10-25",
+ "years_in_file": [
+  2017,
+  2018,
+  2019,
+  2020,
+  2021,
+  2022,
+  2023,
+  2025,
+  2030,
+  2035,
+  2040,
+  2045,
+  2050
+ ],
+ "observed_through": 2023,
+ "annual_columns_past_boundary": [],
+ "year_rule": "latest annual column at or before the observed boundary 2023; FAF forecast columns (2025, 2030, ... 2050) are never summarised"
+}

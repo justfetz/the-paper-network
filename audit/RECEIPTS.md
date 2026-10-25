@@ -28,8 +28,8 @@ Every figure in the model is public, and every mill row carries its source. This
 | PCA: last per-mill disclosures, summed, vs PCA's own year-end-2025 total | 5.55 Mt | 5.80 Mt | -4.3% | within tolerance | [PCA FY2025 10-K: about 5.8 million tons (358 BSF)](https://www.sec.gov/Archives/edgar/data/75677/000119312526074129/pkg-20251231.htm) |
 | IP board to its own box plants (share) | 0.844 | 0.800 | +5.5% | within tolerance | [IP 10-K FY2019-22: about 80%](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000051434&type=10-K) |
 | Containerboard imports into the US, 2024 (model: Canadian mills' tons into US markets) | 0.36 Mt | 1.40 Mt | -74.2% | known gap, shown | [Fastmarkets: 1.27 M tonnes, mostly from Canada](https://www.fastmarkets.com/insights/north-american-linerboard-price-increases/) |
-| Average haul, October 2026 network vs FAF5 paper | 509.958 | 590.100 | -13.6% | within tolerance | [FAF5 2050, SCTG 27 (all paper and paperboard; containerboard is inside it): ton-miles / tons, domestic flows](https://faf.ornl.gov/faf5) |
-| Rail share of domestic tons vs FAF5 paper | 0.426 | 0.081 | +423.3% | outside tolerance | [FAF5 2050, SCTG 27 (all paper and paperboard; containerboard is inside it): ton-miles / tons, domestic flows](https://faf.ornl.gov/faf5) |
+| Average haul, October 2026 network vs FAF5 paper | 509.958 | 581.000 | -12.2% | within tolerance | [FAF5 2023, SCTG 27 (all paper and paperboard; containerboard is inside it): ton-miles / tons, domestic flows](https://faf.ornl.gov/faf5) |
+| Rail share of domestic tons vs FAF5 paper | 0.426 | 0.081 | +424.6% | outside tolerance | [FAF5 2023, SCTG 27 (all paper and paperboard; containerboard is inside it): ton-miles / tons, domestic flows](https://faf.ornl.gov/faf5) |
 
 What each model figure is:
 
