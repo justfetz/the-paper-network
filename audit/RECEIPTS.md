@@ -8,8 +8,8 @@ Every figure in the model is public, and every mill row carries its source. This
 
 - **US capacity, 2024:** 40.76 Mt in the database against 41.40 Mt from AF&PA (-1.6%).
 - **Closures, February 2025 to March 2026:** the database retires 4.03 Mt; Fastmarkets counted about 3.90 Mt (+3.4%).
-- **Production:** the solved 2024 network makes 38.70 Mt at US mills against AF&PA's 37.70 Mt (+2.6%); the October 2026 network makes 35.35 Mt against 2025's 36.10 Mt (-2.1%).
-- **Why 2024 production runs high:** the overshoot (+1.00 Mt) is the Canadian import gap (1.00 Mt). With demand and exports as assumed, every ton the solver does not buy from Canada it makes at a US mill; that is an explanation of the gap, not a second check.
+- **Production:** the solved 2024 network makes 38.68 Mt at US mills against AF&PA's 37.70 Mt (+2.6%); the October 2026 network makes 35.32 Mt against 2025's 36.10 Mt (-2.2%).
+- **Why 2024 production runs high:** the overshoot (+0.98 Mt) is the Canadian import gap (0.98 Mt). With demand and exports as assumed, every ton the solver does not buy from Canada it makes at a US mill; that is an explanation of the gap, not a second check.
 - **Company totals:** independent public per-mill figures for International Paper sum to within 4.4% of IP's own disclosed total, and PCA's to within 4.3% of PCA's. Smurfit Westrock's US and Canadian rows are read straight from its 10-K mill table.
 - **11 of 11 checked anchors are inside tolerance.** Two known gaps are shown, not hidden: the solver keeps more of IP's board in-house than IP reports, and it buys less Canadian board than actually crosses the border.
 - **Sensitivity:** moving truck or rail costs 20% either way puts freight between $55.0 and $63.2 a ton (base $59.6) and the Monticello knockout between $89.7M and $104.2M (base $97.9M). The open-market premium is the assumption that drives outage costs, so it is shown at $80 and $200 a ton.
@@ -22,14 +22,14 @@ Every figure in the model is public, and every mill row carries its source. This
 | Capacity permanently retired, Feb 2025 to Mar 2026 | 4.03 Mt | 3.90 Mt | +3.4% | within tolerance | [Fastmarkets: ~3.9 Mt, roughly 10% of capacity](https://www.fastmarkets.com/insights/north-american-containerboard-market-capacity-cuts/) |
 | US capacity after those closures | 37.15 Mt | 37.50 Mt | -0.9% | within tolerance | [41.4 Mt less 3.9 Mt (derived); the model's October 2026 footprint also carries IP's Riverdale PM16 conversion, due by Q3 2026](https://www.fastmarkets.com/insights/north-american-containerboard-market-capacity-cuts/) |
 | US capacity, 2025 (AF&PA annual figure) | 36.97 Mt | 39.30 Mt | -5.9% | within tolerance | [AF&PA 66th survey: -5.1% in 2025 (derived). AF&PA counts a mill that closed in September for most of the year, so its annual figure sits above a year-end footprint](https://www.afandpa.org/news/2026/afpa-releases-66th-annual-paper-industry-capacity-and-fiber-consumption-survey) |
-| US containerboard production, 2024 | 38.70 Mt | 37.70 Mt | +2.6% | within tolerance | [AF&PA: 2025 production of 36.1 Mt was -4.4% y/y (derived)](https://www.afandpa.org/news/2026/afpa-releases-66th-annual-paper-industry-capacity-and-fiber-consumption-survey) |
-| US containerboard production, 2025 (model: October 2026 footprint) | 35.35 Mt | 36.10 Mt | -2.1% | within tolerance | [AF&PA 66th survey](https://www.afandpa.org/news/2026/afpa-releases-66th-annual-paper-industry-capacity-and-fiber-consumption-survey) |
+| US containerboard production, 2024 | 38.68 Mt | 37.70 Mt | +2.6% | within tolerance | [AF&PA: 2025 production of 36.1 Mt was -4.4% y/y (derived)](https://www.afandpa.org/news/2026/afpa-releases-66th-annual-paper-industry-capacity-and-fiber-consumption-survey) |
+| US containerboard production, 2025 (model: October 2026 footprint) | 35.32 Mt | 36.10 Mt | -2.2% | within tolerance | [AF&PA 66th survey](https://www.afandpa.org/news/2026/afpa-releases-66th-annual-paper-industry-capacity-and-fiber-consumption-survey) |
 | International Paper: public per-mill figures, summed, vs IP's own 2024 US total | 12.42 Mt | 12.98 Mt | -4.4% | within tolerance | [IP FY2024 annual report, Appendix II: 12,984 thousand short tons including Campti](https://www.sec.gov/Archives/edgar/data/51434/000119312525069955/d856503dars.pdf) |
 | PCA: last per-mill disclosures, summed, vs PCA's own year-end-2025 total | 5.55 Mt | 5.80 Mt | -4.3% | within tolerance | [PCA FY2025 10-K: about 5.8 million tons (358 BSF)](https://www.sec.gov/Archives/edgar/data/75677/000119312526074129/pkg-20251231.htm) |
-| IP board to its own box plants (share) | 0.847 | 0.800 | +5.9% | within tolerance | [IP 10-K FY2019-22: about 80%](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000051434&type=10-K) |
-| Containerboard imports into the US, 2024 (model: Canadian mills' tons into US markets) | 0.40 Mt | 1.40 Mt | -71.1% | known gap, shown | [Fastmarkets: 1.27 M tonnes, mostly from Canada](https://www.fastmarkets.com/insights/north-american-linerboard-price-increases/) |
-| Average haul, October 2026 network vs FAF5 paper | 505.978 | 581.000 | -12.9% | within tolerance | [FAF5 2023, SCTG 27 (all paper and paperboard; containerboard is inside it): ton-miles / tons, domestic flows](https://faf.ornl.gov/faf5) |
-| Rail share of domestic tons vs FAF5 paper (rail 8.1% to rail + multiple modes 24.0%) | 0.243 | 0.240 | +1.2% | within tolerance | [FAF5 2023, SCTG 27 (all paper and paperboard; containerboard is inside it): ton-miles / tons, domestic flows](https://faf.ornl.gov/faf5) |
+| IP board to its own box plants (share) | 0.846 | 0.800 | +5.7% | within tolerance | [IP 10-K FY2019-22: about 80%](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000051434&type=10-K) |
+| Containerboard imports into the US, 2024 (model: Canadian mills' tons into US markets) | 0.42 Mt | 1.40 Mt | -70.4% | known gap, shown | [Fastmarkets: 1.27 M tonnes, mostly from Canada](https://www.fastmarkets.com/insights/north-american-linerboard-price-increases/) |
+| Average haul, October 2026 network vs FAF5 paper | 492.397 | 581.000 | -15.2% | within tolerance | [FAF5 2023, SCTG 27 (all paper and paperboard; containerboard is inside it): ton-miles / tons, domestic flows](https://faf.ornl.gov/faf5) |
+| Rail share of domestic tons vs FAF5 paper (rail 8.1% to rail + multiple modes 24.0%) | 0.083 | 0.240 | +0.0% | within tolerance | [FAF5 2023, SCTG 27 (all paper and paperboard; containerboard is inside it): ton-miles / tons, domestic flows](https://faf.ornl.gov/faf5) |
 
 What each model figure is:
 
@@ -37,14 +37,14 @@ What each model figure is:
 - **Capacity permanently retired, Feb 2025 to Mar 2026:** mills the database closes in 2025, plus machines retired at mills that stay open.
 - **US capacity after those closures:** the October 2026 footprint.
 - **US capacity, 2025 (AF&PA annual figure):** mills open at the end of 2025, before the 2026 machine changes.
-- **US containerboard production, 2024:** US mills' shipments plus exports in the solved 2024 network; the overshoot (+1.00 Mt) matches the Canadian import gap in the last row (1.00 Mt): board the solver makes at US mills that in reality crosses the border.
+- **US containerboard production, 2024:** US mills' shipments plus exports in the solved 2024 network; the overshoot (+0.98 Mt) matches the Canadian import gap in the last row (0.98 Mt): board the solver makes at US mills that in reality crosses the border.
 - **US containerboard production, 2025 (model: October 2026 footprint):** US mills' shipments plus exports in the solved October 2026 network; 2026 production is running below 2025.
 - **International Paper: public per-mill figures, summed, vs IP's own 2024 US total:** before calibration; the database now scales IP's 11 oldest rows x1.0674 so they sum to IP's figure.
 - **PCA: last per-mill disclosures, summed, vs PCA's own year-end-2025 total:** PCA stopped publishing per-mill figures after FY2011-12; the database scales the last ones x1.0708 to PCA's total.
 - **IP board to its own box plants (share):** known bias: a cost-minimizing solver keeps more of an integrated producer's board at home than contracts do.
 - **Containerboard imports into the US, 2024 (model: Canadian mills' tons into US markets):** known gap: the solver buys Canadian board only where freight favors it; contracts and currency move about three times as much.
 - **Average haul, October 2026 network vs FAF5 paper:** tons-weighted miles of the solved domestic flows against FAF5's measured ton-miles over tons; a wide tolerance because SCTG 27 mixes pulp and printing grades with containerboard.
-- **Rail share of domestic tons vs FAF5 paper (rail 8.1% to rail + multiple modes 24.0%):** the model's rail flag is the cheaper-mode rule with a rail access premium of $16.41/t that export_json.py calibrates to the band's upper edge; this row shows the calibration closed, not an independent prediction.
+- **Rail share of domestic tons vs FAF5 paper (rail 8.1% to rail + multiple modes 24.0%):** the model's rail flag is the cheaper-mode rule with a rail access premium of $37.50/t that export_json.py calibrates to the band's lower edge (FAF5's explicit rail share); this row shows the calibration closed, not an independent prediction.
 
 ## 2. What each mill figure rests on
 
