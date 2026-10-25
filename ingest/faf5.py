@@ -55,17 +55,24 @@ def tidy(raw: pd.DataFrame, year: int | None = None) -> pd.DataFrame:
     tons_c, tmi_c = cols.get(f"tons_{year}"), cols.get(f"tmiles_{year}")
     if tons_c is None or tmi_c is None:
         raise SystemExit(f"no tons_{year}/tmiles_{year} columns")
-    df = raw[raw[cols["sctg2"]].astype(int).isin(SCTG)].copy()
+    # Code columns arrive as floats with blanks (fr_orig is empty on domestic rows; the 2026-10-25 run
+    # failed on exactly that), so every code is coerced and blanks become 0 before the integer cast.
+    def code(col):
+        return pd.to_numeric(raw[col], errors="coerce").fillna(0).astype(int)
+    sctg = code(cols["sctg2"])
+    df = raw[sctg.isin(SCTG)].copy()
+    def dcode(col):
+        return pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int)
     out = pd.DataFrame({
         "year": year,
-        "sctg2": df[cols["sctg2"]].astype(int),
-        "trade_type": df[cols["trade_type"]].astype(int).map(TRADE).fillna("unknown"),
-        "origin": df[orig].astype(int),
-        "dest": df[dest].astype(int),
-        "fr_orig": df[cols["fr_orig"]].astype(int) if "fr_orig" in cols else 0,
-        "mode": df[cols["dms_mode"]].astype(int).map(MODES).fillna("other"),
-        "tons_kt": df[tons_c].astype(float),
-        "tmiles_mmi": df[tmi_c].astype(float),
+        "sctg2": dcode(cols["sctg2"]),
+        "trade_type": dcode(cols["trade_type"]).map(TRADE).fillna("unknown"),
+        "origin": dcode(orig),
+        "dest": dcode(dest),
+        "fr_orig": dcode(cols["fr_orig"]) if "fr_orig" in cols else 0,
+        "mode": dcode(cols["dms_mode"]).map(MODES).fillna("other"),
+        "tons_kt": pd.to_numeric(df[tons_c], errors="coerce").fillna(0.0).astype(float),
+        "tmiles_mmi": pd.to_numeric(df[tmi_c], errors="coerce").fillna(0.0).astype(float),
     })
     out["origin_state"] = out.origin.map(STATE_FIPS)  # None for FAF zones in the regional file
     return out[out.tons_kt > 0].reset_index(drop=True)
@@ -120,7 +127,7 @@ def main():
         raw = load_zip(io.BytesIO(urllib.request.urlopen(req, timeout=600).read())); provenance = a.url
     df = tidy(raw, a.year)
     df.to_csv(a.dst, index=False)
-    summary = summarize(df); summary["provenance"] = provenance; summary["pulled"] = pd.Timestamp.utcnow().strftime("%Y-%m-%d")
+    summary = summarize(df); summary["provenance"] = provenance; summary["pulled"] = pd.Timestamp.now("UTC").strftime("%Y-%m-%d")
     spath = os.path.join(os.path.dirname(os.path.abspath(a.dst)), "faf5_summary.json")
     json.dump(summary, open(spath, "w"), indent=1)
     c27 = summary["commodities"]["27"]

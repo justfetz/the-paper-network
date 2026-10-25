@@ -96,7 +96,7 @@ def main():
     lanes = pd.DataFrame(rows)
     lanes["ratio"] = (lanes.road_miles / lanes.gc_miles).round(4)
     lanes.to_csv(a.dst, index=False)
-    s = summarize(lanes); s["pulled"] = pd.Timestamp.utcnow().strftime("%Y-%m-%d"); s["server"] = a.server
+    s = summarize(lanes); s["pulled"] = pd.Timestamp.now("UTC").strftime("%Y-%m-%d"); s["server"] = a.server
     spath = os.path.join(os.path.dirname(os.path.abspath(a.dst)), "lanes_osrm_summary.json")
     json.dump(s, open(spath, "w"), indent=1)
     print(len(lanes), "lanes ->", a.dst, "| median road/gc", s["ratio_median"], "| summary ->", spath)
