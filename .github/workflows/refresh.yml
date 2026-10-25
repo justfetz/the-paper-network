@@ -10,7 +10,7 @@ on:
     - cron: "31 13 28 1,4,7,10 *"  # quarter-end + 4 weeks: AF&PA quarterly report and earnings season are in
   workflow_dispatch:
   push:
-    paths: ["data/mills_final.csv", "data/counties.csv", "model/**", "site/src/**", "site/build_site.py"]
+    paths: ["data/mills_final.csv", "data/counties.csv", "model/**", "ingest/**", "site/src/**", "site/build_site.py"]
 permissions:
   contents: write
 concurrency:
@@ -61,7 +61,8 @@ jobs:
           git add -A
           git diff --cached --quiet && echo "no changes" && exit 0
           git commit -m "refresh: $(date -u +%Y-%m-%d) scheduled data and model re-run"
-          for i in 1 2 3 4; do if git pull --rebase -X theirs -q origin main && git push; then break; fi; git rebase --abort 2>/dev/null || true; sleep 15; done
+          # Rebase onto the branch this run is on (main on schedule and dispatch; the PR branch on a branch push), never onto main from a branch.
+          for i in 1 2 3 4; do if git pull --rebase -X theirs -q origin "$GITHUB_REF_NAME" && git push origin "HEAD:$GITHUB_REF_NAME"; then break; fi; git rebase --abort 2>/dev/null || true; sleep 15; done
       - name: Publish the site to the gh-pages branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
