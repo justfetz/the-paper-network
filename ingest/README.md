@@ -33,7 +33,7 @@ the files nothing changes: the model runs on the 1.2 factor and the receipts say
 
 | Pull | Replaces | Cadence |
 |---|---|---|
-| `faf5.py` | the solved 509-mile average haul and 41.7% rail share, which were outputs of the freight rule, now checked against measured ton-miles over tons | annual (FAF release) |
+| `faf5.py` | the solved 509-mile average haul, now checked against measured ton-miles over tons, and the 41.7% rail share, which the freight rule alone produced: the exporter now solves a rail access premium so the rail share meets FAF5's rail + truck-rail share (`params.freight.rail_calibration`) | annual (FAF release) |
 | `census_trade_ports.py` | the hand-set export gateway shares in `PORTS` (Laredo 28%, Savannah 14%, ...) and the 1.40 Mt import anchor read from press | monthly with the Census key |
 | `osrm_lanes.py` | road miles = 1.2 x great-circle on every lane | quarterly (the demo server asks for light use) |
 

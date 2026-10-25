@@ -121,9 +121,17 @@ def measured_freight_anchors(md):
             rows.append(dict(key="haul_faf5", check="Average haul, October 2026 network vs FAF5 paper", model=md["haul_2026"], anchor=c27["avg_haul_mi"], deviation=round(dev, 4), tolerance=0.25, ok=abs(dev) <= 0.25, strict=False, source=src, url=url,
                              note="tons-weighted miles of the solved domestic flows against FAF5's measured ton-miles over tons; a wide tolerance because SCTG 27 mixes pulp and printing grades with containerboard"))
         if c27.get("rail_tons_share") is not None:
-            dev = (md["rail_2026"] - c27["rail_tons_share"]) / max(c27["rail_tons_share"], 1e-9)
-            rows.append(dict(key="rail_faf5", check="Rail share of domestic tons vs FAF5 paper", model=md["rail_2026"], anchor=c27["rail_tons_share"], deviation=round(dev, 4), tolerance=0.30, ok=abs(dev) <= 0.30, strict=False, source=src, url=url,
-                             note="the model's rail flag is the cheaper-mode rule in freight_cost; FAF5 reports the mode actually used"))
+            # The band is FAF5 rail alone (lower edge) to rail + multiple modes, i.e. truck-rail (upper edge): the model's rail
+            # flag prices a rail line-haul, so the tons whose line-haul is rail are the comparable set. Inside the band is 0.
+            lo_b = float(c27["rail_tons_share"]); hi_b = lo_b + float(((c27.get("by_mode") or {}).get("multiple") or {}).get("tons_share") or 0.0)
+            m = float(md["rail_2026"])
+            dev = 0.0 if lo_b <= m <= hi_b else ((m - hi_b) / max(hi_b, 1e-9) if m > hi_b else (m - lo_b) / max(lo_b, 1e-9))
+            cal = ((md.get("freight") or {}).get("rail_calibration") or {})
+            note = ("the model's rail flag is the cheaper-mode rule with a rail access premium of $%.2f/t that export_json.py calibrates to the band's upper edge; "
+                    "this row shows the calibration closed, not an independent prediction" % float(cal.get("rail_access", 0.0))) if cal.get("bounded") == "met" else \
+                   ("the model's rail flag is the cheaper-mode rule in freight_cost (rail access premium: %s); FAF5 reports the mode actually used" % cal.get("bounded", "uncalibrated"))
+            rows.append(dict(key="rail_faf5", check=f"Rail share of domestic tons vs FAF5 paper (rail {lo_b:.1%} to rail + multiple modes {hi_b:.1%})", model=m, anchor=hi_b, anchor_low=lo_b,
+                             deviation=round(dev, 4), tolerance=0.30, ok=abs(dev) <= 0.30, strict=False, source=src, url=url, note=note))
     tpath = os.path.join(ROOT, "data", "trade_paper_ports_summary.json")
     if os.path.exists(tpath):
         imp = (json.load(open(tpath)).get("imports") or {})
@@ -143,7 +151,9 @@ def sensitivity(D):
         emp = np.array(pl["emp_weights"], dtype=float); proxy = nodes.w_total.values / nodes.w_total.sum(); nodes["w_total"] = 0.85 * emp / emp.sum() + 0.15 * proxy
     allm = pd.read_csv(os.path.join(ROOT, "data", "mills_final.csv")); allm = allm[allm.lat.notna()].reset_index(drop=True)
     fp26 = allm[allm.country.isin(["US", "CA"]) & (allm.status_oct2026 == "open")].reset_index(drop=True)
-    p = D["params"]; shares = p["shares"]; base_f = dict(FREIGHT)
+    p = D["params"]; shares = p["shares"]
+    FREIGHT["rail_access"] = float((p.get("freight") or {}).get("rail_access", 0.0))   # the premium the export was calibrated to
+    base_f = dict(FREIGHT)
     top = [k["name"] for k in sorted(D["knockouts"], key=lambda k: -k["d_total"])[:5]]
     def solve(premium=None, truck=1.0, rail=1.0, diesel=None, integrated=None, knock=None):
         FREIGHT.update(base_f); FREIGHT["truck_per_mi"] = base_f["truck_per_mi"] * truck; FREIGHT["rail_per_mi"] = base_f["rail_per_mi"] * rail

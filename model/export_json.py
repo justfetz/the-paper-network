@@ -1,6 +1,7 @@
 """Run footprints, monthly maintenance calendar and knockouts; write compact JSON for the page."""
 import json, os, sys, time, numpy as np, pandas as pd
 sys.path.insert(0, ".")
+import netmodel
 from netmodel import *
 from scenarios import SEASON, outage_calendar
 
@@ -41,8 +42,11 @@ def load_measured_freight():
     fpath = os.path.join(DATA, "faf5_summary.json")
     if os.path.exists(fpath):
         f = json.load(open(fpath)); c27 = f.get("commodities", {}).get("27", {}); c28 = f.get("commodities", {}).get("28", {})
+        by_mode = c27.get("by_mode") or {}
         out["faf5"] = dict(year=f.get("year"), source=f.get("source"), caveat=f.get("caveat"),
                            paper_avg_haul_mi=c27.get("avg_haul_mi"), paper_rail_share=c27.get("rail_tons_share"), paper_truck_share=c27.get("truck_tons_share"),
+                           paper_multiple_modes_share=(by_mode.get("multiple") or {}).get("tons_share"),
+                           paper_by_mode={m: dict(tons_share=v.get("tons_share"), avg_haul_mi=v.get("avg_haul_mi")) for m, v in by_mode.items()},
                            paper_articles_avg_haul_mi=c28.get("avg_haul_mi"), paper_articles_rail_share=c28.get("rail_tons_share"),
                            paper_imports_kt=c27.get("imports_tons_kt"))
     else:
@@ -54,6 +58,35 @@ def load_measured_freight():
     else:
         out["trade_ports"] = None
     return out
+
+def rail_target_from_faf5(measured):
+    """The rail share the model is calibrated to: FAF5 rail PLUS multiple modes (truck-rail intermodal and transload).
+    The model's rail flag prices a rail line-haul and the access premium stands for the drayage and transload around it,
+    so the tons whose line-haul is rail are the comparable set. None until ingest/faf5.py has run."""
+    f = (measured or {}).get("faf5") or {}
+    rail = f.get("paper_rail_share")
+    if rail is None:
+        return None
+    multi = f.get("paper_multiple_modes_share") or 0.0
+    return dict(target=round(rail + multi, 4), rail=rail, multiple=multi, year=f.get("year"),
+                note="FAF5 rail share plus multiple modes (truck-rail): the tons whose line-haul is rail. The model's rail flag prices a rail line-haul; the access premium stands for the drayage, transload and dwell around it.")
+
+
+def calibrate_rail(measured, solve_share, env=os.environ):
+    """Choose the rail access premium for this export: pinned by PN_RAIL_ACCESS, calibrated to FAF5 through
+    `solve_share(premium)` (PN_RAIL_CALIBRATE=0 skips), else the bare rule. Returns the calibration record."""
+    tgt = rail_target_from_faf5(measured)
+    pinned = env.get("PN_RAIL_ACCESS")
+    if pinned is not None:
+        set_rail_access(float(pinned), f"rail access premium ${float(pinned):.2f}/t pinned by PN_RAIL_ACCESS")
+        return dict(rail_access=float(pinned), bounded="pinned", target=(tgt or {}).get("target"), iterations=0, trace=[])
+    if tgt is None or env.get("PN_RAIL_CALIBRATE", "1") == "0":
+        set_rail_access(0.0, "cheaper mode wins, no rail access premium (assumption)" if tgt is None else "cheaper mode wins, calibration skipped by PN_RAIL_CALIBRATE=0")
+        return dict(rail_access=0.0, bounded="uncalibrated", target=(tgt or {}).get("target"), iterations=0, trace=[])
+    cal = calibrate_rail_access(solve_share, tgt["target"])
+    set_rail_access(cal["rail_access"], f"rail access premium ${cal['rail_access']:.2f}/t calibrated to FAF5 {tgt['year']}: rail {tgt['rail']:.1%} + multiple modes {tgt['multiple']:.1%} of domestic paper tons ({cal['bounded']})")
+    return cal
+
 
 def main(mills_csv, out_json, demand_2024=34.5e6, exports_2024=4.6e6, demand_2026=32.2e6, exports_2026=3.6e6,
          premium=150.0, knockout_top=20, shares=None):
@@ -88,6 +121,15 @@ def main(mills_csv, out_json, demand_2024=34.5e6, exports_2024=4.6e6, demand_202
     if "capacity_2024" in fp24: fp24["capacity_tons_per_year"] = fp24.capacity_2024.fillna(fp24.capacity_tons_per_year)
     if "owner_2024" in fp24: fp24["owner"] = fp24.owner_2024.fillna(fp24.owner)
     fp26 = allm[model_ok & (allm.status_oct2026=="open")].reset_index(drop=True)
+    # rail modal choice calibrated to FAF5 (ingest/faf5.py): the bare cheaper-mode rule puts ~43% of tons on rail where FAF5
+    # 2023 measures 8% rail + 16% multiple modes. Every footprint, knockout and sensitivity below prices rail with this premium.
+    def solve_share(prem):
+        FREIGHT["rail_access"] = float(prem)
+        return build_and_solve(fp26, nodes, demand_2026, shares, exports_2026, premium=premium, verbose=False)["kpi"]["rail_share"]
+    rail_cal = calibrate_rail(measured, solve_share)
+    be = rail_breakeven_miles()
+    print(f"rail calibration: {netmodel.RAIL_SOURCE}; rail share {rail_cal.get('rail_share', float('nan')):.3f} vs target {rail_cal.get('target')}; "
+          f"{rail_cal['iterations']} solves; truck/rail breakeven {be:.0f} road mi" if be else f"rail calibration: {netmodel.RAIL_SOURCE}")
     def pack(res, fp, label, kind, extra=None, base=None):
         M, N, ship, exp = res["mills"], res["nodes"], res["ship"], res["exports"]
         util = np.zeros(len(allm)); shadow = np.zeros(len(allm)); shipped = np.zeros(len(allm))
@@ -239,7 +281,9 @@ def main(mills_csv, out_json, demand_2024=34.5e6, exports_2024=4.6e6, demand_202
     print(f"backtest done {time.time()-t0:.0f}s")
     out = dict(
         generated=time.strftime("%Y-%m-%d"),
-        params=dict(premium=premium, freight=dict(FREIGHT, lane_source=LANE_SOURCE, road_factor_median=(round(lane_fill, 4) if lane_fill else None)),
+        params=dict(premium=premium, freight=dict(FREIGHT, lane_source=netmodel.LANE_SOURCE, road_factor_median=(round(lane_fill, 4) if lane_fill else None),
+                                                 rail_source=netmodel.RAIL_SOURCE, rail_breakeven_miles=(round(be) if be else None), rail_target=rail_target_from_faf5(measured),
+                                                 rail_calibration=dict({k: v for k, v in rail_cal.items() if k != "trace"}, trace=[[round(a, 2), round(b, 4)] for a, b in rail_cal.get("trace", [])])),
                     freight_measured=measured, port_shares_source="assumption (model/netmodel.py PORTS); measured shares are in freight_measured.trade_ports when ingest/census_trade_ports.py has run",
                     demand_weighting=weighting, demand_2024=demand_2024, exports_2024=exports_2024, demand_2026=demand_2026, exports_2026=exports_2026, shares=shares, season=SEASON),
         mills=[dict(id=int(r.gid), name=r.mill_name, owner=r.owner, owner_2024=(r.owner_2024 if "owner_2024" in allm else r.owner), cap_2024=int(r.capacity_2024 if "capacity_2024" in allm and not pd.isna(r.capacity_2024) else r.capacity_tons_per_year), city=r.city, st=r.state, country=r.country, lat=float(r.lat), lon=float(r.lon),
