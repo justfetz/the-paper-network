@@ -126,9 +126,10 @@ def measured_freight_anchors(md):
             lo_b = float(c27["rail_tons_share"]); hi_b = lo_b + float(((c27.get("by_mode") or {}).get("multiple") or {}).get("tons_share") or 0.0)
             m = float(md["rail_2026"])
             dev = 0.0 if lo_b <= m <= hi_b else ((m - hi_b) / max(hi_b, 1e-9) if m > hi_b else (m - lo_b) / max(lo_b, 1e-9))
-            cal = ((md.get("freight") or {}).get("rail_calibration") or {})
-            note = ("the model's rail flag is the cheaper-mode rule with a rail access premium of $%.2f/t that export_json.py calibrates to the band's upper edge; "
-                    "this row shows the calibration closed, not an independent prediction" % float(cal.get("rail_access", 0.0))) if cal.get("bounded") == "met" else \
+            cal = ((md.get("freight") or {}).get("rail_calibration") or {}); tgt = ((md.get("freight") or {}).get("rail_target") or {})
+            edge = "upper edge (rail + multiple modes, assumed truck-rail)" if tgt.get("basis") == "rail_plus_multiple" else "lower edge (FAF5's explicit rail share)"
+            note = ("the model's rail flag is the cheaper-mode rule with a rail access premium of $%.2f/t that export_json.py calibrates to the band's %s; "
+                    "this row shows the calibration closed, not an independent prediction" % (float(cal.get("rail_access", 0.0)), edge)) if cal.get("bounded") == "met" else \
                    ("the model's rail flag is the cheaper-mode rule in freight_cost (rail access premium: %s); FAF5 reports the mode actually used" % cal.get("bounded", "uncalibrated"))
             rows.append(dict(key="rail_faf5", check=f"Rail share of domestic tons vs FAF5 paper (rail {lo_b:.1%} to rail + multiple modes {hi_b:.1%})", model=m, anchor=hi_b, anchor_low=lo_b,
                              deviation=round(dev, 4), tolerance=0.30, ok=abs(dev) <= 0.30, strict=False, source=src, url=url, note=note))

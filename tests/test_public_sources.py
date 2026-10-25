@@ -118,10 +118,18 @@ check("calibrate_rail_access: bisection meets the target within tol and reports 
 check("calibrate_rail_access: a target already met at zero premium keeps zero, an unreachable one stops at the upper bound and says so",
       netmodel.calibrate_rail_access(lambda q: 0.10, 0.24)["rail_access"] == 0.0 and netmodel.calibrate_rail_access(lambda q: 0.10, 0.24)["bounded"] == "at_lower_bound"
       and netmodel.calibrate_rail_access(lambda q: 0.5, 0.24, hi=60.0)["bounded"] == "at_upper_bound")
-check("exporter: the FAF5 rail target is rail + multiple modes, None before the pull", ej.rail_target_from_faf5({"faf5": dict(paper_rail_share=0.08, paper_multiple_modes_share=0.16, year=2023)})["target"] == 0.24 and ej.rail_target_from_faf5({"faf5": None}) is None)
+_faf = {"faf5": dict(paper_rail_share=0.08, paper_multiple_modes_share=0.16, year=2023)}
+_t = ej.rail_target_from_faf5(_faf)
+check("exporter: the default FAF5 rail target is the explicit rail share with the band carried, rail+multiple only on request, None before the pull",
+      _t["target"] == 0.08 and _t["basis"] == "rail" and _t["band"] == [0.08, 0.24] and ej.rail_target_from_faf5(_faf, "rail_plus_multiple")["target"] == 0.24 and ej.rail_target_from_faf5({"faf5": None}) is None)
+try: ej.rail_target_from_faf5(_faf, "linehaul"); check("exporter: an unknown PN_RAIL_TARGET basis is refused", False)
+except ValueError: check("exporter: an unknown PN_RAIL_TARGET basis is refused", True)
 _calls = []
-rec = ej.calibrate_rail({"faf5": dict(paper_rail_share=0.08, paper_multiple_modes_share=0.16, year=2023)}, lambda q: (_calls.append(q), curve(q))[1], env={})
-check("exporter: calibrate_rail sets FREIGHT.rail_access and names FAF5 in RAIL_SOURCE", rec["bounded"] == "met" and abs(netmodel.FREIGHT["rail_access"] - rec["rail_access"]) < 1e-9 and "FAF5 2023" in netmodel.RAIL_SOURCE and len(_calls) == rec["iterations"])
+steep = lambda prem: max(0.0, 0.43 - 0.004 * prem)          # 0.08 at $87.5
+rec = ej.calibrate_rail(_faf, lambda q: (_calls.append(q), steep(q))[1], env={})
+check("exporter: calibrate_rail (default basis) sets FREIGHT.rail_access to the measured rail share and names FAF5 in RAIL_SOURCE", rec["bounded"] == "met" and abs(rec["rail_access"] - 87.5) < 1.5 and abs(netmodel.FREIGHT["rail_access"] - rec["rail_access"]) < 1e-9 and "FAF5 2023: rail 8.0%" in netmodel.RAIL_SOURCE and len(_calls) == rec["iterations"])
+rec = ej.calibrate_rail(_faf, curve, env={"PN_RAIL_TARGET": "rail_plus_multiple"})
+check("exporter: PN_RAIL_TARGET=rail_plus_multiple calibrates to the upper edge and says it is assumed", rec["bounded"] == "met" and abs(rec["rail_access"] - 100.0) < 3.0 and "assumed truck-rail" in netmodel.RAIL_SOURCE)
 rec = ej.calibrate_rail({"faf5": None}, lambda q: 0.5, env={})
 check("exporter: no FAF5 file means the bare rule (premium 0, uncalibrated)", rec["bounded"] == "uncalibrated" and netmodel.FREIGHT["rail_access"] == 0.0 and "assumption" in netmodel.RAIL_SOURCE)
 rec = ej.calibrate_rail({"faf5": dict(paper_rail_share=0.08, paper_multiple_modes_share=0.16, year=2023)}, lambda q: 0.5, env={"PN_RAIL_ACCESS": "12.5"})

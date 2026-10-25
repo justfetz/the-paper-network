@@ -149,7 +149,9 @@ tolerance, SCTG 27 is wider than containerboard); rail 8.1% and multiple modes 1
 against the model's 42.6% by rail. The bare cheaper-mode rule was wrong about mode by a factor of five.
 The fix (`feat/rail-modal-calibration`) is a rail ACCESS premium, $/t on every rail quote standing for
 siding access, transload and dwell, that `export_json.py` solves by bisection so the 2026 footprint's rail
-share meets FAF5 rail + multiple modes (the tons whose line-haul is rail). The premium, the target, the
-breakeven miles and the solve trace ride `params.freight`; the receipts row now checks the model against the
-FAF5 band and says it is a calibration, not a prediction. Step 4 (the STB waybill) would replace the premium
-with a measured rail cost curve.
+share meets FAF5's explicit rail share (the measured number; `PN_RAIL_TARGET=rail_plus_multiple` instead
+targets rail + multiple modes on the assumption that paper's multiple-mode tons are truck-rail, which FAF5
+does not decompose, so that is an option, not the default). The premium, the target and its basis, the
+band, the breakeven miles and the solve trace ride `params.freight`; the receipts row checks the model
+against the FAF5 band and says it is a calibration, not a prediction. Step 4 (the STB waybill) would replace
+the premium with a measured rail cost curve.

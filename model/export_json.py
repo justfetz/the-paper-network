@@ -59,23 +59,32 @@ def load_measured_freight():
         out["trade_ports"] = None
     return out
 
-def rail_target_from_faf5(measured):
-    """The rail share the model is calibrated to: FAF5 rail PLUS multiple modes (truck-rail intermodal and transload).
-    The model's rail flag prices a rail line-haul and the access premium stands for the drayage and transload around it,
-    so the tons whose line-haul is rail are the comparable set. None until ingest/faf5.py has run."""
+RAIL_TARGET_BASES = ("rail", "rail_plus_multiple")
+
+
+def rail_target_from_faf5(measured, basis="rail"):
+    """The rail share the model is calibrated to. Default `rail`: FAF5's explicit rail share, the measured number.
+    `rail_plus_multiple` adds FAF5 mode 5, "multiple modes and mail", on the ASSUMPTION that for paper those tons are
+    truck-rail; FAF5 publishes no decomposition of that category, so it is an option (PN_RAIL_TARGET), not the default.
+    Either way the band [rail, rail + multiple] rides along for the receipts. None until ingest/faf5.py has run."""
+    if basis not in RAIL_TARGET_BASES:
+        raise ValueError(f"PN_RAIL_TARGET must be one of {RAIL_TARGET_BASES}, got {basis!r}")
     f = (measured or {}).get("faf5") or {}
     rail = f.get("paper_rail_share")
     if rail is None:
         return None
     multi = f.get("paper_multiple_modes_share") or 0.0
-    return dict(target=round(rail + multi, 4), rail=rail, multiple=multi, year=f.get("year"),
-                note="FAF5 rail share plus multiple modes (truck-rail): the tons whose line-haul is rail. The model's rail flag prices a rail line-haul; the access premium stands for the drayage, transload and dwell around it.")
+    target = rail if basis == "rail" else rail + multi
+    note = ("FAF5 rail share of domestic paper tons, the measured number. FAF5 also reports a multiple-modes share (truck-rail and other combinations, undecomposed) that the model has no mode for; the band is reported, not assumed."
+            if basis == "rail" else
+            "FAF5 rail share PLUS multiple modes, on the assumption that paper's multiple-mode tons are truck-rail (FAF5 does not decompose the category). Chosen by PN_RAIL_TARGET=rail_plus_multiple.")
+    return dict(target=round(target, 4), basis=basis, rail=rail, multiple=multi, band=[round(rail, 4), round(rail + multi, 4)], year=f.get("year"), note=note)
 
 
 def calibrate_rail(measured, solve_share, env=os.environ):
     """Choose the rail access premium for this export: pinned by PN_RAIL_ACCESS, calibrated to FAF5 through
     `solve_share(premium)` (PN_RAIL_CALIBRATE=0 skips), else the bare rule. Returns the calibration record."""
-    tgt = rail_target_from_faf5(measured)
+    tgt = rail_target_from_faf5(measured, env.get("PN_RAIL_TARGET", "rail"))
     pinned = env.get("PN_RAIL_ACCESS")
     if pinned is not None:
         set_rail_access(float(pinned), f"rail access premium ${float(pinned):.2f}/t pinned by PN_RAIL_ACCESS")
@@ -84,7 +93,9 @@ def calibrate_rail(measured, solve_share, env=os.environ):
         set_rail_access(0.0, "cheaper mode wins, no rail access premium (assumption)" if tgt is None else "cheaper mode wins, calibration skipped by PN_RAIL_CALIBRATE=0")
         return dict(rail_access=0.0, bounded="uncalibrated", target=(tgt or {}).get("target"), iterations=0, trace=[])
     cal = calibrate_rail_access(solve_share, tgt["target"])
-    set_rail_access(cal["rail_access"], f"rail access premium ${cal['rail_access']:.2f}/t calibrated to FAF5 {tgt['year']}: rail {tgt['rail']:.1%} + multiple modes {tgt['multiple']:.1%} of domestic paper tons ({cal['bounded']})")
+    what = (f"rail {tgt['rail']:.1%} of domestic paper tons" if tgt["basis"] == "rail"
+            else f"rail {tgt['rail']:.1%} + multiple modes {tgt['multiple']:.1%} of domestic paper tons (assumed truck-rail)")
+    set_rail_access(cal["rail_access"], f"rail access premium ${cal['rail_access']:.2f}/t calibrated to FAF5 {tgt['year']}: {what} ({cal['bounded']})")
     return cal
 
 
@@ -122,7 +133,8 @@ def main(mills_csv, out_json, demand_2024=34.5e6, exports_2024=4.6e6, demand_202
     if "owner_2024" in fp24: fp24["owner"] = fp24.owner_2024.fillna(fp24.owner)
     fp26 = allm[model_ok & (allm.status_oct2026=="open")].reset_index(drop=True)
     # rail modal choice calibrated to FAF5 (ingest/faf5.py): the bare cheaper-mode rule puts ~43% of tons on rail where FAF5
-    # 2023 measures 8% rail + 16% multiple modes. Every footprint, knockout and sensitivity below prices rail with this premium.
+    # 2023 measures 8% rail (plus 16% multiple modes, undecomposed). Every footprint, knockout and sensitivity below prices
+    # rail with this premium; PN_RAIL_TARGET picks the measured rail share (default) or rail + multiple modes.
     def solve_share(prem):
         FREIGHT["rail_access"] = float(prem)
         return build_and_solve(fp26, nodes, demand_2026, shares, exports_2026, premium=premium, verbose=False)["kpi"]["rail_share"]
@@ -282,7 +294,7 @@ def main(mills_csv, out_json, demand_2024=34.5e6, exports_2024=4.6e6, demand_202
     out = dict(
         generated=time.strftime("%Y-%m-%d"),
         params=dict(premium=premium, freight=dict(FREIGHT, lane_source=netmodel.LANE_SOURCE, road_factor_median=(round(lane_fill, 4) if lane_fill else None),
-                                                 rail_source=netmodel.RAIL_SOURCE, rail_breakeven_miles=(round(be) if be else None), rail_target=rail_target_from_faf5(measured),
+                                                 rail_source=netmodel.RAIL_SOURCE, rail_breakeven_miles=(round(be) if be else None), rail_target=rail_target_from_faf5(measured, os.environ.get("PN_RAIL_TARGET", "rail")),
                                                  rail_calibration=dict({k: v for k, v in rail_cal.items() if k != "trace"}, trace=[[round(a, 2), round(b, 4)] for a, b in rail_cal.get("trace", [])])),
                     freight_measured=measured, port_shares_source="assumption (model/netmodel.py PORTS); measured shares are in freight_measured.trade_ports when ingest/census_trade_ports.py has run",
                     demand_weighting=weighting, demand_2024=demand_2024, exports_2024=exports_2024, demand_2026=demand_2026, exports_2026=exports_2026, shares=shares, season=SEASON),
