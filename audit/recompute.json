@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-22",
+ "generated": "2026-10-25",
  "anchors": {
   "cap24": {
    "value": 41400000.0,
@@ -124,21 +124,21 @@
   {
    "key": "prod24",
    "check": "US containerboard production, 2024",
-   "model": 38759555,
+   "model": 38739246,
    "anchor": 37700000.0,
-   "deviation": 0.0281,
+   "deviation": 0.0276,
    "tolerance": 0.05,
    "ok": true,
    "source": "AF&PA: 2025 production of 36.1 Mt was -4.4% y/y (derived)",
    "url": "https://www.afandpa.org/news/2026/afpa-releases-66th-annual-paper-industry-capacity-and-fiber-consumption-survey",
-   "note": "US mills' shipments plus exports in the solved 2024 network; the overshoot (+1.06 Mt) matches the Canadian import gap in the last row (1.06 Mt): board the solver makes at US mills that in reality crosses the border"
+   "note": "US mills' shipments plus exports in the solved 2024 network; the overshoot (+1.04 Mt) matches the Canadian import gap in the last row (1.04 Mt): board the solver makes at US mills that in reality crosses the border"
   },
   {
    "key": "prod25",
    "check": "US containerboard production, 2025 (model: October 2026 footprint)",
-   "model": 35321076,
+   "model": 35369140,
    "anchor": 36100000.0,
-   "deviation": -0.0216,
+   "deviation": -0.0202,
    "tolerance": 0.05,
    "ok": true,
    "source": "AF&PA 66th survey",
@@ -172,9 +172,9 @@
   {
    "key": "ip_int",
    "check": "IP board to its own box plants (share)",
-   "model": 0.845941236321676,
+   "model": 0.8439403610969026,
    "anchor": 0.8,
-   "deviation": 0.0574,
+   "deviation": 0.0549,
    "tolerance": 0.12,
    "ok": true,
    "source": "IP 10-K FY2019-22: about 80%",
@@ -184,9 +184,9 @@
   {
    "key": "imports",
    "check": "Containerboard imports into the US, 2024 (model: Canadian mills' tons into US markets)",
-   "model": 340446,
+   "model": 360756,
    "anchor": 1400000.0,
-   "deviation": -0.7568,
+   "deviation": -0.7423,
    "tolerance": 0.0,
    "ok": null,
    "source": "Fastmarkets: 1.27 M tonnes, mostly from Canada",
@@ -408,51 +408,53 @@
   "exports_2024": 4600000.0,
   "demand_2026": 32200000.0,
   "exports_2026": 3600000.0,
-  "us_out_2024": 38759555,
-  "us_out_2026": 35321076,
-  "ca_2024": 340446,
-  "ca_2026": 478924,
-  "ip_int": 0.845941236321676,
+  "us_out_2024": 38739246,
+  "us_out_2026": 35369140,
+  "ca_2024": 360756,
+  "ca_2026": 430861,
+  "haul_2026": 509.958,
+  "rail_2026": 0.426,
+  "ip_int": 0.8439403610969026,
   "kpi_2026": {
-   "objective_usd": 2191618712.189,
-   "freight_usd": 2082590959.832,
-   "premium_usd": 109027752.357,
+   "objective_usd": 2201518969.624,
+   "freight_usd": 2092912752.331,
+   "premium_usd": 108606217.292,
    "unmet_usd": 0.0,
    "tons_shipped_domestic": 32200000.0,
    "tons_exported": 3600000.0,
    "unmet_tons": 0.0,
-   "owner_purchased_from_market_tons": 726851.682,
-   "avg_haul_miles": 508.712,
-   "rail_share": 0.417,
-   "avg_freight_per_ton": 59.564,
+   "owner_purchased_from_market_tons": 724041.449,
+   "avg_haul_miles": 509.958,
+   "rail_share": 0.426,
+   "avg_freight_per_ton": 59.843,
    "n_vars": 95211,
    "n_rows": 7141,
-   "solve_seconds": 0.7
+   "solve_seconds": 1.3
   },
   "kpi_2024": {
-   "objective_usd": 2377035351.782,
-   "freight_usd": 2292238290.192,
-   "premium_usd": 84797061.59,
+   "objective_usd": 2384441370.18,
+   "freight_usd": 2299938342.675,
+   "premium_usd": 84503027.505,
    "unmet_usd": 0.0,
    "tons_shipped_domestic": 34500000.0,
    "tons_exported": 4600000.0,
    "unmet_tons": 0.0,
-   "owner_purchased_from_market_tons": 565313.744,
-   "avg_haul_miles": 515.854,
-   "rail_share": 0.445,
-   "avg_freight_per_ton": 60.407,
+   "owner_purchased_from_market_tons": 563353.517,
+   "avg_haul_miles": 516.461,
+   "rail_share": 0.454,
+   "avg_freight_per_ton": 60.636,
    "n_vars": 100551,
    "n_rows": 7147,
-   "solve_seconds": 0.7
+   "solve_seconds": 1.2
   },
   "occ": {
    "occ_supply": 30512720.0,
-   "occ_to_mills": 17686355.683,
+   "occ_to_mills": 17426164.755,
    "occ_exported": 8400000.0,
-   "occ_unplaced": 4426364.317,
+   "occ_unplaced": 4686555.245,
    "appetite_scale": 1.0,
-   "avg_haul": 258.588,
-   "freight_usd": 964115855.869
+   "avg_haul": 258.669,
+   "freight_usd": 953326610.783
   },
   "premium": 150.0,
   "freight": {
@@ -460,7 +462,9 @@
    "truck_fixed": 8.0,
    "truck_per_mi": 0.125,
    "rail_fixed": 35.0,
-   "rail_per_mi": 0.065
+   "rail_per_mi": 0.065,
+   "lane_source": "road_factor 1.2 x great-circle (assumption)",
+   "road_factor_median": 1.1975
   },
   "knockouts": [
    {
@@ -468,7 +472,7 @@
     "st": "MS",
     "owner": "Georgia-Pacific",
     "cap_kt": 1000,
-    "musd": 97.9,
+    "musd": 101.4,
     "unmet_kt": 0
    },
    {
@@ -476,7 +480,7 @@
     "st": "IA",
     "owner": "International Paper",
     "cap_kt": 1089,
-    "musd": 91.5,
+    "musd": 91.0,
     "unmet_kt": 0
    },
    {
@@ -484,7 +488,7 @@
     "st": "OR",
     "owner": "Georgia-Pacific",
     "cap_kt": 950,
-    "musd": 90.8,
+    "musd": 90.7,
     "unmet_kt": 0
    },
    {
@@ -492,7 +496,7 @@
     "st": "LA",
     "owner": "International Paper",
     "cap_kt": 1494,
-    "musd": 78.0,
+    "musd": 81.7,
     "unmet_kt": 0
    },
    {
@@ -500,7 +504,7 @@
     "st": "LA",
     "owner": "Packaging Corp of America",
     "cap_kt": 1065,
-    "musd": 62.6,
+    "musd": 63.1,
     "unmet_kt": 0
    },
    {
@@ -508,7 +512,7 @@
     "st": "TN",
     "owner": "Packaging Corp of America",
     "cap_kt": 1078,
-    "musd": 59.1,
+    "musd": 61.4,
     "unmet_kt": 0
    },
    {
@@ -516,7 +520,7 @@
     "st": "OK",
     "owner": "International Paper",
     "cap_kt": 1420,
-    "musd": 58.9,
+    "musd": 60.6,
     "unmet_kt": 0
    },
    {
@@ -524,7 +528,7 @@
     "st": "LA",
     "owner": "Smurfit Westrock",
     "cap_kt": 790,
-    "musd": 54.0,
+    "musd": 54.6,
     "unmet_kt": 0
    },
    {
@@ -532,7 +536,7 @@
     "st": "AL",
     "owner": "Smurfit Westrock",
     "cap_kt": 864,
-    "musd": 43.6,
+    "musd": 44.3,
     "unmet_kt": 0
    },
    {
@@ -540,7 +544,7 @@
     "st": "AL",
     "owner": "International Paper",
     "cap_kt": 900,
-    "musd": 39.5,
+    "musd": 43.4,
     "unmet_kt": 0
    }
   ]

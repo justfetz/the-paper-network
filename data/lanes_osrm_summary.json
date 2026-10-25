@@ -1,0 +1,13 @@
+{
+ "source": "OSRM over OpenStreetMap",
+ "profile": "driving (car) \u2014 a truck profile needs a self-hosted router",
+ "lanes": 41013,
+ "routed": 41013,
+ "unrouted": 0,
+ "ratio_median": 1.1975,
+ "ratio_p10": 1.1348,
+ "ratio_p90": 1.2964,
+ "replaces": "model/netmodel.py FREIGHT.road_factor = 1.2 (every lane); export_json.py uses lanes_osrm.csv per arc when present",
+ "pulled": "2026-10-25",
+ "server": "https://router.project-osrm.org"
+}

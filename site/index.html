@@ -271,7 +271,7 @@ body.has-ticker .src-card{bottom:calc(58px + env(safe-area-inset-bottom,0px))}
 </head>
 <body>
 <header class="app"><div class="wrap">
-  <div class="brand"><b>The Paper Network</b><span>US containerboard and corrugated, mapped from public data · 2026-10-22</span></div>
+  <div class="brand"><b>The Paper Network</b><span>US containerboard and corrugated, mapped from public data · 2026-10-25</span></div>
   <button type="button" class="theme" id="guide-btn" aria-expanded="false" title="How to use this page: a card per view, a tour, and which view answers what">Guide</button>
   <button class="theme" id="theme" type="button" aria-label="Toggle dark mode">light / dark</button>
   <nav class="tabs" role="tablist" aria-label="Views">
@@ -442,7 +442,7 @@ s.t. Σ_{j,g} (x_ijg + y_ijg) + Σ_p z_ip  ≤  c_i a_i          <span class="c"
      Σ_i y_ijg − Σ_k v_kjg + u_jg  =  s_open φ_g D_j         <span class="c"># open market at j</span><br>
      Σ_i z_ip  =  E_p                                        <span class="c"># exports through gateway p (kraft mills only)</span><br>
      f(d) = min(8 + 0.125 d·ft, 35 + 0.065 d·fr) $/ton,  d = 1.2 × great-circle miles, ft/fr = diesel factors (22% / 12% fuel share at $3.75)<br>
-<span class="c"># October 2026 instance: 95,211 variables, 7,141 constraints, 0.7 s with HiGHS. 55 scenarios on this page.</span></div>
+<span class="c"># October 2026 instance: 95,211 variables, 7,141 constraints, 1.3 s with HiGHS. 55 scenarios on this page.</span></div>
 <p><b>Duals.</b> The multiplier on a mill's capacity row is what one more ton of that mill saves the network (the scarcity layer). The multiplier on a demand row is the delivered cost of the marginal ton in that county (the delivered-cost layer and the calculator's freight). <b>Prospects</b> rank, for every market, the active mills by delivered freight; the gap between the first two is the switching threshold. <b>Price shocks</b> add $70/t to one owner's open-market arcs only. <b>The fiber loop</b> is a second transportation LP: counties supply recovered OCC (92% of consumption, plus 3% for imported goods), recycled mills demand 1.15 t per ton of recycled board they ship, export docks take the AF&amp;PA/USITC export tonnage, and freight decides. <b>The maintenance calendar</b> is an assignment problem: for each mill and month the cost of an outage is estimated as capacity dual × tons lost, from twelve no-outage solves, then assigned with at most 10 mills per month and two per owner (a small MILP), and re-solved month by month to measure the true penalty. <b>Knockouts</b> remove one mill and re-solve. <b>The backtest</b> puts 2026 demand on the 2024 mill set and asks which mills the LP leaves idle.</p>
 <h3>Assumptions that matter</h3>
 <ul style="color:var(--ink-2);font-size:14px;padding-left:20px"><li>Demand geography is population tilted by state manufacturing share, rolled up to 441 points; two thirds liner, one third medium; 34.5 Mt domestic + 4.6 Mt exports in 2024, 32.2 + 3.6 in 2026. Canadian mills sell 35% of capacity south; Mexican mills are listed, not modeled.</li>
