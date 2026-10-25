@@ -61,7 +61,8 @@ jobs:
           git add -A
           git diff --cached --quiet && echo "no changes" && exit 0
           git commit -m "refresh: $(date -u +%Y-%m-%d) scheduled data and model re-run"
-          for i in 1 2 3 4; do if git pull --rebase -X theirs -q origin main && git push; then break; fi; git rebase --abort 2>/dev/null || true; sleep 15; done
+          # Rebase onto the branch this run is on (main on schedule and dispatch; the PR branch on a branch push), never onto main from a branch.
+          for i in 1 2 3 4; do if git pull --rebase -X theirs -q origin "$GITHUB_REF_NAME" && git push origin "HEAD:$GITHUB_REF_NAME"; then break; fi; git rebase --abort 2>/dev/null || true; sleep 15; done
       - name: Publish the site to the gh-pages branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
