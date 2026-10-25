@@ -124,21 +124,21 @@
   {
    "key": "prod24",
    "check": "US containerboard production, 2024",
-   "model": 38739246,
+   "model": 38684990,
    "anchor": 37700000.0,
-   "deviation": 0.0276,
+   "deviation": 0.0261,
    "tolerance": 0.05,
    "ok": true,
    "source": "AF&PA: 2025 production of 36.1 Mt was -4.4% y/y (derived)",
    "url": "https://www.afandpa.org/news/2026/afpa-releases-66th-annual-paper-industry-capacity-and-fiber-consumption-survey",
-   "note": "US mills' shipments plus exports in the solved 2024 network; the overshoot (+1.04 Mt) matches the Canadian import gap in the last row (1.04 Mt): board the solver makes at US mills that in reality crosses the border"
+   "note": "US mills' shipments plus exports in the solved 2024 network; the overshoot (+0.98 Mt) matches the Canadian import gap in the last row (0.98 Mt): board the solver makes at US mills that in reality crosses the border"
   },
   {
    "key": "prod25",
    "check": "US containerboard production, 2025 (model: October 2026 footprint)",
-   "model": 35369140,
+   "model": 35321275,
    "anchor": 36100000.0,
-   "deviation": -0.0202,
+   "deviation": -0.0216,
    "tolerance": 0.05,
    "ok": true,
    "source": "AF&PA 66th survey",
@@ -172,9 +172,9 @@
   {
    "key": "ip_int",
    "check": "IP board to its own box plants (share)",
-   "model": 0.8439403610969026,
+   "model": 0.8457835553784314,
    "anchor": 0.8,
-   "deviation": 0.0549,
+   "deviation": 0.0572,
    "tolerance": 0.12,
    "ok": true,
    "source": "IP 10-K FY2019-22: about 80%",
@@ -184,9 +184,9 @@
   {
    "key": "imports",
    "check": "Containerboard imports into the US, 2024 (model: Canadian mills' tons into US markets)",
-   "model": 360756,
+   "model": 415012,
    "anchor": 1400000.0,
-   "deviation": -0.7423,
+   "deviation": -0.7036,
    "tolerance": 0.0,
    "ok": null,
    "source": "Fastmarkets: 1.27 M tonnes, mostly from Canada",
@@ -196,9 +196,9 @@
   {
    "key": "haul_faf5",
    "check": "Average haul, October 2026 network vs FAF5 paper",
-   "model": 509.958,
+   "model": 492.397,
    "anchor": 581.0,
-   "deviation": -0.1223,
+   "deviation": -0.1525,
    "tolerance": 0.25,
    "ok": true,
    "strict": false,
@@ -208,16 +208,17 @@
   },
   {
    "key": "rail_faf5",
-   "check": "Rail share of domestic tons vs FAF5 paper",
-   "model": 0.426,
-   "anchor": 0.0812,
-   "deviation": 4.2463,
+   "check": "Rail share of domestic tons vs FAF5 paper (rail 8.1% to rail + multiple modes 24.0%)",
+   "model": 0.083,
+   "anchor": 0.2401,
+   "anchor_low": 0.0812,
+   "deviation": 0.0,
    "tolerance": 0.3,
-   "ok": false,
+   "ok": true,
    "strict": false,
    "source": "FAF5 2023, SCTG 27 (all paper and paperboard; containerboard is inside it): ton-miles / tons, domestic flows",
    "url": "https://faf.ornl.gov/faf5",
-   "note": "the model's rail flag is the cheaper-mode rule in freight_cost; FAF5 reports the mode actually used"
+   "note": "the model's rail flag is the cheaper-mode rule with a rail access premium of $37.50/t that export_json.py calibrates to the band's lower edge (FAF5's explicit rail share); this row shows the calibration closed, not an independent prediction"
   }
  ],
  "mills": {
@@ -434,53 +435,53 @@
   "exports_2024": 4600000.0,
   "demand_2026": 32200000.0,
   "exports_2026": 3600000.0,
-  "us_out_2024": 38739246,
-  "us_out_2026": 35369140,
-  "ca_2024": 360756,
-  "ca_2026": 430861,
-  "haul_2026": 509.958,
-  "rail_2026": 0.426,
-  "ip_int": 0.8439403610969026,
+  "us_out_2024": 38684990,
+  "us_out_2026": 35321275,
+  "ca_2024": 415012,
+  "ca_2026": 478724,
+  "haul_2026": 492.397,
+  "rail_2026": 0.083,
+  "ip_int": 0.8457835553784314,
   "kpi_2026": {
-   "objective_usd": 2201518969.624,
-   "freight_usd": 2092912752.331,
-   "premium_usd": 108606217.292,
+   "objective_usd": 2500045420.013,
+   "freight_usd": 2341309914.714,
+   "premium_usd": 158735505.299,
    "unmet_usd": 0.0,
    "tons_shipped_domestic": 32200000.0,
    "tons_exported": 3600000.0,
    "unmet_tons": 0.0,
-   "owner_purchased_from_market_tons": 724041.449,
-   "avg_haul_miles": 509.958,
-   "rail_share": 0.426,
-   "avg_freight_per_ton": 59.843,
+   "owner_purchased_from_market_tons": 1058236.702,
+   "avg_haul_miles": 492.397,
+   "rail_share": 0.083,
+   "avg_freight_per_ton": 67.118,
    "n_vars": 95211,
    "n_rows": 7141,
    "solve_seconds": 1.2
   },
   "kpi_2024": {
-   "objective_usd": 2384441370.18,
-   "freight_usd": 2299938342.675,
-   "premium_usd": 84503027.505,
+   "objective_usd": 2727672700.786,
+   "freight_usd": 2596997634.088,
+   "premium_usd": 130675066.698,
    "unmet_usd": 0.0,
    "tons_shipped_domestic": 34500000.0,
    "tons_exported": 4600000.0,
    "unmet_tons": 0.0,
-   "owner_purchased_from_market_tons": 563353.517,
-   "avg_haul_miles": 516.461,
-   "rail_share": 0.454,
-   "avg_freight_per_ton": 60.636,
+   "owner_purchased_from_market_tons": 871167.111,
+   "avg_haul_miles": 501.835,
+   "rail_share": 0.081,
+   "avg_freight_per_ton": 68.598,
    "n_vars": 100551,
    "n_rows": 7147,
    "solve_seconds": 1.1
   },
   "occ": {
    "occ_supply": 30512720.0,
-   "occ_to_mills": 17426164.755,
+   "occ_to_mills": 17680370.967,
    "occ_exported": 8400000.0,
-   "occ_unplaced": 4686555.245,
+   "occ_unplaced": 4432349.033,
    "appetite_scale": 1.0,
-   "avg_haul": 258.669,
-   "freight_usd": 953326610.783
+   "avg_haul": 261.664,
+   "freight_usd": 1052738174.8
   },
   "premium": 150.0,
   "freight": {
@@ -489,24 +490,56 @@
    "truck_per_mi": 0.125,
    "rail_fixed": 35.0,
    "rail_per_mi": 0.065,
-   "lane_source": "road_factor 1.2 x great-circle (assumption)",
-   "road_factor_median": 1.1975
+   "rail_access": 37.5,
+   "lane_source": "OSRM routed miles (ingest/osrm_lanes.py)",
+   "road_factor_median": 1.1975,
+   "rail_source": "rail access premium $37.50/t calibrated to FAF5 2023: rail 8.1% of domestic paper tons (met)",
+   "rail_breakeven_miles": 1075,
+   "rail_target": {
+    "target": 0.0812,
+    "basis": "rail",
+    "rail": 0.0812,
+    "multiple": 0.1589,
+    "band": [
+     0.0812,
+     0.2401
+    ],
+    "year": 2023,
+    "note": "FAF5 rail share of domestic paper tons, the measured number. FAF5 also reports a multiple-modes share (truck-rail and other combinations, undecomposed) that the model has no mode for; the band is reported, not assumed."
+   },
+   "rail_calibration": {
+    "rail_access": 37.5,
+    "rail_share": 0.0827926004390572,
+    "target": 0.0812,
+    "bounded": "met",
+    "iterations": 4,
+    "trace": [
+     [
+      0.0,
+      0.4261
+     ],
+     [
+      150.0,
+      0.0
+     ],
+     [
+      75.0,
+      0.0162
+     ],
+     [
+      37.5,
+      0.0828
+     ]
+    ]
+   }
   },
   "knockouts": [
-   {
-    "mill": "Monticello",
-    "st": "MS",
-    "owner": "Georgia-Pacific",
-    "cap_kt": 1000,
-    "musd": 101.4,
-    "unmet_kt": 0
-   },
    {
     "mill": "Cedar River",
     "st": "IA",
     "owner": "International Paper",
     "cap_kt": 1089,
-    "musd": 91.0,
+    "musd": 112.8,
     "unmet_kt": 0
    },
    {
@@ -514,7 +547,15 @@
     "st": "OR",
     "owner": "Georgia-Pacific",
     "cap_kt": 950,
-    "musd": 90.7,
+    "musd": 95.3,
+    "unmet_kt": 0
+   },
+   {
+    "mill": "Monticello",
+    "st": "MS",
+    "owner": "Georgia-Pacific",
+    "cap_kt": 1000,
+    "musd": 85.6,
     "unmet_kt": 0
    },
    {
@@ -522,31 +563,7 @@
     "st": "LA",
     "owner": "International Paper",
     "cap_kt": 1494,
-    "musd": 81.7,
-    "unmet_kt": 0
-   },
-   {
-    "mill": "DeRidder",
-    "st": "LA",
-    "owner": "Packaging Corp of America",
-    "cap_kt": 1065,
-    "musd": 63.1,
-    "unmet_kt": 0
-   },
-   {
-    "mill": "Counce",
-    "st": "TN",
-    "owner": "Packaging Corp of America",
-    "cap_kt": 1078,
-    "musd": 61.4,
-    "unmet_kt": 0
-   },
-   {
-    "mill": "Valliant",
-    "st": "OK",
-    "owner": "International Paper",
-    "cap_kt": 1420,
-    "musd": 60.6,
+    "musd": 76.7,
     "unmet_kt": 0
    },
    {
@@ -554,7 +571,31 @@
     "st": "LA",
     "owner": "Smurfit Westrock",
     "cap_kt": 790,
-    "musd": 54.6,
+    "musd": 67.3,
+    "unmet_kt": 0
+   },
+   {
+    "mill": "DeRidder",
+    "st": "LA",
+    "owner": "Packaging Corp of America",
+    "cap_kt": 1065,
+    "musd": 65.9,
+    "unmet_kt": 0
+   },
+   {
+    "mill": "Counce",
+    "st": "TN",
+    "owner": "Packaging Corp of America",
+    "cap_kt": 1078,
+    "musd": 64.3,
+    "unmet_kt": 0
+   },
+   {
+    "mill": "Valliant",
+    "st": "OK",
+    "owner": "International Paper",
+    "cap_kt": 1420,
+    "musd": 58.5,
     "unmet_kt": 0
    },
    {
@@ -562,15 +603,15 @@
     "st": "AL",
     "owner": "Smurfit Westrock",
     "cap_kt": 864,
-    "musd": 44.3,
+    "musd": 45.4,
     "unmet_kt": 0
    },
    {
-    "mill": "Pine Hill",
-    "st": "AL",
+    "mill": "Rome",
+    "st": "GA",
     "owner": "International Paper",
-    "cap_kt": 900,
-    "musd": 43.4,
+    "cap_kt": 850,
+    "musd": 42.1,
     "unmet_kt": 0
    }
   ]
