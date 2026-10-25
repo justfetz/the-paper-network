@@ -23,6 +23,8 @@ raw = pd.DataFrame([
     (802, 13, 13, 0, 1, 27, 2, 30.0, 3.0),    # import from Canada (fr_orig 802 is a FAF foreign zone id here)
     (0, 13, 13, 0, 1, 31, 1, 999.0, 99.0),    # another commodity, must be dropped
 ], columns=["fr_orig", "dms_origst", "dms_destst", "fr_dest", "dms_mode", "sctg2", "trade_type", "tons_2023", "tmiles_2023"])
+# The real file carries blank fr_orig on domestic rows (floats with NaN); the 2026-10-25 run failed on the cast.
+raw["fr_orig"] = raw["fr_orig"].astype(float).where(raw["fr_orig"] != 0, other=float("nan"))
 t = faf5.tidy(raw)
 check("faf5 tidy keeps SCTG 27/28 only and maps modes and trade types", set(t.sctg2) == {27, 28} and set(t["mode"]) == {"truck", "rail"} and set(t.trade_type) == {"domestic", "import"} and t.year.iloc[0] == 2023)
 s = faf5.summarize(t)

@@ -98,7 +98,7 @@ def main():
     frames = [fetch(flow, hs, a.start, a.end, key) for flow in FLOWS for hs in HS]
     df = pd.concat(frames, ignore_index=True)
     df.to_csv(a.dst, index=False)
-    summary = dict(source=f"{BASE} (exports/porths, imports/porths), HS 4804 + 4805, COMM_LVL=HS4", pulled=pd.Timestamp.utcnow().strftime("%Y-%m-%d"),
+    summary = dict(source=f"{BASE} (exports/porths, imports/porths), HS 4804 + 4805, COMM_LVL=HS4", pulled=pd.Timestamp.now("UTC").strftime("%Y-%m-%d"),
                    window=[a.start, a.end], export_port_shares=port_shares(df, "export"), imports=import_summary(df),
                    note="shares by weight over the last 12 periods present; HS 4804+4805 is wider than containerboard (sack kraft, other uncoated grades are inside)")
     spath = os.path.join(os.path.dirname(os.path.abspath(a.dst)), "trade_paper_ports_summary.json")
