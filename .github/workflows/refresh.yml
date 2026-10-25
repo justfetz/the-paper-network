@@ -10,7 +10,7 @@ on:
     - cron: "31 13 28 1,4,7,10 *"  # quarter-end + 4 weeks: AF&PA quarterly report and earnings season are in
   workflow_dispatch:
   push:
-    paths: ["data/mills_final.csv", "data/counties.csv", "model/**", "site/src/**", "site/build_site.py"]
+    paths: ["data/mills_final.csv", "data/counties.csv", "model/**", "ingest/**", "site/src/**", "site/build_site.py"]
 permissions:
   contents: write
 concurrency:

@@ -25,6 +25,12 @@ raw = pd.DataFrame([
 ], columns=["fr_orig", "dms_origst", "dms_destst", "fr_dest", "dms_mode", "sctg2", "trade_type", "tons_2023", "tmiles_2023"])
 # The real file carries blank fr_orig on domestic rows (floats with NaN); the 2026-10-25 run failed on the cast.
 raw["fr_orig"] = raw["fr_orig"].astype(float).where(raw["fr_orig"] != 0, other=float("nan"))
+# The real file also carries forecast columns to 2050 beside the observed years; the 2026-10-25 run summarised 2050.
+raw["tons_2050"], raw["tmiles_2050"] = raw["tons_2023"] * 3, raw["tmiles_2023"] * 5
+check("faf5 latest_year is the latest OBSERVED year, never a forecast column", faf5.latest_year(["tons_2017", "tons_2023", "tons_2050"], today_year=2026) == 2023 and faf5.years_in(["tons_2023", "tmiles_2023", "tons_2050"]) == [2023, 2050])
+try:
+    faf5.latest_year(["tons_2050"], today_year=2026); check("faf5 fails loudly when only forecast years exist", False)
+except SystemExit as e: check("faf5 fails loudly when only forecast years exist", "no observed year" in str(e))
 t = faf5.tidy(raw)
 check("faf5 tidy keeps SCTG 27/28 only and maps modes and trade types", set(t.sctg2) == {27, 28} and set(t["mode"]) == {"truck", "rail"} and set(t.trade_type) == {"domestic", "import"} and t.year.iloc[0] == 2023)
 s = faf5.summarize(t)

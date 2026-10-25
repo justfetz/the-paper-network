@@ -23,6 +23,10 @@ sctg2, trade_type, dist_band, tons_<year>..., value_<year>..., tmiles_<year>... 
 dms_orig / dms_dest (FAF zones) instead of the state columns; both are accepted. Verify the column names
 against the release you download; the script fails loudly on a mismatch rather than guessing.
 
+YEAR. The file carries observed years (2017-2023 in FAF5.6.1) AND forecast columns (2025, 2030, ... 2050)
+side by side. Only an observed year is a measurement: the default is the latest year not after the pull
+year, never a forecast column (the 2026-10-25 run took the maximum and summarised 2050). `--year` overrides.
+
 MODES (dms_mode): 1 truck, 2 rail, 3 water, 4 air, 5 multiple modes and mail, 6 pipeline, 7 other/unknown,
 8 no domestic mode. TRADE TYPE: 1 domestic, 2 import, 3 export.
 """
@@ -36,11 +40,21 @@ SCTG = {27: "paper (pulp, newsprint, paper, paperboard)", 28: "paper articles (b
 STATE_FIPS = {1:"AL",2:"AK",4:"AZ",5:"AR",6:"CA",8:"CO",9:"CT",10:"DE",11:"DC",12:"FL",13:"GA",15:"HI",16:"ID",17:"IL",18:"IN",19:"IA",20:"KS",21:"KY",22:"LA",23:"ME",24:"MD",25:"MA",26:"MI",27:"MN",28:"MS",29:"MO",30:"MT",31:"NE",32:"NV",33:"NH",34:"NJ",35:"NM",36:"NY",37:"NC",38:"ND",39:"OH",40:"OK",41:"OR",42:"PA",44:"RI",45:"SC",46:"SD",47:"TN",48:"TX",49:"UT",50:"VT",51:"VA",53:"WA",54:"WV",55:"WI",56:"WY"}
 
 
-def latest_year(columns):
-    years = sorted(int(c.split("_")[1]) for c in columns if c.startswith("tons_") and c.split("_")[1].isdigit())
+def years_in(columns):
+    """Every tons_<year> column in the file, observed and forecast alike, ascending."""
+    return sorted(int(c.split("_")[1]) for c in columns if c.startswith("tons_") and c.split("_")[1].isdigit())
+
+
+def latest_year(columns, today_year: int | None = None):
+    """The latest OBSERVED year: the greatest tons_<year> not after the pull year. FAF forecast columns run to 2050."""
+    years = years_in(columns)
     if not years:
         raise SystemExit("no tons_<year> column found; FAF column names changed — read the release notes and update faf5.py")
-    return years[-1]
+    today_year = today_year or pd.Timestamp.now("UTC").year
+    observed = [y for y in years if y <= today_year]
+    if not observed:
+        raise SystemExit(f"every tons_<year> column ({years[0]}-{years[-1]}) is after {today_year}: no observed year to measure")
+    return observed[-1]
 
 
 def tidy(raw: pd.DataFrame, year: int | None = None) -> pd.DataFrame:
@@ -128,6 +142,8 @@ def main():
     df = tidy(raw, a.year)
     df.to_csv(a.dst, index=False)
     summary = summarize(df); summary["provenance"] = provenance; summary["pulled"] = pd.Timestamp.now("UTC").strftime("%Y-%m-%d")
+    summary["years_in_file"] = years_in([c.lower() for c in raw.columns])
+    summary["year_rule"] = "latest observed year (not after the pull year); FAF forecast columns are never summarised" if a.year is None else f"--year {a.year} given on the command line"
     spath = os.path.join(os.path.dirname(os.path.abspath(a.dst)), "faf5_summary.json")
     json.dump(summary, open(spath, "w"), indent=1)
     c27 = summary["commodities"]["27"]
