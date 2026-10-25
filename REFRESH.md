@@ -16,6 +16,9 @@ commits; the workflow then re-runs the model and redeploys on the push.
 | June | Census County Business Patterns (two-year lag) | Census API (free key) | machine | demand weights by county |
 | August | FBA annual report (box shipments, end use) | FBA via press | judgment | end-use shares |
 | Annually | EPA Facility Registry Service (plant list) | EPA bulk CSV (no key) | machine (manual download) | plant layer |
+| Annually (FAF release, usually summer) | FAF5 paper (SCTG 27) and paper articles (SCTG 28): tons and ton-miles by origin, destination, mode | FAF5 state database zip (no key) | machine | `params.freight_measured.faf5`; receipt rows for average haul and rail share |
+| Monthly, with the key | HS 4804 and 4805 exports and imports by US port and partner country | Census International Trade API (free key) | machine | `params.freight_measured.trade_ports`: measured export gateway shares, import total and Canada share; receipt row for imports |
+| Quarterly | Routed road miles and drive time per mill -> market lane | OSRM public demo server over OpenStreetMap (no key; car profile; light use) | machine | `lanes_osrm.csv`: every arc priced on its own road miles instead of 1.2 x great-circle |
 | On the day | Closure, conversion, acquisition, new machine, price increase announcements | company releases, trade press | judgment | mill table; price shocks |
 
 ## On-demand workflows

@@ -73,7 +73,7 @@ def model_checks(D):
     def out(s, country): return sum(s["shipped"][m["id"]] for m in mills if m["country"] == country and m["id"] < len(s["shipped"]))
     ip = s26["integration"].get("International Paper", {}); ip_tot = ip.get("total", 0) + ip.get("exports", 0)
     return dict(demand_2024=p["demand_2024"], exports_2024=p["exports_2024"], demand_2026=p["demand_2026"], exports_2026=p["exports_2026"],
-                us_out_2024=out(s24, "US"), us_out_2026=out(s26, "US"), ca_2024=out(s24, "CA"), ca_2026=out(s26, "CA"), ip_int=(ip.get("internal", 0) / ip_tot) if ip_tot else None,
+                us_out_2024=out(s24, "US"), us_out_2026=out(s26, "US"), ca_2024=out(s24, "CA"), ca_2026=out(s26, "CA"), haul_2026=float(s26["kpi"]["avg_haul_miles"]), rail_2026=float(s26["kpi"]["rail_share"]), ip_int=(ip.get("internal", 0) / ip_tot) if ip_tot else None,
                 kpi_2026=s26["kpi"], kpi_2024=s24["kpi"], occ=D["occ"]["kpi"], premium=p["premium"], freight=p["freight"],
                 knockouts=[dict(mill=k["name"], st=k["st"], owner=k["owner"], cap_kt=round(k["cap"] / 1e3), musd=round(k["d_total"] / 1e6, 1), unmet_kt=round(k["unmet"] / 1e3)) for k in sorted(D["knockouts"], key=lambda k: -k["d_total"])[:10]])
 
@@ -100,6 +100,38 @@ def anchors(mc, md, chg):
         add("pca_raw", chg["pca_last_disclosed_sum_ye2025_kt"] * 1e3, f"PCA stopped publishing per-mill figures after FY2011-12; the database scales the last ones x{chg['pca_factor']} to PCA's total")
     add("ip_int", md["ip_int"] or 0, "known bias: a cost-minimizing solver keeps more of an integrated producer's board at home than contracts do")
     add("imports", md["ca_2024"], "known gap: the solver buys Canadian board only where freight favors it; contracts and currency move about three times as much")
+    rows.extend(measured_freight_anchors(md))
+    return rows
+
+
+def measured_freight_anchors(md):
+    """Anchors that exist only once their public pull has run (ingest/faf5.py, ingest/census_trade_ports.py).
+    Absent files add no rows and fail nothing; the receipts say the measurement is pending."""
+    rows = []
+    fpath = os.path.join(ROOT, "data", "faf5_summary.json")
+    # These rows carry strict False: a data pull must never turn CI red. They print CHECK / outside tolerance in
+    # the receipts when the model disagrees with the measurement, which is the point; the gate stays on the
+    # capacity, production and company anchors above.
+    if os.path.exists(fpath):
+        f = json.load(open(fpath)); c27 = f.get("commodities", {}).get("27", {}); yr = f.get("year")
+        src = f"FAF5 {yr}, SCTG 27 (all paper and paperboard; containerboard is inside it): ton-miles / tons, domestic flows"
+        url = "https://faf.ornl.gov/faf5"
+        if c27.get("avg_haul_mi"):
+            dev = (md["haul_2026"] - c27["avg_haul_mi"]) / c27["avg_haul_mi"]
+            rows.append(dict(key="haul_faf5", check="Average haul, October 2026 network vs FAF5 paper", model=md["haul_2026"], anchor=c27["avg_haul_mi"], deviation=round(dev, 4), tolerance=0.25, ok=abs(dev) <= 0.25, strict=False, source=src, url=url,
+                             note="tons-weighted miles of the solved domestic flows against FAF5's measured ton-miles over tons; a wide tolerance because SCTG 27 mixes pulp and printing grades with containerboard"))
+        if c27.get("rail_tons_share") is not None:
+            dev = (md["rail_2026"] - c27["rail_tons_share"]) / max(c27["rail_tons_share"], 1e-9)
+            rows.append(dict(key="rail_faf5", check="Rail share of domestic tons vs FAF5 paper", model=md["rail_2026"], anchor=c27["rail_tons_share"], deviation=round(dev, 4), tolerance=0.30, ok=abs(dev) <= 0.30, strict=False, source=src, url=url,
+                             note="the model's rail flag is the cheaper-mode rule in freight_cost; FAF5 reports the mode actually used"))
+    tpath = os.path.join(ROOT, "data", "trade_paper_ports_summary.json")
+    if os.path.exists(tpath):
+        imp = (json.load(open(tpath)).get("imports") or {})
+        if imp.get("total_short_tons"):
+            dev = (md["ca_2024"] - imp["total_short_tons"]) / imp["total_short_tons"]
+            rows.append(dict(key="imports_census", check="Containerboard imports vs Census HS 4804+4805 imports, last 12 months", model=md["ca_2024"], anchor=imp["total_short_tons"], deviation=round(dev, 4), tolerance=0.0, ok=None, strict=False,
+                             source=f"Census trade API, imports by port, HS 4804+4805, {imp.get('periods')}; Canada share {imp.get('canada_share')}", url="https://api.census.gov/data/timeseries/intltrade/imports/porths",
+                             note="known gap, shown with a measured anchor: HS 4804+4805 is wider than containerboard, so the anchor is an upper bound"))
     return rows
 
 def sensitivity(D):
@@ -257,7 +289,7 @@ def main():
     res = dict(generated=time.strftime("%Y-%m-%d", time.gmtime()), anchors=ANCHORS, checks=an, mills=mc, model=md, demand=dd, changes=chg, sensitivity=sens, before_after=ba)
     json.dump(res, open(prev_path, "w"), indent=1, default=float)
     open(os.path.join(ROOT, "audit", "RECEIPTS.md"), "w").write(receipts_md(res))
-    bad = [c for c in an if c["ok"] is False]
+    bad = [c for c in an if c["ok"] is False and c.get("strict", True)]   # measured-freight rows report, never gate (see measured_freight_anchors)
     if a.strict and bad: print("FAILED anchors:", [c["check"] for c in bad]); sys.exit(1)
 
 if __name__ == "__main__": main()
