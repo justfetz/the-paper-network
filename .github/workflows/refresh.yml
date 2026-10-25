@@ -33,12 +33,17 @@ jobs:
           EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           EDGAR_UA: ${{ secrets.EDGAR_UA }}
+          CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
         run: |
           set +e
           if [ -n "$EIA_API_KEY" ]; then python ingest/eia_diesel.py data/diesel_weekly.csv || echo "EIA fetch failed"; else echo "EIA: no key, skipped"; fi
           if [ -n "$FRED_API_KEY" ]; then python ingest/fred.py data/fred_series.csv || echo "FRED fetch failed"; else echo "FRED: no key, skipped"; fi
           python ingest/bls_qcew.py data/qcew_322211_county.csv || echo "QCEW fetch failed"
           if [ -n "$EDGAR_UA" ] && [ "$(date +%m)" = "03" ]; then python ingest/edgar_10k.py data/10k || echo "EDGAR fetch failed"; else echo "EDGAR: runs in March with EDGAR_UA set"; fi
+          # The free freight sources (ingest/README.md, "The freight sources"). Each writes a summary the model and the receipts read.
+          if [ -n "$CENSUS_API_KEY" ]; then python ingest/census_trade_ports.py data/trade_paper_ports.csv --start 2023-01 --end "$(date -u -d '-1 month' +%Y-%m 2>/dev/null || date -u +%Y-%m)" || echo "Census trade fetch failed"; else echo "Census trade: no key, skipped"; fi
+          if [ "$(date +%m)" = "07" ] || [ ! -f data/faf5_summary.json ]; then python ingest/faf5.py data/faf5_paper.csv || echo "FAF5 fetch failed"; else echo "FAF5: annual pull runs in July, or when the summary is missing"; fi
+          if [ "$(date +%d)" = "28" ] || [ ! -f data/lanes_osrm.csv ]; then python ingest/osrm_lanes.py data/paper_network.json data/lanes_osrm.csv || echo "OSRM lanes fetch failed"; else echo "OSRM lanes: quarterly pull runs on the 28th, or when the file is missing"; fi
           true
       - name: Re-run the model (about 5 minutes)
         run: |

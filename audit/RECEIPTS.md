@@ -1,6 +1,6 @@
 # Receipts: how The Paper Network's numbers are checked
 
-Generated 2026-10-21 by `audit/recompute.py` from `data/mills_final.csv` and `data/paper_network.json`. It needs no network access; run it yourself and you get these tables.
+Generated 2026-10-25 by `audit/recompute.py` from `data/mills_final.csv` and `data/paper_network.json`. It needs no network access; run it yourself and you get these tables.
 
 Every figure in the model is public, and every mill row carries its source. This page sets the model's totals against the public anchors, shows what each mill figure rests on, lists what the last audit changed and why, and shows how far the outputs move when the assumptions move. If a number here is wrong, the fix is one row and one source: see the end of the page.
 

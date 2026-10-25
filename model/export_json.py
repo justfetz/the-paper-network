@@ -4,6 +4,57 @@ sys.path.insert(0, ".")
 from netmodel import *
 from scenarios import SEASON, outage_calendar
 
+DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
+
+
+def load_lane_factors(allm, nodes, path=None):
+    """Measured road / great-circle ratios per (mill gid, market index) from ingest/osrm_lanes.py, or None.
+    The matrix is indexed by gid and by the market's position in `nodes`; lanes the file does not cover are
+    NaN and the solver fills them with the file's median ratio."""
+    path = path or os.environ.get("PN_LANES", os.path.join(DATA, "lanes_osrm.csv"))
+    if not os.path.exists(path):
+        return None, None
+    try:
+        lanes = pd.read_csv(path, dtype={"node_id": str})
+    except Exception as ex:
+        print("lanes file unreadable:", ex); return None, None
+    lanes = lanes[lanes.road_miles.notna() & (lanes.gc_miles > 0)]
+    if lanes.empty:
+        return None, None
+    node_pos = {str(n): i for i, n in enumerate(nodes.node_id.astype(str).values)}
+    mat = np.full((int(allm.gid.max()) + 1, len(nodes)), np.nan)
+    ratio = (lanes.road_miles / lanes.gc_miles).clip(lower=1.0, upper=3.0)
+    for gid, nid, r in zip(lanes.mill_id.astype(int), lanes.node_id.astype(str), ratio):
+        j = node_pos.get(nid)
+        if j is not None and 0 <= gid < mat.shape[0]:
+            mat[gid, j] = r
+    fill = float(np.nanmedian(mat))
+    covered = int(np.isfinite(mat).sum())
+    print(f"lane factors: {covered} routed lanes, median road/gc {fill:.3f} (was {FREIGHT['road_factor']})")
+    return mat, fill
+
+
+def load_measured_freight():
+    """The measured freight context the page and the receipts cite: FAF5 haul and modal split, Census trade by
+    port. Each block is present only when its ingest has run; absent blocks say so."""
+    out = {}
+    fpath = os.path.join(DATA, "faf5_summary.json")
+    if os.path.exists(fpath):
+        f = json.load(open(fpath)); c27 = f.get("commodities", {}).get("27", {}); c28 = f.get("commodities", {}).get("28", {})
+        out["faf5"] = dict(year=f.get("year"), source=f.get("source"), caveat=f.get("caveat"),
+                           paper_avg_haul_mi=c27.get("avg_haul_mi"), paper_rail_share=c27.get("rail_tons_share"), paper_truck_share=c27.get("truck_tons_share"),
+                           paper_articles_avg_haul_mi=c28.get("avg_haul_mi"), paper_articles_rail_share=c28.get("rail_tons_share"),
+                           paper_imports_kt=c27.get("imports_tons_kt"))
+    else:
+        out["faf5"] = None
+    tpath = os.path.join(DATA, "trade_paper_ports_summary.json")
+    if os.path.exists(tpath):
+        t = json.load(open(tpath))
+        out["trade_ports"] = dict(window=t.get("window"), source=t.get("source"), export_port_shares=t.get("export_port_shares"), imports=t.get("imports"), note=t.get("note"))
+    else:
+        out["trade_ports"] = None
+    return out
+
 def main(mills_csv, out_json, demand_2024=34.5e6, exports_2024=4.6e6, demand_2026=32.2e6, exports_2026=3.6e6,
          premium=150.0, knockout_top=20, shares=None):
     t0 = time.time()
@@ -26,6 +77,10 @@ def main(mills_csv, out_json, demand_2024=34.5e6, exports_2024=4.6e6, demand_202
         allm["closed_year"] = allm.status_note.fillna("").str.extract(r"closed[^0-9]*(20\d\d)")[0].astype(float)
     allm = allm[allm.lat.notna()].reset_index(drop=True)
     allm["gid"] = range(len(allm))
+    # measured lanes (ingest/osrm_lanes.py): every footprint below prices its arcs on them when the file exists
+    lane_mat, lane_fill = load_lane_factors(allm, nodes)
+    set_lane_factors(lane_mat, lane_fill)
+    measured = load_measured_freight()
     model_ok = allm.country.isin(["US", "CA"])          # Mexican mills are listed for context but do not supply the US network
     shares = shares or {"International Paper":0.31,"Smurfit Westrock":0.20,"Packaging Corp of America":0.155,"Georgia-Pacific":0.095,
                         "Pratt Industries":0.06,"Green Bay Packaging":0.03,"Cascades":0.02}
@@ -184,7 +239,9 @@ def main(mills_csv, out_json, demand_2024=34.5e6, exports_2024=4.6e6, demand_202
     print(f"backtest done {time.time()-t0:.0f}s")
     out = dict(
         generated=time.strftime("%Y-%m-%d"),
-        params=dict(premium=premium, freight=FREIGHT, demand_weighting=weighting, demand_2024=demand_2024, exports_2024=exports_2024, demand_2026=demand_2026, exports_2026=exports_2026, shares=shares, season=SEASON),
+        params=dict(premium=premium, freight=dict(FREIGHT, lane_source=LANE_SOURCE, road_factor_median=(round(lane_fill, 4) if lane_fill else None)),
+                    freight_measured=measured, port_shares_source="assumption (model/netmodel.py PORTS); measured shares are in freight_measured.trade_ports when ingest/census_trade_ports.py has run",
+                    demand_weighting=weighting, demand_2024=demand_2024, exports_2024=exports_2024, demand_2026=demand_2026, exports_2026=exports_2026, shares=shares, season=SEASON),
         mills=[dict(id=int(r.gid), name=r.mill_name, owner=r.owner, owner_2024=(r.owner_2024 if "owner_2024" in allm else r.owner), cap_2024=int(r.capacity_2024 if "capacity_2024" in allm and not pd.isna(r.capacity_2024) else r.capacity_tons_per_year), city=r.city, st=r.state, country=r.country, lat=float(r.lat), lon=float(r.lon),
                     cap=int(r.capacity_tons_per_year), grades=r.grades, status=r.status_oct2026, closed_year=(None if pd.isna(r.closed_year) else int(r.closed_year)),
                     note=("" if pd.isna(r.status_note) else str(r.status_note)), conf=str(r.confidence)) for r in allm.itertuples()],

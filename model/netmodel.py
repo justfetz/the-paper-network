@@ -17,8 +17,39 @@ def haversine(lat1, lon1, lat2, lon2):
 # --- freight: $/ton as a function of great-circle miles (road factor 1.2). Truck vs rail breakpoint ~450 mi.
 FREIGHT = dict(road_factor=1.2, truck_fixed=8.0, truck_per_mi=0.125, rail_fixed=35.0, rail_per_mi=0.065)
 DIESEL_BASE = 3.75   # $/gal; fuel is ~22% of truck cost per mile and ~12% of rail cost per mile at this price
-def freight_cost(gc_miles, p=FREIGHT, diesel=DIESEL_BASE):
-    road = gc_miles * p["road_factor"]
+
+# --- measured road factors (ingest/osrm_lanes.py). When set, every mill -> market lane is priced on its own
+# routed road miles instead of the single 1.2 factor; a lane the file does not cover gets the median ratio.
+# Keyed by the mill's gid (the row index in mills_final.csv the exporter assigns) and the market index, so
+# every footprint (fp2024, fp2026, knockouts, calendar) looks up the same matrix without changing its call.
+_LANE_FACTORS = None          # np.ndarray [max_gid+1, n_nodes] of road_miles / gc_miles, NaN where unrouted
+_LANE_FACTOR_FILL = None      # the median ratio, used for NaN lanes
+LANE_SOURCE = "road_factor 1.2 x great-circle (assumption)"
+
+def set_lane_factors(matrix, fill, source="OSRM routed miles (ingest/osrm_lanes.py)"):
+    global _LANE_FACTORS, _LANE_FACTOR_FILL, LANE_SOURCE
+    _LANE_FACTORS = None if matrix is None else np.asarray(matrix, dtype=float)
+    _LANE_FACTOR_FILL = None if fill is None else float(fill)
+    LANE_SOURCE = source if matrix is not None else "road_factor 1.2 x great-circle (assumption)"
+
+def clear_lane_factors():
+    set_lane_factors(None, None)
+
+def lane_factor_for(M, J):
+    """Per-arc road factor for the mills frame M (needs a gid column) against J markets, or None (use FREIGHT)."""
+    if _LANE_FACTORS is None or "gid" not in M:
+        return None
+    gids = M.gid.values.astype(int)
+    if gids.max() >= _LANE_FACTORS.shape[0] or J > _LANE_FACTORS.shape[1]:
+        return None
+    rf = _LANE_FACTORS[gids][:, :J].copy()
+    rf[np.isnan(rf)] = _LANE_FACTOR_FILL if _LANE_FACTOR_FILL is not None else FREIGHT["road_factor"]
+    return rf
+
+def freight_cost(gc_miles, p=FREIGHT, diesel=DIESEL_BASE, road_factor=None):
+    """$/ton and the rail flag for great-circle miles. `road_factor` may be a scalar or an array shaped like
+    gc_miles (measured per-lane ratios); None means the single FREIGHT road factor."""
+    road = gc_miles * (p["road_factor"] if road_factor is None else road_factor)
     ft = 1 + 0.22*(diesel/DIESEL_BASE - 1); fr = 1 + 0.12*(diesel/DIESEL_BASE - 1)
     truck = p["truck_fixed"] + p["truck_per_mi"]*road*ft
     rail = p["rail_fixed"] + p["rail_per_mi"]*road*fr
@@ -101,7 +132,9 @@ def build_and_solve(mills, nodes, total_demand_tons, owner_shares, export_tons, 
     J = len(N); nM = len(M)
     D = N.w_total.values/N.w_total.sum()*total_demand_tons
     dist = haversine(M.lat.values[:,None], M.lon.values[:,None], N.lat.values[None,:], N.lon.values[None,:])
-    cost, by_rail = freight_cost(dist, diesel=diesel)
+    rf = lane_factor_for(M, J)
+    cost, by_rail = freight_cost(dist, diesel=diesel, road_factor=rf)
+    road_factor = FREIGHT["road_factor"] if rf is None else rf
     pdist = haversine(M.lat.values[:,None], M.lon.values[:,None], PORTS.lat.values[None,:], PORTS.lon.values[None,:])
     pcost, _ = freight_cost(pdist, diesel=diesel)
     surcharge = np.array([(market_surcharge or {}).get(o, 0.0) for o in M.owner.values])
@@ -177,7 +210,7 @@ def build_and_solve(mills, nodes, total_demand_tons, owner_shares, export_tons, 
     ship = flows[flows.kind.isin(["x","y"])].copy()
     ship["mill"] = M.mill_name.values[ship.m]; ship["mill_owner"] = M.owner.values[ship.m]
     ship["node"] = N.name.values[ship.j]; ship["node_id"] = N.node_id.values[ship.j]
-    ship["miles"] = dist[ship.m, ship.j]*FREIGHT["road_factor"]; ship["rail"] = by_rail[ship.m, ship.j]; ship["g"] = ship.g.astype(str)
+    ship["miles"] = dist[ship.m, ship.j]*(road_factor if np.isscalar(road_factor) else road_factor[ship.m, ship.j]); ship["rail"] = by_rail[ship.m, ship.j]; ship["g"] = ship.g.astype(str)
     ship["cost"] = cost[ship.m, ship.j]*ship.tons
     exp = flows[flows.kind=="z"].copy(); exp["mill"] = M.mill_name.values[exp.m]; exp["port"] = PORTS.port.values[exp.g.astype(int)]
     exp["miles"] = pdist[exp.m, exp.g.astype(int)]*FREIGHT["road_factor"]; exp["cost"] = pcost[exp.m, exp.g.astype(int)]*exp.tons
@@ -217,7 +250,7 @@ def prospects(mills, nodes, availability=None, diesel=DIESEL_BASE, grade="L"):
     ok = (M.grades.str.contains("linerboard") if grade == "L" else M.grades.str.contains("medium")).values
     if availability is not None: ok = ok & (availability > 0)
     dist = haversine(M.lat.values[:,None], M.lon.values[:,None], nodes.lat.values[None,:], nodes.lon.values[None,:])
-    cost, _ = freight_cost(dist, diesel=diesel)
+    cost, _ = freight_cost(dist, diesel=diesel, road_factor=lane_factor_for(M, len(nodes)))
     cost = np.where(ok[:,None], cost, np.inf)
     order = np.argsort(cost, axis=0)
     out = []
