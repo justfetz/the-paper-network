@@ -1,4 +1,5 @@
 date,region,usd_per_gal
+2026-10-26,US,6.352
 2026-10-19,US,6.276
 2026-10-12,US,6.179
 2026-10-05,US,6.199
@@ -1700,6 +1701,7 @@ date,region,usd_per_gal
 1994-04-04,US,1.109
 1994-03-28,US,1.107
 1994-03-21,US,1.106
+2026-10-26,East Coast,6.079
 2026-10-19,East Coast,5.984
 2026-10-12,East Coast,5.908
 2026-10-05,East Coast,5.951
@@ -3401,6 +3403,7 @@ date,region,usd_per_gal
 1994-04-04,East Coast,1.122
 1994-03-28,East Coast,1.115
 1994-03-21,East Coast,1.119
+2026-10-26,Midwest,6.48
 2026-10-19,Midwest,6.352
 2026-10-12,Midwest,6.259
 2026-10-05,Midwest,6.286
@@ -5102,6 +5105,7 @@ date,region,usd_per_gal
 1994-04-04,Midwest,1.087
 1994-03-28,Midwest,1.089
 1994-03-21,Midwest,1.087
+2026-10-26,Gulf Coast,5.951
 2026-10-19,Gulf Coast,5.903
 2026-10-12,Gulf Coast,5.809
 2026-10-05,Gulf Coast,5.819
@@ -6803,6 +6807,7 @@ date,region,usd_per_gal
 1994-04-04,Gulf Coast,1.069
 1994-03-28,Gulf Coast,1.064
 1994-03-21,Gulf Coast,1.065
+2026-10-26,Rocky Mountain,6.521
 2026-10-19,Rocky Mountain,6.422
 2026-10-12,Rocky Mountain,6.302
 2026-10-05,Rocky Mountain,6.267
@@ -8504,6 +8509,7 @@ date,region,usd_per_gal
 1994-04-04,Rocky Mountain,1.103
 1994-03-28,Rocky Mountain,1.1
 1994-03-21,Rocky Mountain,1.105
+2026-10-26,West Coast,7.329
 2026-10-19,West Coast,7.394
 2026-10-12,West Coast,7.24
 2026-10-05,West Coast,7.229

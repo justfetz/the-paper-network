@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-26",
+ "generated": "2026-10-28",
  "anchors": {
   "cap24": {
    "value": 41400000.0,
@@ -455,7 +455,7 @@
    "avg_freight_per_ton": 59.843,
    "n_vars": 95211,
    "n_rows": 7141,
-   "solve_seconds": 1.2
+   "solve_seconds": 1.3
   },
   "kpi_2024": {
    "objective_usd": 2384441370.18,
