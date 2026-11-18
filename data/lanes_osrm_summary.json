@@ -8,6 +8,6 @@
  "ratio_p10": 1.1348,
  "ratio_p90": 1.2964,
  "replaces": "model/netmodel.py FREIGHT.road_factor = 1.2 (every lane); export_json.py uses lanes_osrm.csv per arc when present",
- "pulled": "2026-10-25",
+ "pulled": "2026-10-28",
  "server": "https://router.project-osrm.org"
 }
