@@ -503,6 +503,7 @@ GASDESW,"US diesel, weekly retail ($/gal)",2026-10-19,6.276
 GASDESW,"US diesel, weekly retail ($/gal)",2026-10-26,6.352
 GASDESW,"US diesel, weekly retail ($/gal)",2026-11-02,6.292
 GASDESW,"US diesel, weekly retail ($/gal)",2026-11-09,6.127
+GASDESW,"US diesel, weekly retail ($/gal)",2026-11-16,5.937
 IPG322S,Industrial production: paper (index),2019-01-01,100.2872
 IPG322S,Industrial production: paper (index),2019-02-01,99.8471
 IPG322S,Industrial production: paper (index),2019-03-01,98.6327
@@ -591,11 +592,12 @@ IPG322S,Industrial production: paper (index),2026-01-01,78.402
 IPG322S,Industrial production: paper (index),2026-02-01,79.2674
 IPG322S,Industrial production: paper (index),2026-03-01,79.8618
 IPG322S,Industrial production: paper (index),2026-04-01,79.8298
-IPG322S,Industrial production: paper (index),2026-05-01,79.9955
-IPG322S,Industrial production: paper (index),2026-06-01,79.6852
-IPG322S,Industrial production: paper (index),2026-07-01,79.3207
-IPG322S,Industrial production: paper (index),2026-08-01,79.2102
-IPG322S,Industrial production: paper (index),2026-09-01,78.3155
+IPG322S,Industrial production: paper (index),2026-05-01,80.0044
+IPG322S,Industrial production: paper (index),2026-06-01,79.7409
+IPG322S,Industrial production: paper (index),2026-07-01,79.5175
+IPG322S,Industrial production: paper (index),2026-08-01,79.8888
+IPG322S,Industrial production: paper (index),2026-09-01,78.38
+IPG322S,Industrial production: paper (index),2026-10-01,78.0543
 ECOMSA,"E-commerce retail sales ($M, quarterly)",2019-01-01,130188.0
 ECOMSA,"E-commerce retail sales ($M, quarterly)",2019-04-01,135548.0
 ECOMSA,"E-commerce retail sales ($M, quarterly)",2019-07-01,144130.0
@@ -706,8 +708,8 @@ RSXFS,"Retail sales ex food services ($M, monthly)",2025-05-01,599595.0
 RSXFS,"Retail sales ex food services ($M, monthly)",2025-06-01,605482.0
 RSXFS,"Retail sales ex food services ($M, monthly)",2025-07-01,612075.0
 RSXFS,"Retail sales ex food services ($M, monthly)",2025-08-01,613570.0
-RSXFS,"Retail sales ex food services ($M, monthly)",2025-09-01,614111.0
-RSXFS,"Retail sales ex food services ($M, monthly)",2025-10-01,613900.0
+RSXFS,"Retail sales ex food services ($M, monthly)",2025-09-01,613777
+RSXFS,"Retail sales ex food services ($M, monthly)",2025-10-01,613622
 RSXFS,"Retail sales ex food services ($M, monthly)",2025-11-01,618029.0
 RSXFS,"Retail sales ex food services ($M, monthly)",2025-12-01,619122.0
 RSXFS,"Retail sales ex food services ($M, monthly)",2026-01-01,614871.0
@@ -717,5 +719,6 @@ RSXFS,"Retail sales ex food services ($M, monthly)",2026-04-01,635221.0
 RSXFS,"Retail sales ex food services ($M, monthly)",2026-05-01,641883.0
 RSXFS,"Retail sales ex food services ($M, monthly)",2026-06-01,642793.0
 RSXFS,"Retail sales ex food services ($M, monthly)",2026-07-01,639263.0
-RSXFS,"Retail sales ex food services ($M, monthly)",2026-08-01,647440.0
-RSXFS,"Retail sales ex food services ($M, monthly)",2026-09-01,652115.0
+RSXFS,"Retail sales ex food services ($M, monthly)",2026-08-01,648652
+RSXFS,"Retail sales ex food services ($M, monthly)",2026-09-01,653943
+RSXFS,"Retail sales ex food services ($M, monthly)",2026-10-01,655299
