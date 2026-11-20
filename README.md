@@ -61,9 +61,11 @@ site/build_site.py              one HTML page + one data file + a self-contained
 ```
 
 The solver is HiGHS through `scipy.optimize.linprog` (and `milp` for the calendar). Every solve must return optimal or the
-export aborts; the duals are the optimality certificate. Freight on each arc is a rule, not a quote: road miles are 1.2 ×
-great circle, truck $8 + $0.125/mi, rail $35 + $0.065/mi per ton at $3.75 diesel, cheaper mode wins, diesel moves the
-per-mile terms through each mode's fuel share.
+export aborts; the duals are the optimality certificate. Freight on each arc is a rule, not a quote: road miles are routed
+lane by lane on OpenStreetMap (`ingest/osrm_lanes.py`; 1.2 × great circle until that file exists), truck $8 + $0.125/mi,
+rail $35 + $0.065/mi per ton at $3.75 diesel plus a rail access premium that `model/export_json.py` solves so the rail
+share meets FAF5's measured modal split for paper (`ingest/faf5.py`; zero until that file exists), cheaper mode wins,
+diesel moves the per-mile terms through each mode's fuel share. `params.freight` in the data file names every one of these.
 
 ## Quick start
 

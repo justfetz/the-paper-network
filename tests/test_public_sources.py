@@ -107,6 +107,34 @@ check("ship miles carry the per-lane factor (East -> C at 1.05 x great-circle)",
 
 # ── exporter helpers on a temp data dir ─────────────────────────────────────
 import export_json as ej
+# ── rail modal choice: the access premium, the breakeven and the calibration ────────────────────────────
+p0 = dict(netmodel.FREIGHT, rail_access=0.0); p1 = dict(netmodel.FREIGHT, rail_access=30.0)
+c0, r0 = freight_cost(np.array([300.0, 600.0, 1000.0]), p=p0); c1, r1 = freight_cost(np.array([300.0, 600.0, 1000.0]), p=p1)
+check("rail access premium raises only rail quotes: 600 road-mi (500 gc) flips rail -> truck, 1,000 stays rail, truck lane unchanged", bool(r0[1]) and not bool(r1[1]) and bool(r1[2]) and c1[0] == c0[0] and c1[2] > c0[2])
+check("rail_breakeven_miles: (35 - 8) / 0.06 = 450 bare, 950 with a $30 premium", abs(netmodel.rail_breakeven_miles(p0) - 450.0) < 1e-9 and abs(netmodel.rail_breakeven_miles(p1) - 950.0) < 1e-9)
+curve = lambda prem: max(0.0, 0.43 - 0.0019 * prem)        # a monotone stand-in for the LP: share falls as rail gets dearer
+cal = netmodel.calibrate_rail_access(curve, 0.24, tol=0.002)
+check("calibrate_rail_access: bisection meets the target within tol and reports every solve", cal["bounded"] == "met" and abs(cal["rail_share"] - 0.24) <= 0.002 and abs(cal["rail_access"] - 100.0) < 1.5 and cal["iterations"] == len(cal["trace"]))
+check("calibrate_rail_access: a target already met at zero premium keeps zero, an unreachable one stops at the upper bound and says so",
+      netmodel.calibrate_rail_access(lambda q: 0.10, 0.24)["rail_access"] == 0.0 and netmodel.calibrate_rail_access(lambda q: 0.10, 0.24)["bounded"] == "at_lower_bound"
+      and netmodel.calibrate_rail_access(lambda q: 0.5, 0.24, hi=60.0)["bounded"] == "at_upper_bound")
+_faf = {"faf5": dict(paper_rail_share=0.08, paper_multiple_modes_share=0.16, year=2023)}
+_t = ej.rail_target_from_faf5(_faf)
+check("exporter: the default FAF5 rail target is the explicit rail share with the band carried, rail+multiple only on request, None before the pull",
+      _t["target"] == 0.08 and _t["basis"] == "rail" and _t["band"] == [0.08, 0.24] and ej.rail_target_from_faf5(_faf, "rail_plus_multiple")["target"] == 0.24 and ej.rail_target_from_faf5({"faf5": None}) is None)
+try: ej.rail_target_from_faf5(_faf, "linehaul"); check("exporter: an unknown PN_RAIL_TARGET basis is refused", False)
+except ValueError: check("exporter: an unknown PN_RAIL_TARGET basis is refused", True)
+_calls = []
+steep = lambda prem: max(0.0, 0.43 - 0.004 * prem)          # 0.08 at $87.5
+rec = ej.calibrate_rail(_faf, lambda q: (_calls.append(q), steep(q))[1], env={})
+check("exporter: calibrate_rail (default basis) sets FREIGHT.rail_access to the measured rail share and names FAF5 in RAIL_SOURCE", rec["bounded"] == "met" and abs(rec["rail_access"] - 87.5) < 1.5 and abs(netmodel.FREIGHT["rail_access"] - rec["rail_access"]) < 1e-9 and "FAF5 2023: rail 8.0%" in netmodel.RAIL_SOURCE and len(_calls) == rec["iterations"])
+rec = ej.calibrate_rail(_faf, curve, env={"PN_RAIL_TARGET": "rail_plus_multiple"})
+check("exporter: PN_RAIL_TARGET=rail_plus_multiple calibrates to the upper edge and says it is assumed", rec["bounded"] == "met" and abs(rec["rail_access"] - 100.0) < 3.0 and "assumed truck-rail" in netmodel.RAIL_SOURCE)
+rec = ej.calibrate_rail({"faf5": None}, lambda q: 0.5, env={})
+check("exporter: no FAF5 file means the bare rule (premium 0, uncalibrated)", rec["bounded"] == "uncalibrated" and netmodel.FREIGHT["rail_access"] == 0.0 and "assumption" in netmodel.RAIL_SOURCE)
+rec = ej.calibrate_rail({"faf5": dict(paper_rail_share=0.08, paper_multiple_modes_share=0.16, year=2023)}, lambda q: 0.5, env={"PN_RAIL_ACCESS": "12.5"})
+check("exporter: PN_RAIL_ACCESS pins the premium without a solve", rec["bounded"] == "pinned" and netmodel.FREIGHT["rail_access"] == 12.5 and rec["iterations"] == 0)
+netmodel.set_rail_access(0.0, "test reset")
 tmp = tempfile.mkdtemp()
 allm = pd.DataFrame(dict(gid=[0, 1, 2]))
 nodes2 = pd.DataFrame(dict(node_id=["10", "20"]))
