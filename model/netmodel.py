@@ -14,8 +14,11 @@ def haversine(lat1, lon1, lat2, lon2):
     a = np.sin((lat2-lat1)/2)**2 + np.cos(lat1)*np.cos(lat2)*np.sin((lon2-lon1)/2)**2
     return 2*R_MI*np.arcsin(np.sqrt(a))
 
-# --- freight: $/ton as a function of great-circle miles (road factor 1.2). Truck vs rail breakpoint ~450 mi.
-FREIGHT = dict(road_factor=1.2, truck_fixed=8.0, truck_per_mi=0.125, rail_fixed=35.0, rail_per_mi=0.065)
+# --- freight: $/ton as a function of great-circle miles (road factor 1.2). Truck vs rail breakpoint ~450 mi on the
+# bare lines; rail_access is a $/ton premium on every rail quote (siding access, transload, dwell) that export_json.py
+# calibrates so the solved rail share meets FAF5's measured modal split (0 = the bare cheaper-mode rule).
+FREIGHT = dict(road_factor=1.2, truck_fixed=8.0, truck_per_mi=0.125, rail_fixed=35.0, rail_per_mi=0.065, rail_access=0.0)
+RAIL_SOURCE = "cheaper mode wins, no rail access premium (assumption)"
 DIESEL_BASE = 3.75   # $/gal; fuel is ~22% of truck cost per mile and ~12% of rail cost per mile at this price
 
 # --- measured road factors (ingest/osrm_lanes.py). When set, every mill -> market lane is priced on its own
@@ -52,8 +55,49 @@ def freight_cost(gc_miles, p=FREIGHT, diesel=DIESEL_BASE, road_factor=None):
     road = gc_miles * (p["road_factor"] if road_factor is None else road_factor)
     ft = 1 + 0.22*(diesel/DIESEL_BASE - 1); fr = 1 + 0.12*(diesel/DIESEL_BASE - 1)
     truck = p["truck_fixed"] + p["truck_per_mi"]*road*ft
-    rail = p["rail_fixed"] + p["rail_per_mi"]*road*fr
+    rail = p["rail_fixed"] + p.get("rail_access", 0.0) + p["rail_per_mi"]*road*fr
     return np.minimum(truck, rail), (rail < truck)
+
+
+def rail_breakeven_miles(p=FREIGHT, diesel=DIESEL_BASE):
+    """Road miles beyond which rail (fixed + access + per-mile) beats truck under p at this diesel price; None if never."""
+    ft = 1 + 0.22*(diesel/DIESEL_BASE - 1); fr = 1 + 0.12*(diesel/DIESEL_BASE - 1)
+    slope = p["truck_per_mi"]*ft - p["rail_per_mi"]*fr
+    if slope <= 0:
+        return None
+    return (p["rail_fixed"] + p.get("rail_access", 0.0) - p["truck_fixed"]) / slope
+
+
+def calibrate_rail_access(rail_share_at, target, lo=0.0, hi=150.0, tol=0.005, max_iter=12, share_at_lo=None):
+    """The rail access premium ($/t on every rail quote) at which the solved rail share meets `target`.
+
+    `rail_share_at(premium)` solves the network with that premium and returns the rail share; a dearer rail quote never
+    moves tons onto rail, so the curve is non-increasing and bisection on [lo, hi] finds the crossing. Pure: it sets
+    nothing itself (the caller's callable does). Returns rail_access, the share reached, how it stopped (`met`,
+    `at_lower_bound` when even a free rail quote is below target, `at_upper_bound` when `hi` is not enough,
+    `max_iter`), the number of solves and the trace of (premium, share) pairs."""
+    trace = []
+    s_lo = rail_share_at(lo) if share_at_lo is None else share_at_lo; trace.append((lo, s_lo))
+    if s_lo <= target + tol:
+        return dict(rail_access=lo, rail_share=s_lo, target=target, bounded=("met" if s_lo >= target - tol else "at_lower_bound"), iterations=len(trace), trace=trace)
+    s_hi = rail_share_at(hi); trace.append((hi, s_hi))
+    if s_hi > target + tol:
+        return dict(rail_access=hi, rail_share=s_hi, target=target, bounded="at_upper_bound", iterations=len(trace), trace=trace)
+    a, b = lo, hi
+    for _ in range(max_iter):
+        mid = (a + b) / 2; s = rail_share_at(mid); trace.append((mid, s))
+        if abs(s - target) <= tol:
+            return dict(rail_access=mid, rail_share=s, target=target, bounded="met", iterations=len(trace), trace=trace)
+        if s > target: a = mid
+        else: b = mid
+    best = min(trace, key=lambda t: abs(t[1] - target))
+    return dict(rail_access=best[0], rail_share=best[1], target=target, bounded="max_iter", iterations=len(trace), trace=trace)
+
+
+def set_rail_access(premium, source):
+    """Set the rail access premium every later solve prices with, and name where it came from."""
+    global RAIL_SOURCE
+    FREIGHT["rail_access"] = float(premium); RAIL_SOURCE = source
 
 # --- state manufacturing share of nonfarm employment (%, approx 2023 BLS) used to tilt box demand toward industrial states
 MFG_SHARE = {"AL":13.0,"AK":3.5,"AZ":6.3,"AR":12.0,"CA":7.0,"CO":5.3,"CT":9.4,"DE":5.8,"FL":4.3,"GA":8.5,"HI":2.1,"ID":8.6,

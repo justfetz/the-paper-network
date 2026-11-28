@@ -753,7 +753,7 @@
       "Network KPIs: freight bill $" + ((k.freight_usd || 0) / 1e9).toFixed(2) + "B a year; average haul " + Math.round(k.avg_haul_miles || 0) + " mi; rail share " + Math.round((k.rail_share || 0) * 100) + "%; freight $" + (k.avg_freight_per_ton || 0).toFixed(0) + "/t; unmet " + kt(k.unmet_tons) + "; board integrated owners buy on the open market " + kt(k.owner_purchased_from_market_tons) + ".",
       "Mills: " + mills.length + " in the database, " + open.length + " open US mills with " + kt(open.reduce(function (s, m) { return s + (m.cap || 0); }, 0)) + " of capacity.",
       "Integration shares assumed (own board to own plants): " + Object.keys(P.shares || {}).map(function (o) { return o + " " + Math.round(P.shares[o] * 100) + "%"; }).join(", ") + "; about 13% of demand is open market.",
-      "Freight rule: truck 8 + 0.125 per mile or rail 35 + 0.065 per mile, $/t, whichever is cheaper, at $3.75 diesel; road miles are 1.2 x great circle; live diesel $" + (dz.live || "n/a") + "/gal.",
+      "Freight rule: truck 8 + 0.125 per mile or rail 35 + 0.065 per mile" + ((P.freight && P.freight.rail_access) ? " + a $" + P.freight.rail_access.toFixed(0) + "/t rail access premium calibrated to FAF5's measured rail share" : "") + ", $/t, whichever is cheaper (rail beyond about " + Math.round((P.freight && P.freight.rail_breakeven_miles) || 450) + " road miles), at $3.75 diesel; road miles: " + ((P.freight && P.freight.lane_source) || "1.2 x great circle") + "; live diesel $" + (dz.live || "n/a") + "/gal.",
       c ? "Corrugator tier: " + (f.corrugator_plants || 458) + " corrugator plants, about 70 sheet feeders and 634 sheet plants (FBA and AICC counts); national corrugator utilization " + Math.round((c.national_utilization || 0) * 100) + "%; " + c.markets_without_corrugator + " of 441 markets have no corrugator and buy sheets." : "",
       "Costliest single outages: " + D.knockouts.slice(0, 5).map(function (x) { return x.name + " (" + x.owner + ") $" + (x.d_total / 1e6).toFixed(0) + "M a year"; }).join("; ") + ".",
       f.errorbars ? "Accuracy: " + strip(f.errorbars) : "", f.closure_note ? "Backtest: " + strip(f.closure_note) : ""
@@ -1245,7 +1245,9 @@
     eia: ["EIA weekly on-highway diesel", "https://www.eia.gov/petroleum/gasdiesel/"],
     fastm: ["Fastmarkets on the 2025-26 closures", "https://www.fastmarkets.com/insights/north-american-containerboard-market-capacity-cuts/"]
   };
-  var FREIGHT = "Truck costs $8 a ton plus 12.5 cents a ton-mile and rail $35 plus 6.5 cents, so rail wins on lanes over about 450 road miles (road miles are straight-line distance times 1.2); diesel scales the fuel share of each.";
+  var PF = (D.params && D.params.freight) || {}, RA = PF.rail_access || 0, BE = Math.round((PF.rail_breakeven_miles || 450) / 10) * 10;
+  var ROAD = (PF.lane_source && PF.lane_source.indexOf("OSRM") >= 0) ? "road miles are routed on OpenStreetMap, lane by lane" : "road miles are straight-line distance times 1.2";
+  var FREIGHT = "Truck costs $8 a ton plus 12.5 cents a ton-mile and rail $35 plus 6.5 cents" + (RA ? " plus a $" + RA.toFixed(0) + " a ton rail access premium (siding, transload, dwell) calibrated so the solved rail share matches FAF5's measured modal split" : "") + ", so rail wins on lanes over about " + BE + " road miles (" + ROAD + "); diesel scales the fuel share of each.";
   /* the method behind each headline figure, matched on its label */
   var METHODS = [
     [/^scenario$/, "Which footprint and assumptions every number on the page belongs to. Change it under Scenario, the maintenance calendar or the knockout list.", ["scen"]],
@@ -1276,7 +1278,7 @@
     [/^corrugator-equivalents/, "Demand divided by one corrugator's yearly output at 1,000 million square feet.", ["fba"]],
     [/^FBA count|share$/, "Fibre Box Association statements, as published.", ["fba"]],
     [/^board out of US/, "Domestic shipments plus exports in the solved scenario.", ["model"]],
-    [/^rolls by truck/, "Lane by lane, truck under about 450 road miles and rail beyond; tons divided by 22 tons a truckload and 80 tons a railcar, per calendar day. Lanes under 1,000 tons a year are left out of the data file, about 2% of tons.", ["model"]],
+    [/^rolls by truck/, "Lane by lane, truck under about " + BE + " road miles and rail beyond; tons divided by 22 tons a truckload and 80 tons a railcar, per calendar day. Lanes under 1,000 tons a year are left out of the data file, about 2% of tons.", ["model"]],
     [/^through the corrugators$|^boxes shipped$|^sheets to sheet plants$/, "Board shipped, converted with the factors in the Conversions used table below: Fibre Box Association tons per MSF of boxes, corrugator trim and waste, and tons per MSF of combined board.", ["fba", "corr"]],
     [/^exported board$/, "Export tons of the solved scenario.", ["afpa"]],
     [/fleet|board made|board to run|sheet|corrugator|rolls consumed/, "From the corrugator layer: public counts (FBA: 458 corrugator plants; AICC: about 634 sheet plants and 70 sheet feeders) placed in markets by demand. Capacity is width times speed times hours times OEE from the calculator; the sheet trade is a second transport problem.", ["corr", "fba"]],
@@ -1312,7 +1314,7 @@
       ["Status", m.status === "closed" ? "closed" + (m.closed_year ? " in " + Math.round(m.closed_year) : "") + (m.note ? ". " + esc(m.note) : "") : (m.note ? esc(m.note) : "")],
       ["In this scenario", on ? "runs at <b>" + Math.round(s.util[id] * 100) + "%</b> and ships " + kt(s.shipped[id]) + (top ? "; biggest markets " + top : "") + ". This is the solver's cheapest routing, not a shipment record." : "not running in this scenario"],
       ["Scarcity value", on ? "$" + (s.shadow[id] || 0).toFixed(1) + " a ton: the dual on the mill's capacity, what one more ton of capacity would save the network" : ""],
-      ["Trucks, railcars", "Throughput tab: lane by lane, truck under about 450 road miles and rail beyond, at 22 tons a truckload and 80 a railcar"]
+      ["Trucks, railcars", "Throughput tab: lane by lane, truck under about " + BE + " road miles and rail beyond, at 22 tons a truckload and 80 a railcar"]
     ], linkList(["mills", "receipts", "model"]), "Know a better figure? Open an issue with the source and the next refresh re-solves.");
   }
   function openMarket(n) {
